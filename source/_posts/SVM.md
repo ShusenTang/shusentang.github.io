@@ -208,9 +208,9 @@ $$
 因为至少存在一个 $\hat{\alpha}_j > 0$(若不存在，即 $\hat{\alpha}$ 全为0，则 $\hat{W}=0$, 即 $margin = \frac 2 {||\hat{W}||}= \infty $,显然不行), 再根据KKT条件，即
 $$ 
 \begin{cases}
-乘子非负: \alpha_i \ge 0 \\\\
-约束条件:  y_i(X_i^TW+b) - 1\ge 0, i=1,2,...n. \\\\
-互补条件:  \alpha_i (y_i(X_i^TW+b) - 1)=0, i=1,2,...n.
+乘子非负: \alpha_i \ge 0 (i=1,2,...n.下同) \\\\
+约束条件:  y_i(X_i^TW+b) - 1\ge 0 \\\\
+互补条件:  \alpha_i (y_i(X_i^TW+b) - 1)=0
 \end{cases}
 $$
 所以至少存在一个 $j$ , 使  $ y_j(X_j^T \hat{W}+\hat{b}) - 1=0$, 即可求得最优 $\hat{b}$:
@@ -230,7 +230,9 @@ $$
 f(X) = sign(\sum_{i=1}^n \hat{\alpha}_i y_i X^TX_i + \hat{b})
 \tag{2.4.14}
 $$
-再来分析KKT条件里的互补条件，对于任意样本 $(X_i, y_i)$ ，总会有 $ \alpha_i=0 $ 或者 $y_if(X_i)=y_i(X_i^T \hat{W}+b) = 1$。对于$ \alpha_i>0$，此样本点位于最大间隔边界上，是一个支持向量；对于$ \alpha_i=0$，此样本点不是支持向量，如下图所示。
+再来分析KKT条件里的互补条件，对于任意样本 $(X_i, y_i)$ ，总会有 $ \alpha_i=0 $ 或者 $y_if(X_i)=y_i(X_i^T \hat{W}+b) = 1$。则有
+* 若$ \alpha_i=0$，此样本点不是支持向量，对模型没有任何作用；
+* 若$ \alpha_i>0$，此样本点位于最大间隔边界上，是一个支持向量，如下图所示。
 <center>
     <img src="./SVM/2.3.png"
     width="500">
@@ -300,6 +302,9 @@ L(W,b,\xi,\alpha,\beta)=\frac 1 2 ||W||^2 + C \sum_{i=1}^n \xi_i - \sum_{i=1}^n 
 $$
 类似2.4节，为了求得对偶问题的解，我们需要先求得$L(W,b,\xi,\alpha,\beta)$对 $W$、$b$ 和 $\xi$ 的极小再求对 $\alpha$ 和 $\beta$ 的极大。
 
+
+> 以下两步和2.4节几乎完全一样，除了最后对 $\alpha$ 的约束条件略有不同。 
+
 (1) 求$\underset{W, b, \xi}{min} L(W,b,\xi,\alpha,\beta)$:
 将 $L(W,b,\xi,\alpha,\beta)$ 分别对 $W$、$b$ 和 $\xi$ 求偏导并令为0可得
 $$
@@ -311,6 +316,92 @@ $$
 $$
 C = \alpha_i + \beta_i \tag{3.2.4}
 $$
+将上面三个式子代入式 $(3.2.1)$ 并进行类似式 $(2.4.8)$ 的推导即得
+$$
+\underset{W, b, \xi}{min} L(W,b,\xi,\alpha,\beta) = 
+-\frac 1 2 \sum_{i=1}^n \sum_{j=1}^n \alpha_i \alpha_j y_i y_j X_i^T X_j \ + \ \sum_{i=1}^n \alpha_i \tag{3.2.5}
+$$
+注意其中的 $\beta$ 被消去了。
+
+(2) 求$\underset{W, b, \xi}{min} L(W,b,\xi,\alpha,\beta)$对 $\alpha$ 的极大：
+式$(3.2.5)$对$\alpha$求极大，也等价于式$(3.2.5)$取负数后对$\alpha$求极小，即
+$$
+\underset{\alpha}{min}  \quad  \frac 1 2 \sum_{i=1}^n \sum_{j=1}^n \alpha_i \alpha_j y_i y_j X_i^T X_j \ - \ \sum_{i=1}^n \alpha_i  \tag{3.2.6}
+$$
+同时满足约束条件:
+$$
+\sum_{i=1}^n \alpha_i y_i = 0 \\\\
+\quad 0 \le \alpha_i \le C, i=1,2,...,n. \tag{3.2.7}
+$$
+
+至此，我们得到了原始最优化问题$(3.1.4)$和对偶最优化问题$(3.2.6)$、$(3.2.7)$。
+
+类似2.4节地，假设我们现在通过通用的二次规划求解方法或者SMO算法求得了$(3.2.6)$、$(3.2.7)$的最优解 $\hat{\alpha}$，则根据式$(3.2.2)$可求得最优$\hat{W}$：
+$$
+\hat{W}= \sum_{i=1}^n \hat{\alpha}_i y_i X_i \tag{3.2.8}
+$$
+再根据KKT条件，即
+$$ 
+\begin{cases}
+乘子非负: \alpha_i \ge 0 ,\enspace \beta_i \ge 0 (i=1,2,...n.下同)\\\\
+约束条件:  y_i(X_i^TW+b) - 1\ge \xi_i \\\\
+互补条件:  \alpha_i [y_i(X_i^TW+b) - 1+\xi_i]=0, \enspace \beta_i \xi_i=0
+\end{cases}
+$$
+可求得整个软间隔SVM的解，即:
+$$
+\hat{W}= \sum_{i \in SV} \hat{\alpha}_i y_i X_i \tag{3.2.9}
+$$
+$$
+\hat{b} = y_j-\sum_{i \in SV} \hat{\alpha}_i y_i X_j^T X_i
+\tag{3.2.10}
+$$
+其中 $j$ 需满足 $0 < \hat{\alpha}_j < C$ 。
+
+对于任意样本 $(X_i, y_i)$ ，
+* 若 $ \alpha_i=0$，此样本点不是支持向量，该样本对模型没有任何的作用；
+* 若 $ \alpha_i>0$，此样本是一个支持向量。
+
+若满足 $ \alpha_i>0$ ，进一步地， 
+* 若 $ 0 < \alpha_i < C$, 由式 $(3.2.4)$ 得 $\beta_i = 0$，即刚好 $y_i(X_i^TW+b) =1$，样本恰好在最大间隔边界上；
+* 若 $\alpha_i = C$，有$\beta_i > 0$，此时若 $\beta_i < 1$则该样本落在最大间隔内部，若 $\beta_i > 1$ 则该样本落在最大间隔内部即被错误分类。
+
+如下图所示。
+<center>
+    <img src="./SVM/3.2.png"
+    width="700">
+    <br>
+    <div style="border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;">图3.2</div>
+</center>
+
+因此，我们有与2.4节相同的结论，最优超平面只与支持向量有关而与非支持向量无关。
+
+### 3.3 正则化常数C
+再来看看我们的原始目标函数:
+$$
+\underset{W,b,\xi}{min} \quad \frac 1 2 ||W||^2 +  C \sum_{i=1}^n \xi_i
+$$
+
+对于不同C，SVM结果如下图所示。
+<center>
+    <img src="./SVM/3.3.png"
+    width="900">
+    <br>
+    <div style="border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;">图3.3</div>
+</center>
+
+对于更加一般化的问题，可将上述式子抽象成：
+$$
+\underset{f}{min} \quad \Omega(f) +  C \sum_{i=1}^n l(f(x_i),y_i) \tag{3.3.1}
+$$
+前一项可以理解为“结构风险(structural risk)”，用来描述所求模型的某些性质(SVM就是要求间隔最大)；第二项称为“经验风险(empirical risk)”，用来描述模型与训练数据的契合程度(即误差)。而参数C就是用于对二者的折中,即我们一方面要求模型要满足某种性质另一方面又想使模型与训练数据很契合。
+
+从正则化角度来讲， $\Omega(f)$ 称为正则化项，C称为正则化常数(或惩罚常数)，C越大即对误分类的惩罚越大(要求模型对训练模型更契合)，这可能会存在过拟合；C越小即相对更加看重正则化项，此时可能存在欠拟合。
+
 ## 4. 非线性SVM——核方法
 
 ## 5. SMO算法
