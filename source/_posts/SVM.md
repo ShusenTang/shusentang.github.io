@@ -2,6 +2,7 @@
 title: 看了这篇文章你还不懂SVM你就来打我
 date: 2018-10-27 23:19:45
 toc: true
+mathjax: true
 categories: 
 - Machine Learning
 tags:
@@ -10,10 +11,16 @@ tags:
 - classification
 ---
 
-# 支持向量机(Support Vector Machine, SVM)
+<center>
+<img src="./SVM/2.1.png" width="400" class="full-image">
+</center>
+
 <!-- more -->
+
+# 支持向量机(Support Vector Machine, SVM)
 ## 1. 概要
 ### 1.1 简介
+
 自从大半年前接触到SVM以来，感觉一直没怎么把SVM整明白。直到最近上的《模式识别》课程才仿佛打通了我的任督二脉，使我终于搞清楚了SVM的来龙去脉，所以写个博客作个总结。
 
 SVM是什么? 先来看看维基百科上对[SVM的定义](https://zh.wikipedia.org/wiki/支持向量机):
@@ -22,10 +29,10 @@ SVM是什么? 先来看看维基百科上对[SVM的定义](https://zh.wikipedia
 如果从未接触SVM的话，维基的这一大段解释肯定会让你一头雾水。简单点讲，SVM就是一种二类分类模型，他的基本模型是的定义在特征空间上的**间隔最大**的线性分类器，SVM的学习策略就是间隔最大化。
 
 ### 1.2 直观理解
+
 我们先来看看下面这个图:
 <center>
-    <img src="./SVM/1.1.png"
-    width="320">
+    <img src="./SVM/1.1.png" width="400" class="full-image">
     <br>
     <div style="border-bottom: 1px solid #d9d9d9;
     display: inline-block;
@@ -61,8 +68,7 @@ $$
 > 注意: 如果$X$和$W$都是列向量,即$X^TW$会得到$X$和$W$的点积(dot product, 是一个标量),等价于$X \cdot W$和$W \cdot X$。
 
 <center>
-    <img src="./SVM/2.1.png"
-    width="400">
+    <img src="./SVM/2.1.png" width="400" class="full-image">
     <br>
     <div style="border-bottom: 1px solid #d9d9d9;
     display: inline-block;
@@ -92,7 +98,7 @@ $$\underset{W,b}{min}J(W) = \underset{W,b}{min}\frac 1 2 ||W||^2 \\\\
 s.t.\quad y_i(X_i^TW+b) \ge 1, i=1,2,...n. \tag{2.2.4}
 $$
 
-通过求解上式即可得到最优超平面 $ W^* $ 和 $ b^* $ 。具体如何求解见2.4和2.5节。
+通过求解上式即可得到最优超平面 $ \hat{W} $ 和 $ \hat{b} $ 。具体如何求解见2.4和2.5节。
 
 ### 2.3 支持向量
 在线性可分的情况下，训练数据集的样本点中与分离超平面距离最近的数据点称为支持向量(support vector)，支持向量是使$(2.2.4)$中的约束条件取等的点，即满足
@@ -102,7 +108,7 @@ $$
 的点。也即所有在直线$ X^TW+b = 1$或直线$ X^TW+b = -1$的点。如下图所示:
 <center>
     <img src="./SVM/2.2.png"
-    width="400">
+    width="400" class="full-image">
     <br>
     <div style="border-bottom: 1px solid #d9d9d9;
     display: inline-block;
@@ -156,7 +162,7 @@ $$
 将上面两式代入$L(W,b,\alpha)$：
 <center>
     <img src="./SVM/fomula_1.png"
-    width="500px">
+    width="500px" class="full-image">
 </center>
 
 所以，
@@ -231,7 +237,7 @@ $$
 * 若$ \alpha_i>0$，此样本点位于最大间隔边界上，是一个支持向量，如下图所示。
 <center>
     <img src="./SVM/2.3.png"
-    width="500">
+    width="500" class="full-image">
     <br>
     <div style="border-bottom: 1px solid #d9d9d9;
     display: inline-block;
@@ -258,7 +264,7 @@ $$
 在前面的讨论中，我们一直假定训练数据是严格线性可分的，即存在一个超平面能完全将两类数据分开。但是现实任务这个假设往往不成立，例如下图所示的数据。
 <center>
     <img src="./SVM/3.1.png"
-    width="300">
+    width="300" class="full-image">
     <br>
     <div style="border-bottom: 1px solid #d9d9d9;
     display: inline-block;
@@ -365,7 +371,7 @@ $$
 如下图所示。
 <center>
     <img src="./SVM/3.2.png"
-    width="600">
+    width="600" class="full-image">
     <br>
     <div style="border-bottom: 1px solid #d9d9d9;
     display: inline-block;
@@ -379,7 +385,7 @@ $$
 对于不同惩罚参数 $C$，SVM结果如下图所示。
 <center>
     <img src="./SVM/3.3.png"
-    width="900">
+    width="900" class="full-image">
     <br>
     <div style="border-bottom: 1px solid #d9d9d9;
     display: inline-block;
@@ -409,7 +415,7 @@ $$
 
 <center>
     <img src="./SVM/4.1.png"
-    width="600">
+    width="600" class="full-image">
     <br>
     <div style="border-bottom: 1px solid #d9d9d9;
     display: inline-block;
