@@ -7,4 +7,6 @@
 [利用Hexo在多台电脑上提交和更新github pages博客](https://www.jianshu.com/p/0b1fccce74e0)[hexo博客同步管理及迁移](https://www.jianshu.com/p/fceaf373d797)  
 [Mathjax公式快速参考](https://colobu.com/2014/08/17/MathJax-quick-reference/)
 [各种图标](https://fontawesome.com/v4.7.0/icons/)
+[Hexo个人博客站点被百度谷歌收录](https://blog.csdn.net/qq_32454537/article/details/79482914)
+
 
