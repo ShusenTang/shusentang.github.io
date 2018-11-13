@@ -12,7 +12,7 @@ tags:
 ---
 
 <center>
-<img src="./SVM/2.1.png" width="400" class="full-image">
+<img src="./SVM/cover.png" width="300" class="full-image">
 </center>
 
 <!-- more -->
@@ -482,6 +482,9 @@ f(x)=sign(\sum_{i \in SV}\hat{\alpha}_i y_i K(X_j,X_i) + \hat{b}) \tag{4.3.3}
 $$
 
 ## 5. 总结
+
+### 5.1 SVM优缺点
+
 任何算法都有其优缺点，支持向量机也不例外。
 
 支持向量机的优点是:
@@ -493,3 +496,15 @@ $$
 支持向量机的缺点是:
 > 1. 二次规划问题求解将涉及m阶矩阵的计算(m为样本的个数), 因此SVM不适用于超大数据集。(SMO算法可以缓解这个问题)
 > 2. 只适用于二分类问题。(SVM的推广SVR也适用于回归问题；可以通过多个SVM的组合来解决多分类问题)
+
+### 5.2 SVM调参经验
+SVM很适合做分类任务，但是如果刚开始接触SVM而不知道如何进行合理的参数选择的话可能得不到满意的结果。下面简介运用SVM的基本步骤，或者说调参经验。
+> 主要参考:
+`Hsu C W, Chang C C, Lin C J. A practical guide to support vector classification[J]. 2003.`
+
+1. 将原始数据转换为SVM算法期待的格式；
+2. 将数据进行scaling(很重要)；
+3. 一般考虑用高斯核RBF(如果特征维度太高，建议直接用线性SVM)；
+4. 交叉验证寻找最优的RBF的参数以及参数 $C$ ;
+5. 用上面找到的最优参数在整个训练集上训练；
+
