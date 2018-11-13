@@ -112,20 +112,26 @@
 
 
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="TangShusen">
-<meta property="og:url" content="https://tangshusen.me/index.html">
+  <meta name="keywords" content="tensorflow,RNN,attention,seq2seq">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensorFlow实现多层RNN的一个大坑">
+<meta property="og:url" content="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/index.html">
 <meta property="og:site_name" content="TangShusen">
 <meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/cover.jpg">
+<meta property="og:image" content="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/enc_dec_with_attn.png">
+<meta property="og:image" content="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/enc_dec_with_attn_2.png">
+<meta property="og:updated_time" content="2018-11-13T16:03:00.256Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="TangShusen">
+<meta name="twitter:title" content="TensorFlow实现多层RNN的一个大坑">
+<meta name="twitter:image" content="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/cover.jpg">
 
 
 
 
 
 
-  <link rel="canonical" href="https://tangshusen.me/"/>
+  <link rel="canonical" href="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/"/>
 
 
 
@@ -135,7 +141,7 @@
   };
 </script>
 
-  <title>TangShusen</title>
+  <title>TensorFlow实现多层RNN的一个大坑 | TangShusen</title>
   
 
 
@@ -184,8 +190,7 @@
     
   
 
-  <div class="container sidebar-position-left 
-  page-home">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -222,7 +227,7 @@
         
         
           
-          <li class="menu-item menu-item-home menu-item-active">
+          <li class="menu-item menu-item-home">
 
     
     
@@ -335,9 +340,9 @@
           
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
 
@@ -369,10 +374,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2018/11/13/tf-multi-rnn-bug/" class="post-title-link" itemprop="https://tangshusen.me/index.html">TensorFlow实现多层RNN的一个大坑</a>
+          <h1 class="post-title" itemprop="name headline">TensorFlow实现多层RNN的一个大坑
               
             
           </h1>
@@ -465,20 +467,52 @@
       
 
       
-        
-          <center><br><img src="/2018/11/13/tf-multi-rnn-bug/cover.jpg" width="400" class="full-image"><br></center>
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2018/11/13/tf-multi-rnn-bug/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-         
-          <!--/noindex-->
-        
+        <center><br><img src="/2018/11/13/tf-multi-rnn-bug/cover.jpg" width="400" class="full-image"><br></center>
+
+<a id="more"></a>
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>事情的起因是这样的，我已经用tensorflow实现了一个带attention的encoder-decoder(都是单层的RNN)的结构，代码组织结构如下所示<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">encoder_cell = tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)</span><br><span class="line">decoder_cell = tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Encoder</span><span class="params">(cell, inputs)</span>:</span></span><br><span class="line">    <span class="string">'''根据输入得到输出'''</span></span><br><span class="line">    ......</span><br><span class="line">    <span class="keyword">return</span> outputs</span><br><span class="line"></span><br><span class="line"><span class="comment"># shape: (batch_size, max_seq_len, rnn_size)</span></span><br><span class="line">encoder_outputs = Encoder(encoder_cell, inputs)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下面是attention</span></span><br><span class="line">attn_mech = tf.contrib.seq2seq.LuongAttention(...) </span><br><span class="line">decoder_cell = tf.contrib.seq2seq.AttentionWrapper(decoder_cell, attn_mech, attention_layer_size=attn_size,...)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下面的就不重要了</span></span><br><span class="line">......</span><br></pre></td></tr></table></figure></p>
+<p>上面这段代码在attn_size为任何值的时候都是可以正常执行的。这也很符合预期，因为上面这段代码所干的事情如下:</p>
+<ul>
+<li>用encoder将input编码成encoder_output(即attention的keys或者memory)；</li>
+<li>对于decode的每一个时刻t，将t-1时刻得到的attention context(shape[-1]为attn_size)和decoder的输入合并在一起输入到decoder；<br>……</li>
+</ul>
+<p>可以看到attn_size确实是任何值都可以, 也即decoder的输入维度(attn_size + input_x_size)为任何都可以。</p>
+<blockquote>
+<p>注意TensorFlow中的RNN cell不需要显式指定输入的维度(而是自己推断出来)，这和pytorch不一样:<br><code>pytorch_rnn = torch.nn.LSTM(input_size = attn_size + input_x_size, hidden_size=rnn_size)</code></p>
+</blockquote>
+<h2 id="经过"><a href="#经过" class="headerlink" title="经过"></a>经过</h2><p>后来我又想将decoder改成多层的RNN，decoder结构就像下面右边这样：</p>
+<center><br><img src="/2018/11/13/tf-multi-rnn-bug/enc_dec_with_attn.png" width="400" class="full-image"><br></center>
+
+<p>于是我将<code>decoder_cell</code>的定义做了如下修改:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line"></span><br><span class="line">one_cell = tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)</span><br><span class="line">decoder_cell = tf.nn.rnn_cell.MultiRNNCell([one_cell <span class="keyword">for</span> _ <span class="keyword">in</span> range(dec_num_layers)])</span><br><span class="line">......</span><br></pre></td></tr></table></figure></p>
+<p>除非把<code>attn_size</code>设置成<code>rnn_size - input_x_size</code>，否则会报类似下面的维度不对的错误(假设<code>rnn_size=256</code>, <code>attn_size + input_x_size = 356</code>)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ValueError: Dimensions must be equal, but are 256 and 356 for &apos;rnn/while/rnn/multi_rnn_cell/cell_0/cell_0/lstm_cell/MatMul_1&apos; (op: &apos;MatMul&apos;) with input shapes: [30,256], [356,1200].</span><br></pre></td></tr></table></figure></p>
+<p>这是为什么呢？明明按照前面的分析，明明attn_size设置成任何值都可以的啊。</p>
+<h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>一开始我一直以为是我的attention写得不对，于是google了好久都没发现attention问题在哪？<br>直到我看到了这个<a href="https://github.com/tensorflow/tensorflow/issues/16186" target="_blank" rel="noopener">issue</a>才发现是我的多层RNN没写对，还是自己太菜了😭</p>
+<p>正确的多层<code>decoder_cell</code>应该是如下定义:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line">cell_list = [tf.nn.rnn_cell.LSTMCell(num_units=rnn_size) <span class="keyword">for</span> _ <span class="keyword">in</span> range(dec_num_layers)]</span><br><span class="line">decoder_cell = tf.nn.rnn_cell.MultiRNNCell(cell_list)</span><br><span class="line">......</span><br></pre></td></tr></table></figure></p>
+<p>咋一看上面这段代码貌似和之前的错误代码没什么区别，但是如下代码你就应该意识到哪儿不对了<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>str = <span class="string">"bug"</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>strs = [str <span class="keyword">for</span> _ <span class="keyword">in</span> range(<span class="number">2</span>)]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>print(strs)</span><br><span class="line">[<span class="string">'bug'</span>, <span class="string">'bug'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">for</span> str <span class="keyword">in</span> strs:</span><br><span class="line">        print(id(str)) <span class="comment"># id()函数用于获取对象的内存地址</span></span><br><span class="line"><span class="number">4367049200</span></span><br><span class="line"><span class="number">4367049200</span></span><br></pre></td></tr></table></figure></p>
+<p>注意到上面输出的两个地址都是一样的。因此，我们就知道问题出在哪儿了:<br>对于前面错误的多层rnn实现, 每一层的LSTMCell其实都是同一个(指向它们的指针是相同的)，那么每一层的LSTMCell的weights维度就也是一样的，但其实第一层的输入维度(<code>attn_size + input_x_size</code>)和其它层的（<code>rnn_size</code>)一般都是不一样的，如下图所示，这样就会报维度错误了。</p>
+<center><br><img src="/2018/11/13/tf-multi-rnn-bug/enc_dec_with_attn_2.png" width="400" class="full-image"><br></center>
+
+<p>而正确代码中，每一个LSTMCell都是通过<code>tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)</code>定义的，因此可以有不同的结构，自然不会报错。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li><p>TensorFlow中错误的多层RNN实现方式:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">one_cell = tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)</span><br><span class="line">decoder_cell = tf.nn.rnn_cell.MultiRNNCell([one_cell <span class="keyword">for</span> _ <span class="keyword">in</span> range(dec_num_layers)])</span><br><span class="line"><span class="comment"># decoder_cell = tf.nn.rnn_cell.MultiRNNCell([one_cell]*dec_num_layers])也是错误的</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>TensorFlow中正确的多层RNN实现方式:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cell_list = [tf.nn.rnn_cell.LSTMCell(num_units=rnn_size) <span class="keyword">for</span> _ <span class="keyword">in</span> range(dec_num_layers)]</span><br><span class="line">decoder_cell = tf.nn.rnn_cell.MultiRNNCell(cell_list)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>参考</p>
+<ol>
+<li><a href="https://stackoverflow.com/questions/47371608/cannot-stack-lstm-with-multirnncell-and-dynamic-rnn" target="_blank" rel="noopener">Cannot stack LSTM with MultiRNNCell and dynamic_rnn</a></li>
+<li><a href="https://stackoverflow.com/questions/48865554/using-dynamic-rnn-with-multirnn-gives-error/53277463#53277463" target="_blank" rel="noopener">using dynamic_rnn with multiRNN gives error</a></li>
+</ol>
+
       
     </div>
+
+    
+      
+
 
     
 
@@ -492,197 +526,76 @@
        
     
     
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/assets/wechatpay.jpg" alt="TangShusen 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/assets/alipay.jpg" alt="TangShusen 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
 
     
 
     <footer class="post-footer">
       
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2018/10/27/SVM/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="TangShusen">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/assets/header.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="TangShusen">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                
-                <a href="/2018/10/27/SVM/" class="post-title-link" itemprop="https://tangshusen.me/index.html">看了这篇文章你还不懂SVM你就来打我</a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2018-10-27 23:19:45" itemprop="dateCreated datePublished" datetime="2018-10-27T23:19:45+08:00">2018-10-27</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2018-11-13 21:59:23" itemprop="dateModified" datetime="2018-11-13T21:59:23+08:00">2018-11-13</time>
-              
-            
-          </span>
-
+        <div class="post-tags">
           
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Machine-Learning/" itemprop="url" rel="index"><span itemprop="name">Machine Learning</span></a></span>
-
-                
-                
-              
-            </span>
+            <a href="/tags/tensorflow/" rel="tag"># tensorflow</a>
           
-
+            <a href="/tags/RNN/" rel="tag"># RNN</a>
           
-            
+            <a href="/tags/attention/" rel="tag"># attention</a>
           
-
+            <a href="/tags/seq2seq/" rel="tag"># seq2seq</a>
           
-          
-
-          
-
-          
-
-          
-
         </div>
-      </header>
-    
+      
 
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
+      
       
       
 
       
-        
-          <center><br><img src="/2018/10/27/SVM/cover.png" width="300" class="full-image"><br></center>
-          <!--noindex-->
-          
-            <div class="post-button text-center">
-              <a class="btn" href="/2018/10/27/SVM/#more" rel="contents">
-                阅读全文 &raquo;
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/27/SVM/" rel="next" title="看了这篇文章你还不懂SVM你就来打我">
+                <i class="fa fa-chevron-left"></i> 看了这篇文章你还不懂SVM你就来打我
               </a>
-            </div>
-         
-          <!--/noindex-->
-        
-      
-    </div>
+            
+          </div>
 
-    
+          <span class="post-nav-divider"></span>
 
-    
-    
-    
-
-    
-
-    
-       
-    
-    
-
-    
-
-    <footer class="post-footer">
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
       
 
       
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -692,14 +605,15 @@
   </article>
 
 
-    
-  </section>
-
-  
+  </div>
 
 
           </div>
           
+
+  
+
+
 
         </div>
         
@@ -722,8 +636,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -837,6 +760,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#起因"><span class="nav-text">起因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#经过"><span class="nav-text">经过</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决"><span class="nav-text">解决</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -965,6 +904,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
 
   
 
@@ -1006,14 +949,6 @@
   
 
   
-  
-    
-      
-        
-      
-    
-      
-    
   
 
   
