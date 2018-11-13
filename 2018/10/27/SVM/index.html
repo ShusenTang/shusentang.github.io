@@ -118,7 +118,7 @@
 <meta property="og:url" content="https://tangshusen.me/2018/10/27/SVM/index.html">
 <meta property="og:site_name" content="TangShusen">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://tangshusen.me/2018/10/27/SVM/2.1.png">
+<meta property="og:image" content="https://tangshusen.me/2018/10/27/SVM/cover.png">
 <meta property="og:image" content="https://tangshusen.me/2018/10/27/SVM/1.1.png">
 <meta property="og:image" content="https://tangshusen.me/2018/10/27/SVM/2.1.png">
 <meta property="og:image" content="https://tangshusen.me/2018/10/27/SVM/2.2.png">
@@ -128,10 +128,10 @@
 <meta property="og:image" content="https://tangshusen.me/2018/10/27/SVM/3.2.png">
 <meta property="og:image" content="https://tangshusen.me/2018/10/27/SVM/3.3.png">
 <meta property="og:image" content="https://tangshusen.me/2018/10/27/SVM/4.1.png">
-<meta property="og:updated_time" content="2018-11-11T13:04:55.604Z">
+<meta property="og:updated_time" content="2018-11-13T13:59:23.716Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="看了这篇文章你还不懂SVM你就来打我">
-<meta name="twitter:image" content="https://tangshusen.me/2018/10/27/SVM/2.1.png">
+<meta name="twitter:image" content="https://tangshusen.me/2018/10/27/SVM/cover.png">
 
 
 
@@ -423,7 +423,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-11-11 21:04:55" itemprop="dateModified" datetime="2018-11-11T21:04:55+08:00">2018-11-11</time>
+                <time title="修改时间：2018-11-13 21:59:23" itemprop="dateModified" datetime="2018-11-13T21:59:23+08:00">2018-11-13</time>
               
             
           </span>
@@ -474,7 +474,7 @@
       
 
       
-        <center><br><img src="/2018/10/27/SVM/2.1.png" width="400" class="full-image"><br></center>
+        <center><br><img src="/2018/10/27/SVM/cover.png" width="300" class="full-image"><br></center>
 
 <a id="more"></a>
 <h1 id="支持向量机-Support-Vector-Machine-SVM"><a href="#支持向量机-Support-Vector-Machine-SVM" class="headerlink" title="支持向量机(Support Vector Machine, SVM)"></a>支持向量机(Support Vector Machine, SVM)</h1><h2 id="1-概要"><a href="#1-概要" class="headerlink" title="1. 概要"></a>1. 概要</h2><h3 id="1-1-简介"><a href="#1-1-简介" class="headerlink" title="1.1 简介"></a>1.1 简介</h3><p>自从大半年前接触到SVM以来，感觉一直没怎么把SVM整明白。直到最近上的《模式识别》课程才仿佛打通了我的任督二脉，使我终于搞清楚了SVM的来龙去脉，所以写个博客作个总结。</p>
@@ -641,7 +641,7 @@
 <li><p>构造决策函数：<br>$$<br>f(x)=sign(\sum_{i \in SV}\hat{\alpha}_i y_i K(X_j,X_i) + \hat{b}) \tag{4.3.3}<br>$$</p>
 </li>
 </ul>
-<h2 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h2><p>任何算法都有其优缺点，支持向量机也不例外。</p>
+<h2 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h2><h3 id="5-1-SVM优缺点"><a href="#5-1-SVM优缺点" class="headerlink" title="5.1 SVM优缺点"></a>5.1 SVM优缺点</h3><p>任何算法都有其优缺点，支持向量机也不例外。</p>
 <p>支持向量机的优点是:</p>
 <blockquote>
 <ol>
@@ -658,6 +658,17 @@
 <li>只适用于二分类问题。(SVM的推广SVR也适用于回归问题；可以通过多个SVM的组合来解决多分类问题)</li>
 </ol>
 </blockquote>
+<h3 id="5-2-SVM调参经验"><a href="#5-2-SVM调参经验" class="headerlink" title="5.2 SVM调参经验"></a>5.2 SVM调参经验</h3><p>SVM很适合做分类任务，但是如果刚开始接触SVM而不知道如何进行合理的参数选择的话可能得不到满意的结果。下面简介运用SVM的基本步骤，或者说调参经验。</p>
+<blockquote>
+<p>主要参考:<br><code>Hsu C W, Chang C C, Lin C J. A practical guide to support vector classification[J]. 2003.</code></p>
+</blockquote>
+<ol>
+<li>将原始数据转换为SVM算法期待的格式；</li>
+<li>将数据进行scaling(很重要)；</li>
+<li>一般考虑用高斯核RBF(如果特征维度太高，建议直接用线性SVM)；</li>
+<li>交叉验证寻找最优的RBF的参数以及参数 $C$ ;</li>
+<li>用上面找到的最优参数在整个训练集上训练；</li>
+</ol>
 
       
     </div>
@@ -894,7 +905,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#支持向量机-Support-Vector-Machine-SVM"><span class="nav-text">支持向量机(Support Vector Machine, SVM)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-概要"><span class="nav-text">1. 概要</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-简介"><span class="nav-text">1.1 简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-直观理解"><span class="nav-text">1.2 直观理解</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-线性可分SVM——硬间隔"><span class="nav-text">2. 线性可分SVM——硬间隔</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-超平面与间隔"><span class="nav-text">2.1 超平面与间隔</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-间隔最大化"><span class="nav-text">2.2 间隔最大化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-支持向量"><span class="nav-text">2.3 支持向量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-对偶问题"><span class="nav-text">2.4 对偶问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-线性SVM——软间隔"><span class="nav-text">3. 线性SVM——软间隔</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-软间隔最大化"><span class="nav-text">3.1 软间隔最大化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-对偶问题"><span class="nav-text">3.2 对偶问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-惩罚参数-C"><span class="nav-text">3.3 惩罚参数 $C$</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-非线性SVM——核技巧"><span class="nav-text">4. 非线性SVM——核技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-核函数"><span class="nav-text">4.1 核函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-正定核"><span class="nav-text">4.2 正定核</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-非线性支持向量机"><span class="nav-text">4.3 非线性支持向量机</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-总结"><span class="nav-text">5. 总结</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#支持向量机-Support-Vector-Machine-SVM"><span class="nav-text">支持向量机(Support Vector Machine, SVM)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-概要"><span class="nav-text">1. 概要</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-简介"><span class="nav-text">1.1 简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-直观理解"><span class="nav-text">1.2 直观理解</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-线性可分SVM——硬间隔"><span class="nav-text">2. 线性可分SVM——硬间隔</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-超平面与间隔"><span class="nav-text">2.1 超平面与间隔</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-间隔最大化"><span class="nav-text">2.2 间隔最大化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-支持向量"><span class="nav-text">2.3 支持向量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-对偶问题"><span class="nav-text">2.4 对偶问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-线性SVM——软间隔"><span class="nav-text">3. 线性SVM——软间隔</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-软间隔最大化"><span class="nav-text">3.1 软间隔最大化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-对偶问题"><span class="nav-text">3.2 对偶问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-惩罚参数-C"><span class="nav-text">3.3 惩罚参数 $C$</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-非线性SVM——核技巧"><span class="nav-text">4. 非线性SVM——核技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#4-1-核函数"><span class="nav-text">4.1 核函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-2-正定核"><span class="nav-text">4.2 正定核</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-3-非线性支持向量机"><span class="nav-text">4.3 非线性支持向量机</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-总结"><span class="nav-text">5. 总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-1-SVM优缺点"><span class="nav-text">5.1 SVM优缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-SVM调参经验"><span class="nav-text">5.2 SVM调参经验</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
