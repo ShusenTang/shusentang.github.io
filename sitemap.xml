@@ -2,16 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/</loc>
+    <loc>https://tangshusen.me/2018/11/18/adaboost/</loc>
     
-    <lastmod>2018-11-13T16:03:00.256Z</lastmod>
+    <lastmod>2018-11-23T16:01:08.570Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://tangshusen.me/2018/10/27/SVM/</loc>
     
-    <lastmod>2018-11-13T13:59:23.716Z</lastmod>
+    <lastmod>2018-11-18T14:04:12.324Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/</loc>
+    
+    <lastmod>2018-11-13T16:03:00.256Z</lastmod>
     
   </url>
   
