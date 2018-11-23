@@ -74,7 +74,7 @@ Adaboost算法结构如下图([图片来源](https://www.python-course.eu/Boosti
 
 ## 2.2 算法步骤
 
-考虑如下形式的二分类训练数据集:
+考虑如下形式的二分类（标准AdaBoost算法只适用于二分类任务）训练数据集:
 $$
 \{(x_1,y_1),(x_2,y_2),...,(x_N,y_N)\}
 $$
@@ -94,7 +94,7 @@ $$
 $$
 e_m = \sum_{i=1}^NP(G_m(x_i) \neq y_i)=\sum_{i=1}^N w_{mi} I(G_m(x_i) \neq y_i) \tag{2.2.2}
 $$
-上式中 $I(\cdot)$ 是指示函数。
+上式中 $I(\cdot)$ 是指示函数，考虑更加周全的AdaBoost算法在这一步还应该判断是否满足基本条件(例如生成的基学习器是否比随机猜测好), 如果不满足，则当前基学习器被抛弃，学习过程提前终止。
 (3) 计算 $G_m(x)$ 的系数(即最终集成使用的的基学习器的权重):  
 $$
 \alpha_m = \frac 1 2 log \frac {1-e_m} {e_m} \tag{2.2.3}
@@ -139,7 +139,7 @@ f(x) = \sum_{i=1}^M \alpha_m G_m(x) \tag{3.1.1}
 $$
 可以看到这是一个“加性模型(additive model)”。我们希望这个模型在训练集上的经验误差最小，即
 $$
-min \sum_{i=1}^N L(yi, f(x)) \iff  min \sum_{i=1}^N L(yi, \sum_{i=1}^M \alpha_m G_m(x)) \tag{3.1.2}
+min \sum_{i=1}^N L(y_i, f(x)) \iff  min \sum_{i=1}^N L(y_i, \sum_{i=1}^M \alpha_m G_m(x)) \tag{3.1.2}
 $$
 通常这是一个复杂的优化问题。前向分步算法求解这一优化问题的思想就是: 因为最终模型是一个加性模型，如果能从前往后，每一步只学习一个基学习器 $G_m(x)$ 及其权重 $\alpha_m$ , 不断迭代得到最终的模型，那么就可以简化问题复杂度。具体的，当我们经过 $m-1$ 轮迭代得到了最优模型 $f_{m-1}(x)$ 时，因为
 
@@ -164,37 +164,112 @@ $$
 
 将指数损失函数代入式 $(3.1.4)$ ，优化目标就为
 $$
-\underset{\alpha_m,G_m}{argmin} \sum_{i=1}^N exp[-y_i(f_{m-1}(x) + \alpha_mG_m(x))] \tag{3.1.5}
+\underset{\alpha_m,G_m}{argmin} \sum_{i=1}^N exp[-y_i(f_{m-1}(x) + \alpha_mG_m(x))] \tag{3.2.1}
 $$
 因为 $y_if_{m-1}(x)$ 与优化变量 $\alpha$ 和 $G$ 无关，如果令
 $$
-w_{m,i} = exp[-y_i f_{m-1}(x)] \tag{3.1.6}
+w_{m,i} = exp[-y_i f_{m-1}(x)] \tag{3.2.2}
 $$
 > 这个 $w_{m,i}$ 其实就是2.2节中归一化之前的权重 $w_{m,i}$ 
 
-那么式 $(3.1.5)$ 等价于
+那么式 $(3.2.1)$ 等价于
 $$
-\underset{\alpha_m,G_m}{argmin} \sum_{i=1}^N w_{m,i}exp(-y_i\alpha_mG_m(x)) \tag{3.1.7}
+\underset{\alpha_m,G_m}{argmin} \sum_{i=1}^N w_{m,i}exp(-y_i\alpha_mG_m(x)) \tag{3.2.3}
 $$
 
-我们分两步来求解式 $(3.1.7)$ 所示的优化问题的最优解 $\hat{\alpha}_m$ 和 $\hat{G}_m(x)$ :
+我们分两步来求解式 $(3.2.3)$ 所示的优化问题的最优解 $\hat{\alpha}_m$ 和 $\hat{G}_m(x)$ :
 
 1. 对任意的 $\alpha_m > 0$, 求 $\hat{G}_m(x)$：
 $$
-\hat{G}_m (x) = \underset{G_m}{argmin} \sum_{i=1}^N w_{m,i} I(y_i \neq  G_m(x_i)) \tag{3.1.8}
+\hat{G}_m (x) = \underset{G_m}{argmin} \sum_{i=1}^N w_{m,i} I(y_i \neq  G_m(x_i)) \tag{3.2.4}
 $$
     > 上式将指数函数换成指示函数是因为前面说的指数损失函数和0/1损失函数是一致等价的。
 
-    式子 $(3.1.8)$ 所示的优化问题其实就是AdaBoost算法的基学习器的学习过程，得到的  $\hat{G}_m(x)$ 是使第 $m$ 轮加权训练数据分类误差最小的基分类器。
+    式子 $(3.2.4)$ 所示的优化问题其实就是AdaBoost算法的基学习器的学习过程，即2.2节的步骤2(1)，得到的  $\hat{G}_m(x)$ 是使第 $m$ 轮加权训练数据分类误差最小的基分类器。
 
 2. 求解 $\hat{\alpha}_m$ ：
-    将式子 $(3.1.7)$ 中的目标函数展开
+    将式子 $(3.2.3)$ 中的目标函数展开
 $$
 \begin{aligned}
-\sum_{i=1}^N w_{m,i}exp(-y_i\alpha_mG_m(x)) &= \sum_{y_i=G_m(x_i)} w_{m,i}e^{-\alpha} + \sum_{y_i \neq G_m(x_i)}w_{m,i}e^{\alpha} \\\\
+\sum_{i=1}^N w_{m,i}exp(-y_i\alpha_mG_m(x)) &= \sum_{y_i=G_m(x_i)} w_{m,i}e^{- \alpha} + \sum_{y_i \neq G_m(x_i)}w_{m,i}e^{\alpha} \\\\
 & = (e^{\alpha} - e^{-\alpha}) \sum_{i=1}^N w_{m,i} I(y_i \neq  G_m(x_i)) + e^{-\alpha} \sum_{i=1}^N w_{m,i} 
-\end{aligned} \tag{3.1.9}
+\end{aligned} \tag{3.2.5}
 $$
-    将已求得的
+    > 注：为了简洁，上式子中的$\hat{G}_m(x)$ 被略去了 $\hat{\cdot}$ ， $\alpha_m$ 被略去了下标 $m$ ，下同
+    
+    将上式对 $\alpha$ 求导并令导数为0，即
+    $$
+(e^{\alpha} + e^{-\alpha}) \sum_{i=1}^N w_{m,i} I(y_i \neq  G_m(x_i)) - e^{-\alpha} \sum_{i=1}^N w_{m,i} = 0 \tag{3.2.6}
+    $$
+    解得
+    $$
+    \hat{\alpha}_m = \frac 1 2 log \frac {1-e_m} {e_m} \tag{3.2.7}
+    $$
+    其中, $e_m$ 是分类误差率：
+    $$
+    e_m = \frac  {\sum_{i=1}^N w_{m,i} I(y_i \neq  G_m(x_i)} {\sum_{i=1}^N w_{mi}} \tag{3.2.8}
+    $$
+    如果式子 $(3.2.8)$ 中的 $w_{mi}$ 归一化成和为1的话那么式 $(3.2.8)$ 也就和2.2节式 $(2.2.2)$ 一模一样了，进一步地也有上面的 $\hat{\alpha}_m$ 也就是2.2节的 $\alpha_m$ 。
+    最后来看看每一轮样本权值的更新，由 $(3.1.3)$ 和 $(3.2.2)$ 可得
+    $$
+    w_{m+1,i} = w_{m,i} exp[-y_i \alpha_m G_{m}(x)] \tag{3.2.9}
+    $$
+    如果将上式进行归一化成和为1的话就和与2.2节中 $(2.2.5)$ 完全相同了。
+
+
+
+由此可见，2.2节所述的AdaBoost算法步骤是可以经过严密推导得来的。总结一下，本节推导有如下关键点:
+* AdaBoost算法是一个加性模型，将其简化成**前向分步算法求解**；
+* 将0/1损失函数用数学性质更好的**指数损失函数**替代。
+
 
 # 4. python实现
+## 4.1 基学习器
+首先需要定义一个基学习器，它应该是一个弱分类器。
+弱分类器使用库 `sklearn` 中的决策树分类器`DecisionTreeClassifier`, 可设置该决策树的最大深度为1。
+``` python
+# Fit a simple decision tree(weak classifier) first
+clf_tree = DecisionTreeClassifier(max_depth = 1, random_state = 1)
+```
+## 4.2 AdaBoost实现
+然后就是完整AdaBoost算法的实现了，如下所示。
+``` python
+def my_adaboost_clf(Y_train, X_train, Y_test, X_test, M=20, weak_clf=DecisionTreeClassifier(max_depth = 1)):
+    n_train, n_test = len(X_train), len(X_test)
+    # Initialize weights
+    w = np.ones(n_train) / n_train
+    pred_train, pred_test = [np.zeros(n_train), np.zeros(n_test)]
+    
+    for i in range(M):
+        # Fit a classifier with the specific weights
+        weak_clf.fit(X_train, Y_train, sample_weight = w)
+        pred_train_i = weak_clf.predict(X_train)
+        pred_test_i = weak_clf.predict(X_test)
+        
+        # Indicator function
+        miss = [int(x) for x in (pred_train_i != Y_train)]
+        print("weak_clf_%02d train acc: %.4f"
+         % (i + 1, 1 - sum(miss) / n_train))
+        
+        # Error
+        err_m = np.dot(w, miss)
+        # Alpha
+        alpha_m = 0.5 * np.log((1 - err_m) / float(err_m))
+        # New weights
+        miss2 = [x if x==1 else -1 for x in miss] # -1 * y_i * G(x_i): 1 / -1
+        w = np.multiply(w, np.exp([float(x) * alpha_m for x in miss2]))
+        w = w / sum(w)
+
+        # Add to prediction
+        pred_train_i = [1 if x == 1 else -1 for x in pred_train_i]
+        pred_test_i = [1 if x == 1 else -1 for x in pred_test_i]
+        pred_train = pred_train + np.multiply(alpha_m, pred_train_i)
+        pred_test = pred_test + np.multiply(alpha_m, pred_test_i)
+    
+    pred_train = (pred_train > 0) * 1
+    pred_test = (pred_test > 0) * 1
+
+    print("My AdaBoost clf train accuracy: %.4f" % (sum(pred_train == Y_train) / n_train))
+    print("My AdaBoost clf test accuracy: %.4f" % (sum(pred_test == Y_test) / n_test))
+
+```
