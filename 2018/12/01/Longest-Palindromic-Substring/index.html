@@ -112,22 +112,22 @@
 
 
 
-  <meta name="description" content="1. 问题描述Given a string s, find the longest palindromic substring in s. You may assume that the maximum length of s is 1000.给定一个字符串s，找出s中的最长回文子串。s的长度不超过1000.">
+  <meta name="description" content="1. 问题描述Given a string s, find the longest palindromic substring in s. You may assume that the maximum length of s is 1000.给定一个字符串s，找出s中的最长回文子串。s的长度不超过1000.">
 <meta name="keywords" content="动态规划,马拉车算法,字符串">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Longest Palindromic Substring(最长回文子串)">
 <meta property="og:url" content="https://tangshusen.me/2018/12/01/Longest-Palindromic-Substring/index.html">
 <meta property="og:site_name" content="TangShusen">
-<meta property="og:description" content="1. 问题描述Given a string s, find the longest palindromic substring in s. You may assume that the maximum length of s is 1000.给定一个字符串s，找出s中的最长回文子串。s的长度不超过1000.">
+<meta property="og:description" content="1. 问题描述Given a string s, find the longest palindromic substring in s. You may assume that the maximum length of s is 1000.给定一个字符串s，找出s中的最长回文子串。s的长度不超过1000.">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://tangshusen.me/2018/12/01/Longest-Palindromic-Substring/2.4.1.png">
 <meta property="og:image" content="https://tangshusen.me/2018/12/01/Longest-Palindromic-Substring/2.4.2.png">
 <meta property="og:image" content="https://tangshusen.me/2018/12/01/Longest-Palindromic-Substring/2.4.3.png">
 <meta property="og:image" content="https://tangshusen.me/2018/12/01/Longest-Palindromic-Substring/2.4.4.png">
-<meta property="og:updated_time" content="2018-12-02T11:01:48.567Z">
+<meta property="og:updated_time" content="2018-12-30T09:14:45.273Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Longest Palindromic Substring(最长回文子串)">
-<meta name="twitter:description" content="1. 问题描述Given a string s, find the longest palindromic substring in s. You may assume that the maximum length of s is 1000.给定一个字符串s，找出s中的最长回文子串。s的长度不超过1000.">
+<meta name="twitter:description" content="1. 问题描述Given a string s, find the longest palindromic substring in s. You may assume that the maximum length of s is 1000.给定一个字符串s，找出s中的最长回文子串。s的长度不超过1000.">
 <meta name="twitter:image" content="https://tangshusen.me/2018/12/01/Longest-Palindromic-Substring/2.4.1.png">
 
 
@@ -420,7 +420,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-12-02 19:01:48" itemprop="dateModified" datetime="2018-12-02T19:01:48+08:00">2018-12-02</time>
+                <time title="修改时间：2018-12-30 17:14:45" itemprop="dateModified" datetime="2018-12-30T17:14:45+08:00">2018-12-30</time>
               
             
           </span>
@@ -471,7 +471,7 @@
       
 
       
-        <h1 id="1-问题描述"><a href="#1-问题描述" class="headerlink" title="1. 问题描述"></a>1. 问题描述</h1><p>Given a string s, find the longest palindromic substring in s. You may assume that the maximum length of s is 1000.<br>给定一个字符串s，找出s中的最长回文子串。s的长度不超过1000.</p>
+        <h1 id="1-问题描述"><a href="#1-问题描述" class="headerlink" title="1. 问题描述"></a>1. 问题描述</h1><p>Given a string s, find the longest palindromic substring in s. You may assume that the maximum length of s is 1000.<br>给定一个字符串s，找出s中的最长回文子串。s的长度不超过1000.</p>
 <a id="more"></a>
 <p>Example 1:</p>
 <blockquote>
@@ -483,9 +483,9 @@
 </blockquote>
 <h1 id="2-题解"><a href="#2-题解" class="headerlink" title="2. 题解"></a>2. 题解</h1><h2 id="2-1-暴力法"><a href="#2-1-暴力法" class="headerlink" title="2.1 暴力法"></a>2.1 暴力法</h2><h3 id="2-1-1-思路"><a href="#2-1-1-思路" class="headerlink" title="2.1.1 思路"></a>2.1.1 思路</h3><p>暴力穷举所有子字符串的可能，然后依次按位判断其是否是回文。虽然其时间复杂度很高，但它对空间的要求很低。</p>
 <h3 id="2-1-2-复杂度"><a href="#2-1-2-复杂度" class="headerlink" title="2.1.2 复杂度"></a>2.1.2 复杂度</h3><p>空间复杂度显然为 $O(1)$ ；<br>穷举所有字符串复杂度为 $O(n^2)$ ，再加上判断是否是回文的，所以总的时间复杂度为 $O(n^3)$ 。</p>
-<h3 id="2-1-3-代码"><a href="#2-1-3-代码" class="headerlink" title="2.1.3 代码"></a>2.1.3 代码</h3><p>代码就不给了，给了你也不会看😀</p>
-<h2 id="2-2-动态规划"><a href="#2-2-动态规划" class="headerlink" title="2.2 动态规划"></a>2.2 动态规划</h2><h3 id="2-2-1-思路"><a href="#2-2-1-思路" class="headerlink" title="2.2.1 思路"></a>2.2.1 思路</h3><p>我们知道，当某个字符串是回文的时候，在它两边同时增加一个相同字符后肯定依然是回文的，例如 bccb -&gt; abccba。基于这个特点，我们可以将暴力法中的判断是否为回文这一步用动态规划解决。</p>
-<p>具体的，我们可以先把所有长度为1的子字符串计算出来，这些必定是回文的；然后计算出所有长度为2的子字符串并判断是否为回文。到长度为3的时候，我们就可以利用上次的计算结果：如果中心对称的短字符串不是回文，那长字符串也不是，如果短字符串是回文，那就要看长字符串两头是否一样。这样，一直到长度最大的子字符串，我们就把整个字符串集穷举完了。在这个过程中用一个 n x n 的二维bool型数组<code>isOK</code>记录是否会回文，其中n是字符串s的长度，<code>isOK[i][j] == true</code>就表示子串<code>s[i...j]</code>是回文的。</p>
+<h3 id="2-1-3-代码"><a href="#2-1-3-代码" class="headerlink" title="2.1.3 代码"></a>2.1.3 代码</h3><p>代码就不给了，给了你也不会看😀</p>
+<h2 id="2-2-动态规划"><a href="#2-2-动态规划" class="headerlink" title="2.2 动态规划"></a>2.2 动态规划</h2><h3 id="2-2-1-思路"><a href="#2-2-1-思路" class="headerlink" title="2.2.1 思路"></a>2.2.1 思路</h3><p>我们知道，当某个字符串是回文的时候，在它两边同时增加一个相同字符后肯定依然是回文的，例如 bccb -&gt; abccba。基于这个特点，我们可以将暴力法中的判断是否为回文这一步用动态规划解决。</p>
+<p>具体的，我们可以先把所有长度为1的子字符串计算出来，这些必定是回文的；然后计算出所有长度为2的子字符串并判断是否为回文。到长度为3的时候，我们就可以利用上次的计算结果：如果中心对称的短字符串不是回文，那长字符串也不是，如果短字符串是回文，那就要看长字符串两头是否一样。这样，一直到长度最大的子字符串，我们就把整个字符串集穷举完了。在这个过程中用一个 n x n 的二维bool型数组<code>isOK</code>记录是否会回文，其中n是字符串s的长度，<code>isOK[i][j] == true</code>就表示子串<code>s[i...j]</code>是回文的。</p>
 <h3 id="2-2-2-复杂度"><a href="#2-2-2-复杂度" class="headerlink" title="2.2.2 复杂度"></a>2.2.2 复杂度</h3><p>由于要申请一个二维数组<code>isOK</code>, 所以空间复杂度为 $O(n^2)$ ;<br>由于使用动态规划，时间复杂度从暴力法的 $O(n^3)$ 减少到 $O(n^2)$。<br>实测:</p>
 <blockquote>
 <p>Runtime: 244 ms, faster than 14.67% of C++ online submissions for Longest Palindromic Substring.</p>
@@ -502,11 +502,11 @@
 <p>Runtime: 20 ms, faster than 57.88% of C++ online submissions for Longest Palindromic Substring.</p>
 </blockquote>
 <h3 id="2-3-3-代码"><a href="#2-3-3-代码" class="headerlink" title="2.3.3 代码"></a>2.3.3 代码</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Solution</span> &#123;</span></span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="function"><span class="built_in">string</span> <span class="title">longestPalindrome</span><span class="params">(<span class="built_in">string</span> s)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span>(!s.size()) <span class="keyword">return</span> <span class="string">""</span>;</span><br><span class="line">        <span class="built_in">string</span> res = s.substr(<span class="number">0</span>, <span class="number">1</span>); </span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> mid = <span class="number">0</span>; mid &lt; s.size(); mid++)&#123; <span class="comment">// mid为中心字母或者对称轴的前一个字母的下标</span></span><br><span class="line">            <span class="comment">// mid为中心字母下标，即子串长度为奇数</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> half_len = <span class="number">1</span>; mid + half_len &lt; s.size() &amp;&amp; mid - half_len &gt;= <span class="number">0</span>; half_len++)&#123;</span><br><span class="line">                <span class="keyword">if</span>(s[mid + half_len] != s[mid - half_len]) <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">if</span>(<span class="number">2</span> * half_len + <span class="number">1</span> &gt; res.size())</span><br><span class="line">                    res = s.substr(mid - half_len, <span class="number">2</span>*half_len + <span class="number">1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// mid为对称轴的前一个字母，即子串长度为偶数</span></span><br><span class="line">            <span class="keyword">for</span>(<span class="keyword">int</span> half_len = <span class="number">1</span>; mid + half_len &lt; s.size() &amp;&amp; mid - half_len &gt;= <span class="number">-1</span>; half_len++)&#123;</span><br><span class="line">                <span class="keyword">if</span>(s[mid + half_len] != s[mid - half_len + <span class="number">1</span>]) <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">if</span>(<span class="number">2</span> * half_len &gt; res.size())</span><br><span class="line">                    res = s.substr(mid - half_len + <span class="number">1</span>, <span class="number">2</span> * half_len);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<h2 id="2-4-马拉车-Manacher-算法"><a href="#2-4-马拉车-Manacher-算法" class="headerlink" title="2.4 马拉车(Manacher)算法"></a>2.4 马拉车(Manacher)算法</h2><p>下面要出场的就是大名鼎鼎的马拉车算法了，前面介绍的算法最快也不过 $O(n^2)$ 的时间复杂度，而马拉车的时间复杂度为逆天的 $O(n)$ 😨，是此题最理想的复杂度了。</p>
+<h2 id="2-4-马拉车-Manacher-算法"><a href="#2-4-马拉车-Manacher-算法" class="headerlink" title="2.4 马拉车(Manacher)算法"></a>2.4 马拉车(Manacher)算法</h2><p>下面要出场的就是大名鼎鼎的马拉车算法了，前面介绍的算法最快也不过 $O(n^2)$ 的时间复杂度，而马拉车的时间复杂度为逆天的 $O(n)$ 😨，是此题最理想的复杂度了。</p>
 <blockquote>
 <p>本节主要参考<a href="https://articles.leetcode.com/longest-palindromic-substring-part-ii/" target="_blank" rel="noopener">LeetCode对此算法的详细解释。</a></p>
 </blockquote>
-<h3 id="2-4-1-思路"><a href="#2-4-1-思路" class="headerlink" title="2.4.1 思路"></a>2.4.1 思路</h3><p>首先，为了避免2.3那样将子串分为长度为奇数和偶数两种情况，我们先将字符串简单处理一下, 在s中的每个字符两边插入一个字符“#”得到字符串(在具体实现中，为了避免越界检查，通常还会在首尾额外插入两个与所有可能的字符都不同的字符如^、$),例如：</p>
+<h3 id="2-4-1-思路"><a href="#2-4-1-思路" class="headerlink" title="2.4.1 思路"></a>2.4.1 思路</h3><p>首先，为了避免2.3那样将子串分为长度为奇数和偶数两种情况，我们先将字符串简单处理一下, 在s中的每个字符两边插入一个字符“#”得到字符串(在具体实现中，为了避免越界检查，通常还会在首尾额外插入两个与所有可能的字符都不同的字符如^、$),例如：</p>
 <blockquote>
 <p>s = abaaba  —插入字符–&gt;  T = #a#b#a#a#b#a#</p>
 </blockquote>
@@ -514,12 +514,12 @@
 <blockquote>
 <p>T : # a # b # a # a # b # a #<br>P : 0 1 0 3 0 1 6 1 0 3 0 1 0</p>
 </blockquote>
-<p>通过数组P，找到其中最大的数字6，我们可以马上得出最长的回文字符串就是s本身<code>abaaba</code>，即<strong>问题转换为如何高效地求解数组P</strong>。</p>
+<p>通过数组P，找到其中最大的数字6，我们可以马上得出最长的回文字符串就是s本身<code>abaaba</code>，即<strong>问题转换为如何高效地求解数组P</strong>。</p>
 <p>我们仔细观察一下上面这个特殊的例子，我们会发现不仅T是对称的，就连P都是对称的，由于我们的目的就是计算出P的所有元素值，那么如果P是对称的，岂不是可以大大减少计算量！马拉车算法就是基于这样一个想法展开的。</p>
-<p>为了详细介绍马拉车算法，我们来看一个稍微复杂的例子<code>s = babcbabcbaccba</code>:</p>
+<p>为了详细介绍马拉车算法，我们来看一个稍微复杂的例子<code>s = babcbabcbaccba</code>:</p>
 <center><br>    <img src="/2018/12/01/Longest-Palindromic-Substring/2.4.1.png" width="800" class="full-image"><br></center>
 
-<p>如上图所示,假设已经完成了P数组的部分数值的计算，当前需要计算的是<code>P[i]</code>。我们<strong>引入变量 R，表示当前访问到的所有回文子串中所能触及的最右一个字符的位置</strong>。另外还要记录下R对应的回文串的对称轴所在的位置，记为C。另外也可推断出该回文串的左边位置L。图中的实线即表示C，两条虚线(L和R)分别表示以C为中心的回文串的边界。现在需要计算的是 <code>P[i]</code> 的值，图中 i’ 表示的是 i 关于 C 对称的点。那么问题来了，怎么高效地算出<code>P[i]</code>。</p>
+<p>如上图所示,假设已经完成了P数组的部分数值的计算，当前需要计算的是<code>P[i]</code>。我们<strong>引入变量 R，表示当前访问到的所有回文子串中所能触及的最右一个字符的位置</strong>。另外还要记录下R对应的回文串的对称轴所在的位置，记为C。另外也可推断出该回文串的左边位置L。图中的实线即表示C，两条虚线(L和R)分别表示以C为中心的回文串的边界。现在需要计算的是 <code>P[i]</code> 的值，图中 i’ 表示的是 i 关于 C 对称的点。那么问题来了，怎么高效地算出<code>P[i]</code>。</p>
 <p>当前 i 的值是 13，我们需要得到<code>P[13]</code>的值，我们首先看下 i 关于 C对称的 <code>i&#39; = 9</code>的值。</p>
 <center><br>    <img src="/2018/12/01/Longest-Palindromic-Substring/2.4.2.png" width="800" class="full-image"><br></center>
 
@@ -527,18 +527,18 @@
 <center><br>    <img src="/2018/12/01/Longest-Palindromic-Substring/2.4.3.png" width="800" class="full-image"><br></center>
 
 <p>如上图所示，现在我们到了 <code>i = 15</code> 这个点，i 关于 C对称的点是 <code>i&#39; = 7</code>, 那么这里 <code>P[15] = P[7] = 7</code> 还会不会成立呢？</p>
-<p>很显然是不成立的，我们凭肉眼观察可知 <code>p[15] = 5</code> 而 <code>P[7] = 7</code>。这是为什么呢？</p>
+<p>很显然是不成立的，我们凭肉眼观察可知 <code>p[15] = 5</code> 而 <code>P[7] = 7</code>。这是为什么呢？</p>
 <center><br>    <img src="/2018/12/01/Longest-Palindromic-Substring/2.4.4.png" width="800" class="full-image"><br></center>
 
 <p>上图中，绿色实线表示的是以C为中心的最长回文子串所覆盖的区域，红色实线表示的是与绿色区域不匹配的部分，左边的红色实线是以<code>T[i&#39;]</code>为中心的最长回文子串所覆盖区域超出绿色实线的部分。右边的红色实线是以<code>T[i]</code>为中心的最长回文子串所覆盖区域超出绿色实线的部分。而绿色的虚线部分则是分别以<code>T[i]</code>和<code>T[i&#39;]</code>为中心最长回文子串与绿色实线部分的重叠部分。</p>
-<p>从图中我们可以明显的看出被两条绿色实线所覆盖的区域中，C两边的子串是完全相同的。同时绿色虚线的那部分也是关于中心对称的。当 <code>i = 12,13,14</code> 即 <code>i&#39; = 10,9,8</code> 时，以<code>T[i&#39;]</code>为中心的最大回文子串全落在了L和R之间，这就使得我们能够使用LR的对称性直接得出关于<code>T[i]</code>对称的最大回文子串；但当 <code>i&#39; = 7</code> 即 <code>P[i&#39;] = 7</code>，此时以<code>T[i&#39;]</code>为中心的最长回文子串超出了以C为中心的最长回文子串的左边界(图中L左边红色实线)，正是因为这个原因，此时无法再按照对称性直接得出 <code>P[i]</code> 的值了，但是可以推出 <code>P[i] &gt;= 5</code>。</p>
+<p>从图中我们可以明显的看出被两条绿色实线所覆盖的区域中，C两边的子串是完全相同的。同时绿色虚线的那部分也是关于中心对称的。当 <code>i = 12,13,14</code> 即 <code>i&#39; = 10,9,8</code> 时，以<code>T[i&#39;]</code>为中心的最大回文子串全落在了L和R之间，这就使得我们能够使用LR的对称性直接得出关于<code>T[i]</code>对称的最大回文子串；但当 <code>i&#39; = 7</code> 即 <code>P[i&#39;] = 7</code>，此时以<code>T[i&#39;]</code>为中心的最长回文子串超出了以C为中心的最长回文子串的左边界(图中L左边红色实线)，正是因为这个原因，此时无法再按照对称性直接得出 <code>P[i]</code> 的值了，但是可以推出 <code>P[i] &gt;= 5</code>。</p>
 <p>现在我们知道的是<code>P[i] &gt;= 5</code>, 为了找出<code>P[i]</code>最终的值，我们只有继续以<code>P[i]</code>为中心向两边扩展进行比较，在这个例子中<code>P[21] != P[1]</code>,那么我们最终推断是<code>P[i] = 5</code>。</p>
 <p>总结一下，在每一步中，都存在两种可能:</p>
 <ol>
 <li><code>R &gt; i</code>，也就是刚刚我们讨论的情况，此时又细分为两种情况:<br>(1) 若 <code>P[i&#39;] &lt; R – i</code>, 则令 <code>P[i] = P[i&#39;]</code>;<br>(2) 否则， 先令<code>P[i] = P[i&#39;]</code>，再以i为中心扩展回文串并<code>P[i]++</code>，直到左右两边字符不同或者到达边界。并更新变量R、C。</li>
-<li><code>R &lt;= i</code>，即i移动到R右边了，此时也应该以i为中心扩展回文串。类似情况1(2),只是<code>P[i]</code>初始为0。</li>
+<li><code>R &lt;= i</code>，即i移动到R右边了，此时也应该以i为中心扩展回文串。类似情况1(2),只是<code>P[i]</code>初始为0。</li>
 </ol>
-<h3 id="2-4-2-复杂度"><a href="#2-4-2-复杂度" class="headerlink" title="2.4.2 复杂度"></a>2.4.2 复杂度</h3><p>空间复杂度显然是O(n).<br>下面讨论一下时间复杂度，虽然代码中存在两个循环for和while，但是需要注意是：</p>
+<h3 id="2-4-2-复杂度"><a href="#2-4-2-复杂度" class="headerlink" title="2.4.2 复杂度"></a>2.4.2 复杂度</h3><p>空间复杂度显然是O(n).<br>下面讨论一下时间复杂度，虽然代码中存在两个循环for和while，但是需要注意是：</p>
 <ul>
 <li>当R不需要进行扩展时，不会进入while循环；</li>
 <li>R需要进行扩展时，会进入while循环，但整个算法过程while<strong>一共</strong>循环最多n次，即R从0不断扩展到n。</li>
@@ -839,7 +839,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-问题描述"><span class="nav-text">1. 问题描述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-题解"><span class="nav-text">2. 题解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-暴力法"><span class="nav-text">2.1 暴力法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-1-思路"><span class="nav-text">2.1.1 思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-2-复杂度"><span class="nav-text">2.1.2 复杂度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-3-代码"><span class="nav-text">2.1.3 代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-动态规划"><span class="nav-text">2.2 动态规划</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-思路"><span class="nav-text">2.2.1 思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-复杂度"><span class="nav-text">2.2.2 复杂度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-3-代码"><span class="nav-text">2.2.3 代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-中心扩散法"><span class="nav-text">2.3 中心扩散法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-1-思路"><span class="nav-text">2.3.1 思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-2-复杂度"><span class="nav-text">2.3.2 复杂度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-3-代码"><span class="nav-text">2.3.3 代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-马拉车-Manacher-算法"><span class="nav-text">2.4 马拉车(Manacher)算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-1-思路"><span class="nav-text">2.4.1 思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-2-复杂度"><span class="nav-text">2.4.2 复杂度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-1-代码"><span class="nav-text">2.5.1 代码</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-问题描述"><span class="nav-text">1. 问题描述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-题解"><span class="nav-text">2. 题解</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-暴力法"><span class="nav-text">2.1 暴力法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-1-思路"><span class="nav-text">2.1.1 思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-2-复杂度"><span class="nav-text">2.1.2 复杂度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-3-代码"><span class="nav-text">2.1.3 代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-动态规划"><span class="nav-text">2.2 动态规划</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-思路"><span class="nav-text">2.2.1 思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-复杂度"><span class="nav-text">2.2.2 复杂度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-3-代码"><span class="nav-text">2.2.3 代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-中心扩散法"><span class="nav-text">2.3 中心扩散法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-1-思路"><span class="nav-text">2.3.1 思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-2-复杂度"><span class="nav-text">2.3.2 复杂度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-3-代码"><span class="nav-text">2.3.3 代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-马拉车-Manacher-算法"><span class="nav-text">2.4 马拉车(Manacher)算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-1-思路"><span class="nav-text">2.4.1 思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-2-复杂度"><span class="nav-text">2.4.2 复杂度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-1-代码"><span class="nav-text">2.5.1 代码</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>

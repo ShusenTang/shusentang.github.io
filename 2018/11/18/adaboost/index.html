@@ -121,7 +121,7 @@
 <meta property="og:description" content="目前网上大多数博客只介绍了AdaBoost算法是什么，但是鲜有人介绍为什么Adaboost长这样，本文对此给出了详细的解释。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://tangshusen.me/2018/11/18/adaboost/2.1.png">
-<meta property="og:updated_time" content="2018-11-23T16:01:08.570Z">
+<meta property="og:updated_time" content="2018-12-30T09:14:14.935Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AdaBoost算法详解与python实现">
 <meta name="twitter:description" content="目前网上大多数博客只介绍了AdaBoost算法是什么，但是鲜有人介绍为什么Adaboost长这样，本文对此给出了详细的解释。">
@@ -417,7 +417,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-11-24 00:01:08" itemprop="dateModified" datetime="2018-11-24T00:01:08+08:00">2018-11-24</time>
+                <time title="修改时间：2018-12-30 17:14:14" itemprop="dateModified" datetime="2018-12-30T17:14:14+08:00">2018-12-30</time>
               
             
           </span>
@@ -469,39 +469,39 @@
 
       
         <p>目前网上大多数博客只介绍了AdaBoost算法是什么，但是鲜有人介绍为什么Adaboost长这样，本文对此给出了详细的解释。<br><a id="more"></a></p>
-<h1 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h1><h2 id="1-1-集成学习"><a href="#1-1-集成学习" class="headerlink" title="1.1 集成学习"></a>1.1 集成学习</h2><p>目前存在各种各样的机器学习算法，例如SVM、决策树、感知机等等。但是实际应用中，或者说在打比赛时，成绩较好的队伍几乎都用了集成学习(ensemble learning)的方法。集成学习的思想，简单来讲，就是“三个臭皮匠顶个诸葛亮”。集成学习通过结合多个学习器(例如同种算法但是参数不同，或者不同算法)，一般会获得比任意单个学习器都要好的性能，尤其是在这些学习器都是”弱学习器”的时候提升效果会很明显。</p>
+<h1 id="1-概述"><a href="#1-概述" class="headerlink" title="1. 概述"></a>1. 概述</h1><h2 id="1-1-集成学习"><a href="#1-1-集成学习" class="headerlink" title="1.1 集成学习"></a>1.1 集成学习</h2><p>目前存在各种各样的机器学习算法，例如SVM、决策树、感知机等等。但是实际应用中，或者说在打比赛时，成绩较好的队伍几乎都用了集成学习(ensemble learning)的方法。集成学习的思想，简单来讲，就是“三个臭皮匠顶个诸葛亮”。集成学习通过结合多个学习器(例如同种算法但是参数不同，或者不同算法)，一般会获得比任意单个学习器都要好的性能，尤其是在这些学习器都是”弱学习器”的时候提升效果会很明显。</p>
 <blockquote>
 <p>弱学习器指的是性能不太好的学习器，比如一个准确率略微超过50%的二分类器。</p>
 </blockquote>
-<p>下面看看西瓜书对此做的一个简单理论分析。<br>考虑一个二分类问题 $y \in {-1, +1}$ 、真实函数 $f$ 以及奇数 $M$ 个犯错概率<strong>相互独立</strong>且均为 $\epsilon $ 的个体学习器(或者称基学习器) $h_i$ 。我们用简单的投票进行集成学习，即分类结果取半数以上的基学习器的结果:<br>$$<br>H(x) = sign(\sum_{i=1}^M h_i(x)) \tag{1.1.1}<br>$$<br>由Hoeffding不等式知，集成学习后的犯错(即过半数基学习器犯错)概率满足<br>$$<br>P(H(x) \neq f(x)) \leq exp(- \frac 1 2 M (1-2\epsilon)^2) \tag{1.1.2}<br>$$</p>
+<p>下面看看西瓜书对此做的一个简单理论分析。<br>考虑一个二分类问题 $y \in {-1, +1}$ 、真实函数 $f$ 以及奇数 $M$ 个犯错概率<strong>相互独立</strong>且均为 $\epsilon $ 的个体学习器(或者称基学习器) $h_i$ 。我们用简单的投票进行集成学习，即分类结果取半数以上的基学习器的结果:<br>$$<br>H(x) = sign(\sum_{i=1}^M h_i(x)) \tag{1.1.1}<br>$$<br>由Hoeffding不等式知，集成学习后的犯错(即过半数基学习器犯错)概率满足<br>$$<br>P(H(x) \neq f(x)) \leq exp(- \frac 1 2 M (1-2\epsilon)^2) \tag{1.1.2}<br>$$</p>
 <blockquote>
 <p>式 $（1.1.2）$ 的证明是周志华《机器学习》的习题8.1，题解可参考<a href="https://blog.csdn.net/icefire_tyh/article/details/52194771" target="_blank" rel="noopener">此处</a></p>
 </blockquote>
-<p>式 $（1.1.2）$ 指出，当<strong>犯错概率</strong>独立的基学习器个数 $M$ 很大时，集成后的犯错概率接近0，这也很符合直观想法: 大多数人同时犯错的概率是比较低的。</p>
-<p>就如上面加粗字体强调的，以上推论全部建立在基学习器犯错相互独立的情况下，但实际中这些学习器不可能相互独立，而如何让基学习器变得“相对独立一些”，也即增加这些基学习器的多样性，正是集成学习需要考虑的主要问题。</p>
+<p>式 $（1.1.2）$ 指出，当<strong>犯错概率</strong>独立的基学习器个数 $M$ 很大时，集成后的犯错概率接近0，这也很符合直观想法: 大多数人同时犯错的概率是比较低的。</p>
+<p>就如上面加粗字体强调的，以上推论全部建立在基学习器犯错相互独立的情况下，但实际中这些学习器不可能相互独立，而如何让基学习器变得“相对独立一些”，也即增加这些基学习器的多样性，正是集成学习需要考虑的主要问题。</p>
 <p>按照每个基学习器之间是否存在依赖关系可以将集成学习分为两类：</p>
 <ol>
 <li>基学习器之间存在强依赖关系，一系列基学习器需要串行生成，代表算法是<strong>Boosting</strong>；</li>
 <li>基学习器之间不存在强依赖关系，一系列基学习器可并行生成，代表算法是<strong>Bagging</strong>和<strong>随机森林</strong>。</li>
 </ol>
-<p>Boosting系列算法里最著名算法主要有AdaBoost和提升树(Boosting tree)系列算法，本文只介绍最具代表性的AdaBoost。提升树、Bagging以及随机森林不在本文介绍范围内，有时间了再另外介绍。</p>
-<h2 id="1-2-Boosting"><a href="#1-2-Boosting" class="headerlink" title="1.2 Boosting"></a>1.2 Boosting</h2><p>Boosting指的是一类集成方法，其主要思想就是将弱的基学习器提升(boost)为强学习器。具体步骤如下:</p>
+<p>Boosting系列算法里最著名算法主要有AdaBoost和提升树(Boosting tree)系列算法，本文只介绍最具代表性的AdaBoost。提升树、Bagging以及随机森林不在本文介绍范围内，有时间了再另外介绍。</p>
+<h2 id="1-2-Boosting"><a href="#1-2-Boosting" class="headerlink" title="1.2 Boosting"></a>1.2 Boosting</h2><p>Boosting指的是一类集成方法，其主要思想就是将弱的基学习器提升(boost)为强学习器。具体步骤如下:</p>
 <ol>
-<li>先用每个样本权重相等的训练集训练一个初始的基学习器；</li>
-<li>根据上轮得到的学习器对训练集的预测表现情况调整训练集中的样本权重(例如提高被错分类的样本的权重使之在下轮训练中得到更多的关注), 然后据此训练一个新的基学习器；</li>
+<li>先用每个样本权重相等的训练集训练一个初始的基学习器；</li>
+<li>根据上轮得到的学习器对训练集的预测表现情况调整训练集中的样本权重(例如提高被错分类的样本的权重使之在下轮训练中得到更多的关注), 然后据此训练一个新的基学习器；</li>
 <li>重复2直到得到 $M$ 个基学习器，最终的集成结果是 $M$ 个基学习器的组合。</li>
 </ol>
 <p>由此看出，Boosting算法是一个串行的过程。</p>
-<p>Boosting算法簇中最著名的就是AdaBoost，下文将会详细介绍。</p>
-<h1 id="2-AdaBoost原理"><a href="#2-AdaBoost原理" class="headerlink" title="2. AdaBoost原理"></a>2. AdaBoost原理</h1><h2 id="2-1-基本思想"><a href="#2-1-基本思想" class="headerlink" title="2.1 基本思想"></a>2.1 基本思想</h2><p>对于1.2节所述的Boosting算法步骤，需要回答两个问题:</p>
+<p>Boosting算法簇中最著名的就是AdaBoost，下文将会详细介绍。</p>
+<h1 id="2-AdaBoost原理"><a href="#2-AdaBoost原理" class="headerlink" title="2. AdaBoost原理"></a>2. AdaBoost原理</h1><h2 id="2-1-基本思想"><a href="#2-1-基本思想" class="headerlink" title="2.1 基本思想"></a>2.1 基本思想</h2><p>对于1.2节所述的Boosting算法步骤，需要回答两个问题:</p>
 <ol>
 <li>如何调整每一轮的训练集中的样本权重？</li>
-<li>如何将得到的 $M$ 个组合成最终的学习器？</li>
+<li>如何将得到的 $M$ 个组合成最终的学习器？</li>
 </ol>
 <p>AdaBoost(Adaptive Boosting, 自适应增强)算法采取的方法是:</p>
 <ol>
-<li>提高上一轮被错误分类的样本的权值，降低被正确分类的样本的权值；</li>
-<li>线性加权求和。误差率小的基学习器拥有较大的权值，误差率大的基学习器拥有较小的权值。</li>
+<li>提高上一轮被错误分类的样本的权值，降低被正确分类的样本的权值；</li>
+<li>线性加权求和。误差率小的基学习器拥有较大的权值，误差率大的基学习器拥有较小的权值。</li>
 </ol>
 <p>Adaboost算法结构如下图(<a href="https://www.python-course.eu/Boosting.php" target="_blank" rel="noopener">图片来源</a>)所示。</p>
 <center><br>    <img src="/2018/11/18/adaboost/2.1.png" width="600" class="full-image"><br>    <br><br>    <div style="border-bottom: 1px solid #d9d9d9;
@@ -509,25 +509,25 @@
     color: #999;">图2.1</div><br></center>
 
 <p>下面先给出AdaBoost算法具体实现步骤，至于算法解释（为什么要这样做）将在下一大节阐述。</p>
-<h2 id="2-2-算法步骤"><a href="#2-2-算法步骤" class="headerlink" title="2.2 算法步骤"></a>2.2 算法步骤</h2><p>考虑如下形式的二分类（标准AdaBoost算法只适用于二分类任务）训练数据集:<br>$$<br>{(x_1,y_1),(x_2,y_2),…,(x_N,y_N)}<br>$$<br>其中 $x_i$是一个含有$d$个元素的列向量, 即 $x_i\in \mathcal{X} \subseteq \mathbf{R}^d$ ; $y_i$是标量, $y\in{+1,-1}$。</p>
+<h2 id="2-2-算法步骤"><a href="#2-2-算法步骤" class="headerlink" title="2.2 算法步骤"></a>2.2 算法步骤</h2><p>考虑如下形式的二分类（标准AdaBoost算法只适用于二分类任务）训练数据集:<br>$$<br>{(x_1,y_1),(x_2,y_2),…,(x_N,y_N)}<br>$$<br>其中 $x_i$是一个含有$d$个元素的列向量, 即 $x_i\in \mathcal{X} \subseteq \mathbf{R}^d$ ; $y_i$是标量, $y\in{+1,-1}$。</p>
 <p>Adaboost算法具体步骤如下:</p>
 <ol>
 <li>初始化样本的权重<br>$$<br>D_1=(w_{11}, w_{12},…w_{1N}), w_{1i}=\frac 1 N, i = 1,2…N \tag{2.2.1}<br>$$</li>
-<li>对$m = 1,2,…M$,重复以下操作得到 $M$ 个基学习器:<br>(1) 按照样本权重分布 $D_m$ 训练数据得到第 $m$ 个基学习器 $G_m(x)$:<br>$$<br>G_m(x): \mathcal{X} \to {-1, +1}<br>$$<br>(2) 计算 $G_m(x)$ 在加权训练数据集上的分类误差率:<br>$$<br>e_m = \sum_{i=1}^NP(G_m(x_i) \neq y_i)=\sum_{i=1}^N w_{mi} I(G_m(x_i) \neq y_i) \tag{2.2.2}<br>$$<br>上式中 $I(\cdot)$ 是指示函数，考虑更加周全的AdaBoost算法在这一步还应该判断是否满足基本条件(例如生成的基学习器是否比随机猜测好), 如果不满足，则当前基学习器被抛弃，学习过程提前终止。<br>(3) 计算 $G_m(x)$ 的系数(即最终集成使用的的基学习器的权重):<br>$$<br>\alpha_m = \frac 1 2 log \frac {1-e_m} {e_m} \tag{2.2.3}<br>$$<br>(4) 更新训练样本的权重<br>$$<br>D_{m+1}=(w_{m+1,1}, w_{m+1,2},…w_{m+1,N}) \tag{2.2.4}<br>$$<br>$$<br>w_{m+1, i} = \frac{w_{mi}} {Z_m} exp(-\alpha_my_iG_m(x_i)) ,i=1,2,…N \tag{2.2.5}<br>$$<br>其中 $Z_m$ 是规范化因子，目的是为了使 $D_{m+1}$ 的所有元素和为1。即<br>$$<br>Z_m=\sum_{i=1}^N w_{mi} exp(-\alpha_my_iG_m(x_i)) \tag{2.2.6}<br>$$</li>
+<li>对$m = 1,2,…M$,重复以下操作得到 $M$ 个基学习器:<br>(1) 按照样本权重分布 $D_m$ 训练数据得到第 $m$ 个基学习器 $G_m(x)$:<br>$$<br>G_m(x): \mathcal{X} \to {-1, +1}<br>$$<br>(2) 计算 $G_m(x)$ 在加权训练数据集上的分类误差率:<br>$$<br>e_m = \sum_{i=1}^NP(G_m(x_i) \neq y_i)=\sum_{i=1}^N w_{mi} I(G_m(x_i) \neq y_i) \tag{2.2.2}<br>$$<br>上式中 $I(\cdot)$ 是指示函数，考虑更加周全的AdaBoost算法在这一步还应该判断是否满足基本条件(例如生成的基学习器是否比随机猜测好), 如果不满足，则当前基学习器被抛弃，学习过程提前终止。<br>(3) 计算 $G_m(x)$ 的系数(即最终集成使用的的基学习器的权重):<br>$$<br>\alpha_m = \frac 1 2 log \frac {1-e_m} {e_m} \tag{2.2.3}<br>$$<br>(4) 更新训练样本的权重<br>$$<br>D_{m+1}=(w_{m+1,1}, w_{m+1,2},…w_{m+1,N}) \tag{2.2.4}<br>$$<br>$$<br>w_{m+1, i} = \frac{w_{mi}} {Z_m} exp(-\alpha_my_iG_m(x_i)) ,i=1,2,…N \tag{2.2.5}<br>$$<br>其中 $Z_m$ 是规范化因子，目的是为了使 $D_{m+1}$ 的所有元素和为1。即<br>$$<br>Z_m=\sum_{i=1}^N w_{mi} exp(-\alpha_my_iG_m(x_i)) \tag{2.2.6}<br>$$</li>
 <li>构建最终的分类器线性组合<br>$$<br>f(x) = \sum_{i=1}^M \alpha_m G_m(x) \tag{2.2.7}<br>$$<br>得到最终的分类器为<br>$$<br>G(x) = sign(f(x))=sign(\sum_{i=1}^M \alpha_m G_m(x)) \tag{2.2.8}<br>$$</li>
 </ol>
-<p>由式 $(2.2.3)$ 知，当基学习器 $G_m(x)$ 的误差率 $e_m \le 0.5$ 时，$\alpha_m \ge 0$，并且 $\alpha_m$ 随着 $e_m$ 的减小而增大，即分类误差率越小的基学习器在最终集成时占比也越大。即AdaBoost能够适应各个弱分类器的训练误差率，这也是它的名称中”适应性(Adaptive)”的由来。</p>
-<p>由式 $(2.2.5)$ 知， 被基学习器 $G_m(x)$ 误分类的样本权值得以扩大，而被正确分类的样本的权值被得以缩小。</p>
-<p>需要注意的是式 $(2.2.7)$ 中所有的 $\alpha_m$ 的和并不为1(因为没有做一个softmax操作)，$f(x)$ 的符号决定了所预测的类，其绝对值代表了分类的确信度。</p>
+<p>由式 $(2.2.3)$ 知，当基学习器 $G_m(x)$ 的误差率 $e_m \le 0.5$ 时，$\alpha_m \ge 0$，并且 $\alpha_m$ 随着 $e_m$ 的减小而增大，即分类误差率越小的基学习器在最终集成时占比也越大。即AdaBoost能够适应各个弱分类器的训练误差率，这也是它的名称中”适应性(Adaptive)”的由来。</p>
+<p>由式 $(2.2.5)$ 知， 被基学习器 $G_m(x)$ 误分类的样本权值得以扩大，而被正确分类的样本的权值被得以缩小。</p>
+<p>需要注意的是式 $(2.2.7)$ 中所有的 $\alpha_m$ 的和并不为1(因为没有做一个softmax操作)，$f(x)$ 的符号决定了所预测的类，其绝对值代表了分类的确信度。</p>
 <h1 id="3-AdaBoost算法解释"><a href="#3-AdaBoost算法解释" class="headerlink" title="3. AdaBoost算法解释"></a>3. AdaBoost算法解释</h1><p>有没有想过为什么AdaBoost算法长上面这个样子，例如为什么 $\alpha_m$ 要用式 $(2.2.3)$ 那样计算？本节将探讨这个问题。</p>
 <h2 id="3-1-前向分步算法"><a href="#3-1-前向分步算法" class="headerlink" title="3.1 前向分步算法"></a>3.1 前向分步算法</h2><p>在解释AdaBoost算法之前，先来看看前向分步算法。</p>
-<p>就以AdaBoost算法的最终模型表达式为例:<br>$$<br>f(x) = \sum_{i=1}^M \alpha_m G_m(x) \tag{3.1.1}<br>$$<br>可以看到这是一个“加性模型(additive model)”。我们希望这个模型在训练集上的经验误差最小，即<br>$$<br>min \sum_{i=1}^N L(y_i, f(x)) \iff  min \sum_{i=1}^N L(y_i, \sum_{i=1}^M \alpha_m G_m(x)) \tag{3.1.2}<br>$$<br>通常这是一个复杂的优化问题。前向分步算法求解这一优化问题的思想就是: 因为最终模型是一个加性模型，如果能从前往后，每一步只学习一个基学习器 $G_m(x)$ 及其权重 $\alpha_m$ , 不断迭代得到最终的模型，那么就可以简化问题复杂度。具体的，当我们经过 $m-1$ 轮迭代得到了最优模型 $f_{m-1}(x)$ 时，因为</p>
-<p>$$<br>f_m(x)= f_{m-1}(x) + \alpha_mG_m(x) \tag{3.1.3}<br>$$<br>所以此轮优化目标就为<br>$$<br>min \sum_{i=1}^N L(y_i, f_{m-1}(x) + \alpha_mG_m(x)) \tag{3.1.4}<br>$$<br>求解上式即可得到第 $m$ 个基分类器 $G_m(x)$ 及其权重 $\alpha_m$ 。<br>这样，前向分步算法就通过不断迭代求得了从 $m=1$ 到 $m=M$ 的所有基分类器及其权重，问题得到了解决。</p>
-<h2 id="3-2-AdaBoost算法证明"><a href="#3-2-AdaBoost算法证明" class="headerlink" title="3.2 AdaBoost算法证明"></a>3.2 AdaBoost算法证明</h2><p>上一小结介绍的前向分步算法逐一学习基学习器，这一过程也即AdaBoost算法逐一学习基学习器的过程。但是为什么2.2节中的公式为什么长那样还是没有解释。本节就证明前向分步算法的损失函数是指数损失函数(exponential loss function)时，AdaBoost学习的具体步骤就如2.2节所示。</p>
+<p>就以AdaBoost算法的最终模型表达式为例:<br>$$<br>f(x) = \sum_{i=1}^M \alpha_m G_m(x) \tag{3.1.1}<br>$$<br>可以看到这是一个“加性模型(additive model)”。我们希望这个模型在训练集上的经验误差最小，即<br>$$<br>min \sum_{i=1}^N L(y_i, f(x)) \iff  min \sum_{i=1}^N L(y_i, \sum_{i=1}^M \alpha_m G_m(x)) \tag{3.1.2}<br>$$<br>通常这是一个复杂的优化问题。前向分步算法求解这一优化问题的思想就是: 因为最终模型是一个加性模型，如果能从前往后，每一步只学习一个基学习器 $G_m(x)$ 及其权重 $\alpha_m$ , 不断迭代得到最终的模型，那么就可以简化问题复杂度。具体的，当我们经过 $m-1$ 轮迭代得到了最优模型 $f_{m-1}(x)$ 时，因为</p>
+<p>$$<br>f_m(x)= f_{m-1}(x) + \alpha_mG_m(x) \tag{3.1.3}<br>$$<br>所以此轮优化目标就为<br>$$<br>min \sum_{i=1}^N L(y_i, f_{m-1}(x) + \alpha_mG_m(x)) \tag{3.1.4}<br>$$<br>求解上式即可得到第 $m$ 个基分类器 $G_m(x)$ 及其权重 $\alpha_m$ 。<br>这样，前向分步算法就通过不断迭代求得了从 $m=1$ 到 $m=M$ 的所有基分类器及其权重，问题得到了解决。</p>
+<h2 id="3-2-AdaBoost算法证明"><a href="#3-2-AdaBoost算法证明" class="headerlink" title="3.2 AdaBoost算法证明"></a>3.2 AdaBoost算法证明</h2><p>上一小结介绍的前向分步算法逐一学习基学习器，这一过程也即AdaBoost算法逐一学习基学习器的过程。但是为什么2.2节中的公式为什么长那样还是没有解释。本节就证明前向分步算法的损失函数是指数损失函数(exponential loss function)时，AdaBoost学习的具体步骤就如2.2节所示。</p>
 <blockquote>
-<p>指数损失函数即<br>$$<br>L(y, f(x)) = exp(-yf(x))<br>$$<br>周志华《机器学习》p174有证明，指数损失函数是分类任务原本0/1损失函数的一致(consistent)替代损失函数，由于指数损失函数有更好的数学性质，例如处处可微，所以我们用它替代0/1损失作为优化目标。</p>
+<p>指数损失函数即<br>$$<br>L(y, f(x)) = exp(-yf(x))<br>$$<br>周志华《机器学习》p174有证明，指数损失函数是分类任务原本0/1损失函数的一致(consistent)替代损失函数，由于指数损失函数有更好的数学性质，例如处处可微，所以我们用它替代0/1损失作为优化目标。</p>
 </blockquote>
-<p>将指数损失函数代入式 $(3.1.4)$ ，优化目标就为<br>$$<br>\underset{\alpha_m,G_m}{argmin} \sum_{i=1}^N exp[-y_i(f_{m-1}(x) + \alpha_mG_m(x))] \tag{3.2.1}<br>$$<br>因为 $y_if_{m-1}(x)$ 与优化变量 $\alpha$ 和 $G$ 无关，如果令<br>$$<br>w_{m,i} = exp[-y_i f_{m-1}(x)] \tag{3.2.2}<br>$$</p>
+<p>将指数损失函数代入式 $(3.1.4)$ ，优化目标就为<br>$$<br>\underset{\alpha_m,G_m}{argmin} \sum_{i=1}^N exp[-y_i(f_{m-1}(x) + \alpha_mG_m(x))] \tag{3.2.1}<br>$$<br>因为 $y_if_{m-1}(x)$ 与优化变量 $\alpha$ 和 $G$ 无关，如果令<br>$$<br>w_{m,i} = exp[-y_i f_{m-1}(x)] \tag{3.2.2}<br>$$</p>
 <blockquote>
 <p>这个 $w_{m,i}$ 其实就是2.2节中归一化之前的权重 $w_{m,i}$ </p>
 </blockquote>
@@ -536,7 +536,7 @@
 <ol>
 <li><p>对任意的 $\alpha_m &gt; 0$, 求 $\hat{G}_m(x)$：<br>$$<br>\hat{G}_m (x) = \underset{G_m}{argmin} \sum_{i=1}^N w_{m,i} I(y_i \neq  G_m(x_i)) \tag{3.2.4}<br>$$</p>
 <blockquote>
-<p>上式将指数函数换成指示函数是因为前面说的指数损失函数和0/1损失函数是一致等价的。</p>
+<p>上式将指数函数换成指示函数是因为前面说的指数损失函数和0/1损失函数是一致等价的。</p>
 </blockquote>
 <p> 式子 $(3.2.4)$ 所示的优化问题其实就是AdaBoost算法的基学习器的学习过程，即2.2节的步骤2(1)，得到的  $\hat{G}_m(x)$ 是使第 $m$ 轮加权训练数据分类误差最小的基分类器。</p>
 </li>
@@ -544,15 +544,15 @@
 <blockquote>
 <p>注：为了简洁，上式子中的$\hat{G}_m(x)$ 被略去了 $\hat{\cdot}$ ， $\alpha_m$ 被略去了下标 $m$ ，下同</p>
 </blockquote>
-<p> 将上式对 $\alpha$ 求导并令导数为0，即<br> $$<br>(e^{\alpha} + e^{-\alpha}) \sum_{i=1}^N w_{m,i} I(y_i \neq  G_m(x_i)) - e^{-\alpha} \sum_{i=1}^N w_{m,i} = 0 \tag{3.2.6}<br> $$<br> 解得<br> $$<br> \hat{\alpha}_m = \frac 1 2 log \frac {1-e_m} {e_m} \tag{3.2.7}<br> $$<br> 其中, $e_m$ 是分类误差率：<br> $$<br> e_m = \frac  {\sum_{i=1}^N w_{m,i} I(y_i \neq  G_m(x_i)} {\sum_{i=1}^N w_{mi}} \tag{3.2.8}<br> $$<br> 如果式子 $(3.2.8)$ 中的 $w_{mi}$ 归一化成和为1的话那么式 $(3.2.8)$ 也就和2.2节式 $(2.2.2)$ 一模一样了，进一步地也有上面的 $\hat{\alpha}_m$ 也就是2.2节的 $\alpha_m$ 。<br> 最后来看看每一轮样本权值的更新，由 $(3.1.3)$ 和 $(3.2.2)$ 可得<br> $$<br> w_{m+1,i} = w_{m,i} exp[-y_i \alpha_m G_{m}(x)] \tag{3.2.9}<br> $$<br> 如果将上式进行归一化成和为1的话就和与2.2节中 $(2.2.5)$ 完全相同了。</p>
+<p> 将上式对 $\alpha$ 求导并令导数为0，即<br> $$<br>(e^{\alpha} + e^{-\alpha}) \sum_{i=1}^N w_{m,i} I(y_i \neq  G_m(x_i)) - e^{-\alpha} \sum_{i=1}^N w_{m,i} = 0 \tag{3.2.6}<br> $$<br> 解得<br> $$<br> \hat{\alpha}_m = \frac 1 2 log \frac {1-e_m} {e_m} \tag{3.2.7}<br> $$<br> 其中, $e_m$ 是分类误差率：<br> $$<br> e_m = \frac  {\sum_{i=1}^N w_{m,i} I(y_i \neq  G_m(x_i)} {\sum_{i=1}^N w_{mi}} \tag{3.2.8}<br> $$<br> 如果式子 $(3.2.8)$ 中的 $w_{mi}$ 归一化成和为1的话那么式 $(3.2.8)$ 也就和2.2节式 $(2.2.2)$ 一模一样了，进一步地也有上面的 $\hat{\alpha}_m$ 也就是2.2节的 $\alpha_m$ 。<br> 最后来看看每一轮样本权值的更新，由 $(3.1.3)$ 和 $(3.2.2)$ 可得<br> $$<br> w_{m+1,i} = w_{m,i} exp[-y_i \alpha_m G_{m}(x)] \tag{3.2.9}<br> $$<br> 如果将上式进行归一化成和为1的话就和与2.2节中 $(2.2.5)$ 完全相同了。</p>
 </li>
 </ol>
-<p>由此可见，2.2节所述的AdaBoost算法步骤是可以经过严密推导得来的。总结一下，本节推导有如下关键点:</p>
+<p>由此可见，2.2节所述的AdaBoost算法步骤是可以经过严密推导得来的。总结一下，本节推导有如下关键点:</p>
 <ul>
 <li>AdaBoost算法是一个加性模型，将其简化成<strong>前向分步算法求解</strong>；</li>
-<li>将0/1损失函数用数学性质更好的<strong>指数损失函数</strong>替代。</li>
+<li>将0/1损失函数用数学性质更好的<strong>指数损失函数</strong>替代。</li>
 </ul>
-<h1 id="4-python实现"><a href="#4-python实现" class="headerlink" title="4. python实现"></a>4. python实现</h1><h2 id="4-1-基学习器"><a href="#4-1-基学习器" class="headerlink" title="4.1 基学习器"></a>4.1 基学习器</h2><p>首先需要定义一个基学习器，它应该是一个弱分类器。<br>弱分类器使用库 <code>sklearn</code> 中的决策树分类器<code>DecisionTreeClassifier</code>, 可设置该决策树的最大深度为1。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Fit a simple decision tree(weak classifier) first</span></span><br><span class="line">clf_tree = DecisionTreeClassifier(max_depth = <span class="number">1</span>, random_state = <span class="number">1</span>)</span><br></pre></td></tr></table></figure></p>
+<h1 id="4-python实现"><a href="#4-python实现" class="headerlink" title="4. python实现"></a>4. python实现</h1><h2 id="4-1-基学习器"><a href="#4-1-基学习器" class="headerlink" title="4.1 基学习器"></a>4.1 基学习器</h2><p>首先需要定义一个基学习器，它应该是一个弱分类器。<br>弱分类器使用库 <code>sklearn</code> 中的决策树分类器<code>DecisionTreeClassifier</code>, 可设置该决策树的最大深度为1。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Fit a simple decision tree(weak classifier) first</span></span><br><span class="line">clf_tree = DecisionTreeClassifier(max_depth = <span class="number">1</span>, random_state = <span class="number">1</span>)</span><br></pre></td></tr></table></figure></p>
 <h2 id="4-2-AdaBoost实现"><a href="#4-2-AdaBoost实现" class="headerlink" title="4.2 AdaBoost实现"></a>4.2 AdaBoost实现</h2><p>然后就是完整AdaBoost算法的实现了，如下所示。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_adaboost_clf</span><span class="params">(Y_train, X_train, Y_test, X_test, M=<span class="number">20</span>, weak_clf=DecisionTreeClassifier<span class="params">(max_depth = <span class="number">1</span>)</span>)</span>:</span></span><br><span class="line">    n_train, n_test = len(X_train), len(X_test)</span><br><span class="line">    <span class="comment"># Initialize weights</span></span><br><span class="line">    w = np.ones(n_train) / n_train</span><br><span class="line">    pred_train, pred_test = [np.zeros(n_train), np.zeros(n_test)]</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(M):</span><br><span class="line">        <span class="comment"># Fit a classifier with the specific weights</span></span><br><span class="line">        weak_clf.fit(X_train, Y_train, sample_weight = w)</span><br><span class="line">        pred_train_i = weak_clf.predict(X_train)</span><br><span class="line">        pred_test_i = weak_clf.predict(X_test)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Indicator function</span></span><br><span class="line">        miss = [int(x) <span class="keyword">for</span> x <span class="keyword">in</span> (pred_train_i != Y_train)]</span><br><span class="line">        print(<span class="string">"weak_clf_%02d train acc: %.4f"</span></span><br><span class="line">         % (i + <span class="number">1</span>, <span class="number">1</span> - sum(miss) / n_train))</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Error</span></span><br><span class="line">        err_m = np.dot(w, miss)</span><br><span class="line">        <span class="comment"># Alpha</span></span><br><span class="line">        alpha_m = <span class="number">0.5</span> * np.log((<span class="number">1</span> - err_m) / float(err_m))</span><br><span class="line">        <span class="comment"># New weights</span></span><br><span class="line">        miss2 = [x <span class="keyword">if</span> x==<span class="number">1</span> <span class="keyword">else</span> <span class="number">-1</span> <span class="keyword">for</span> x <span class="keyword">in</span> miss] <span class="comment"># -1 * y_i * G(x_i): 1 / -1</span></span><br><span class="line">        w = np.multiply(w, np.exp([float(x) * alpha_m <span class="keyword">for</span> x <span class="keyword">in</span> miss2]))</span><br><span class="line">        w = w / sum(w)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Add to prediction</span></span><br><span class="line">        pred_train_i = [<span class="number">1</span> <span class="keyword">if</span> x == <span class="number">1</span> <span class="keyword">else</span> <span class="number">-1</span> <span class="keyword">for</span> x <span class="keyword">in</span> pred_train_i]</span><br><span class="line">        pred_test_i = [<span class="number">1</span> <span class="keyword">if</span> x == <span class="number">1</span> <span class="keyword">else</span> <span class="number">-1</span> <span class="keyword">for</span> x <span class="keyword">in</span> pred_test_i]</span><br><span class="line">        pred_train = pred_train + np.multiply(alpha_m, pred_train_i)</span><br><span class="line">        pred_test = pred_test + np.multiply(alpha_m, pred_test_i)</span><br><span class="line">    </span><br><span class="line">    pred_train = (pred_train &gt; <span class="number">0</span>) * <span class="number">1</span></span><br><span class="line">    pred_test = (pred_test &gt; <span class="number">0</span>) * <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    print(<span class="string">"My AdaBoost clf train accuracy: %.4f"</span> % (sum(pred_train == Y_train) / n_train))</span><br><span class="line">    print(<span class="string">"My AdaBoost clf test accuracy: %.4f"</span> % (sum(pred_test == Y_test) / n_test))</span><br></pre></td></tr></table></figure></p>
 
       
@@ -842,7 +842,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-概述"><span class="nav-text">1. 概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-集成学习"><span class="nav-text">1.1 集成学习</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-Boosting"><span class="nav-text">1.2 Boosting</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-AdaBoost原理"><span class="nav-text">2. AdaBoost原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-基本思想"><span class="nav-text">2.1 基本思想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-算法步骤"><span class="nav-text">2.2 算法步骤</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-AdaBoost算法解释"><span class="nav-text">3. AdaBoost算法解释</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-前向分步算法"><span class="nav-text">3.1 前向分步算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-AdaBoost算法证明"><span class="nav-text">3.2 AdaBoost算法证明</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-python实现"><span class="nav-text">4. python实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-基学习器"><span class="nav-text">4.1 基学习器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-AdaBoost实现"><span class="nav-text">4.2 AdaBoost实现</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-概述"><span class="nav-text">1. 概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-集成学习"><span class="nav-text">1.1 集成学习</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-Boosting"><span class="nav-text">1.2 Boosting</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-AdaBoost原理"><span class="nav-text">2. AdaBoost原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-基本思想"><span class="nav-text">2.1 基本思想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-算法步骤"><span class="nav-text">2.2 算法步骤</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-AdaBoost算法解释"><span class="nav-text">3. AdaBoost算法解释</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-前向分步算法"><span class="nav-text">3.1 前向分步算法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-AdaBoost算法证明"><span class="nav-text">3.2 AdaBoost算法证明</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-python实现"><span class="nav-text">4. python实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-基学习器"><span class="nav-text">4.1 基学习器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-AdaBoost实现"><span class="nav-text">4.2 AdaBoost实现</span></a></li></ol></li></ol></div>
             
 
           </div>

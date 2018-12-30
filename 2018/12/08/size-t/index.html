@@ -122,7 +122,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://tangshusen.me/2018/12/08/size-t/1.png">
 <meta property="og:image" content="https://tangshusen.me/2018/12/08/size-t/2.png">
-<meta property="og:updated_time" content="2018-12-08T14:37:30.688Z">
+<meta property="og:updated_time" content="2018-12-30T09:15:20.196Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="实际应用中关于size_t的一个容易忽略的坑">
 <meta name="twitter:description" content="今天在LeetCode上做3Sum的时候，遇到了一个一开始令我百思不得其解的bug，最后发现还是自己太菜了😭，在此记录一下以加深印象。">
@@ -401,12 +401,24 @@
                 
               
 
-              <time title="创建时间：2018-12-08 21:42:13 / 修改时间：22:37:30" itemprop="dateCreated datePublished" datetime="2018-12-08T21:42:13+08:00">2018-12-08</time>
+              <time title="创建时间：2018-12-08 21:42:13" itemprop="dateCreated datePublished" datetime="2018-12-08T21:42:13+08:00">2018-12-08</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2018-12-30 17:15:20" itemprop="dateModified" datetime="2018-12-30T17:15:20+08:00">2018-12-30</time>
               
             
           </span>
@@ -459,7 +471,7 @@
       
         <p>今天在LeetCode上做<a href="https://leetcode.com/problems/3sum/" target="_blank" rel="noopener">3Sum</a>的时候，遇到了一个一开始令我百思不得其解的bug，最后发现还是自己太菜了😭，在此记录一下以加深印象。</p>
 <a id="more"></a>
-<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>如下图所示，下面这段代码是过不了输入为空的测试样例的。</p>
+<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>如下图所示，下面这段代码是过不了输入为空的测试样例的。</p>
 <center><br><img src="/2018/12/08/size-t/1.png" width="700" class="full-image"><br></center>
 
 
@@ -470,22 +482,22 @@
 <h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>考虑这样一段代码:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;typeinfo&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;vector&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">   <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;ar;</span><br><span class="line">   <span class="built_in">cout</span> &lt;&lt; <span class="string">"数组ar的size是"</span> &lt;&lt; ar.size()&lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">   <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; ar.size() - <span class="number">1</span>; i++)&#123;</span><br><span class="line">       <span class="built_in">cout</span> &lt;&lt; <span class="string">"进入了for循环！"</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">       <span class="keyword">break</span>;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="built_in">cout</span> &lt;&lt; <span class="string">"ar.size() - 1: "</span> &lt;&lt; ar.size() - <span class="number">1</span> &lt;&lt; <span class="built_in">endl</span>;</span><br><span class="line">   <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>运行结果是:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">数组ar的size是0</span><br><span class="line">进入了for循环！</span><br><span class="line">ar.size() - 1: 18446744073709551615</span><br></pre></td></tr></table></figure></p>
 <p>其中 $18446744073709551615 = 2^{64} - 1$。<br>仿佛知道问题大概出在哪儿了。</p>
-<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>这才突然想起C++ primer讲过，size()返回的是一个类型为<strong>size_t</strong>的量，那什么是size_t型呢？<br>来看<a href="http://www.cplusplus.com/reference/cstring/size_t/" target="_blank" rel="noopener">标准库</a>的定义:</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>这才突然想起C++ primer讲过，size()返回的是一个类型为<strong>size_t</strong>的量，那什么是size_t型呢？<br>来看<a href="http://www.cplusplus.com/reference/cstring/size_t/" target="_blank" rel="noopener">标准库</a>的定义:</p>
 <blockquote>
 <p>size_t<br>Unsigned integral type<br>Alias of one of the fundamental unsigned integer types.</p>
 </blockquote>
 <p>原来size_t是无符号型的，但是为什么 <code>ar.size() - 1</code> 没有自动转换为带符号型的呢？</p>
-<p>C++ primer第五版中文版P35还讲过：</p>
+<p>C++ primer第五版中文版P35还讲过：</p>
 <blockquote>
-<p><strong>提示：切勿混用带符号类型和无符号类型</strong><br>如果表达式里既有带符号类型又有无符号类型，当带符号类型取值为负时会出现异常结果，这是因为<em>带符号数会自动转换为无符号数</em>。</p>
+<p><strong>提示：切勿混用带符号类型和无符号类型</strong><br>如果表达式里既有带符号类型又有无符号类型，当带符号类型取值为负时会出现异常结果，这是因为<em>带符号数会自动转换为无符号数</em>。</p>
 </blockquote>
-<p>原来在<strong>同时存在无符号型数和有符号型数的表达式中，带符号型数是会自动转换为无符号型的!</strong></p>
+<p>原来在<strong>同时存在无符号型数和有符号型数的表达式中，带符号型数是会自动转换为无符号型的!</strong></p>
 <p>所以，当无符号的ar.size()减去1时，结果自然不是-1而是 $2^{n} - 1$，$n$ 表示size_t型的位数。</p>
 <p>值得提一点的是，size_t的位数并不一定等于unsigned的位数的:</p>
 <blockquote>
 <p>size_t和unsigned int有所不同,size_t的取值range是目标平台下最大可能的数组尺寸。<br>一些平台下size_t的范围小于int的正数范围,又或者大于unsigned int.最典型的,在x64下,int还是4B,但size_t是8B.这意味着你在x64下最大可能开辟的数组尺寸是2^64.<br>作者：KE meng<br>链接：<a href="https://www.zhihu.com/question/24773728/answer/28920149" target="_blank" rel="noopener">https://www.zhihu.com/question/24773728/answer/28920149</a><br>来源：知乎<br>著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
 </blockquote>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以后一定要注意，<strong>size()是返回的无符号型的数！</strong><br>所以对于第一个图中代码，for循环内部是会执行的，结果自然不对了(越界)。以后要用到数组的size时，还是先定义<code>int len = ar.size()</code>，这样不仅不会反犯这次这个错误，还能方便多次使用。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以后一定要注意，<strong>size()是返回的无符号型的数！</strong><br>所以对于第一个图中代码，for循环内部是会执行的，结果自然不对了(越界)。以后要用到数组的size时，还是先定义<code>int len = ar.size()</code>，这样不仅不会反犯这次这个错误，还能方便多次使用。</p>
 
       
     </div>
