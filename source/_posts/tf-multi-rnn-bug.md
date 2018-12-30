@@ -40,9 +40,9 @@ decoder_cell = tf.contrib.seq2seq.AttentionWrapper(decoder_cell, attn_mech, atte
 # 下面的就不重要了
 ......
 ```
-上面这段代码在attn_size为任何值的时候都是可以正常执行的。这也很符合预期，因为上面这段代码所干的事情如下:
-* 用encoder将input编码成encoder_output(即attention的keys或者memory)；
-* 对于decode的每一个时刻t，将t-1时刻得到的attention context(shape[-1]为attn_size)和decoder的输入合并在一起输入到decoder；
+上面这段代码在attn_size为任何值的时候都是可以正常执行的。这也很符合预期，因为上面这段代码所干的事情如下:
+* 用encoder将input编码成encoder_output(即attention的keys或者memory)；
+* 对于decode的每一个时刻t，将t-1时刻得到的attention context(shape[-1]为attn_size)和decoder的输入合并在一起输入到decoder；
 ......
 
 可以看到attn_size确实是任何值都可以, 也即decoder的输入维度(attn_size + input_x_size)为任何都可以。
@@ -63,7 +63,7 @@ one_cell = tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)
 decoder_cell = tf.nn.rnn_cell.MultiRNNCell([one_cell for _ in range(dec_num_layers)])
 ......
 ```
-除非把`attn_size`设置成`rnn_size - input_x_size`，否则会报类似下面的维度不对的错误(假设`rnn_size=256`, `attn_size + input_x_size = 356`)
+除非把`attn_size`设置成`rnn_size - input_x_size`，否则会报类似下面的维度不对的错误(假设`rnn_size=256`, `attn_size + input_x_size = 356`)
 ```
 ValueError: Dimensions must be equal, but are 256 and 356 for 'rnn/while/rnn/multi_rnn_cell/cell_0/cell_0/lstm_cell/MatMul_1' (op: 'MatMul') with input shapes: [30,256], [356,1200].
 ```
@@ -72,9 +72,9 @@ ValueError: Dimensions must be equal, but are 256 and 356 for 'rnn/while/rnn/mul
 
 ## 解决
 一开始我一直以为是我的attention写得不对，于是google了好久都没发现attention问题在哪？
-直到我看到了这个[issue](https://github.com/tensorflow/tensorflow/issues/16186)才发现是我的多层RNN没写对，还是自己太菜了😭
+直到我看到了这个[issue](https://github.com/tensorflow/tensorflow/issues/16186)才发现是我的多层RNN没写对，还是自己太菜了😭
 
-正确的多层`decoder_cell`应该是如下定义:
+正确的多层`decoder_cell`应该是如下定义:
 ``` python
 ......
 cell_list = [tf.nn.rnn_cell.LSTMCell(num_units=rnn_size) for _ in range(dec_num_layers)]
@@ -82,7 +82,7 @@ decoder_cell = tf.nn.rnn_cell.MultiRNNCell(cell_list)
 ......
 ```
 
-咋一看上面这段代码貌似和之前的错误代码没什么区别，但是如下代码你就应该意识到哪儿不对了
+咋一看上面这段代码貌似和之前的错误代码没什么区别，但是如下代码你就应该意识到哪儿不对了
 ``` python
 >>> str = "bug"
 >>> strs = [str for _ in range(2)]
@@ -93,13 +93,13 @@ decoder_cell = tf.nn.rnn_cell.MultiRNNCell(cell_list)
 4367049200
 4367049200
 ```
-注意到上面输出的两个地址都是一样的。因此，我们就知道问题出在哪儿了:  
-对于前面错误的多层rnn实现, 每一层的LSTMCell其实都是同一个(指向它们的指针是相同的)，那么每一层的LSTMCell的weights维度就也是一样的，但其实第一层的输入维度(`attn_size + input_x_size`)和其它层的（`rnn_size`)一般都是不一样的，如下图所示，这样就会报维度错误了。
+注意到上面输出的两个地址都是一样的。因此，我们就知道问题出在哪儿了:  
+对于前面错误的多层rnn实现, 每一层的LSTMCell其实都是同一个(指向它们的指针是相同的)，那么每一层的LSTMCell的weights维度就也是一样的，但其实第一层的输入维度(`attn_size + input_x_size`)和其它层的（`rnn_size`)一般都是不一样的，如下图所示，这样就会报维度错误了。
 <center>
 <img src="./tf-multi-rnn-bug/enc_dec_with_attn_2.png" width="400" class="full-image">
 </center>
 
-而正确代码中，每一个LSTMCell都是通过`tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)`定义的，因此可以有不同的结构，自然不会报错。
+而正确代码中，每一个LSTMCell都是通过`tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)`定义的，因此可以有不同的结构，自然不会报错。
 
 ## 总结
 
