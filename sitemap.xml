@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://tangshusen.me/about/index.html</loc>
+    
+    <lastmod>2018-12-30T09:38:48.304Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://tangshusen.me/2018/12/09/vc-dimension/</loc>
     
     <lastmod>2018-12-30T09:16:22.473Z</lastmod>
@@ -40,13 +47,6 @@
     <loc>https://tangshusen.me/2018/11/18/adaboost/</loc>
     
     <lastmod>2018-12-30T09:14:14.935Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://tangshusen.me/about/index.html</loc>
-    
-    <lastmod>2018-12-11T02:06:11.304Z</lastmod>
     
   </url>
   
