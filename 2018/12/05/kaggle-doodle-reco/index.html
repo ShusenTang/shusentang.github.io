@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="UM_oWjkmpNS4sC6N8fDEsgSTPTOong_3Muz7XL_l-bQ" />
+
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="NntzqnjuUs" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/my_apple-touch-icon-next.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/my_favicon-32x32.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/my_favicon-16x16.jpg?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/my_logo.jpg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="这个比赛于12.05早上结束，最终结果是排在69/1316、铜牌，离银牌区差4名，还是比较遗憾的。不过这是我第一次花大量时间和精力在图像分类问题上，作为一个小菜鸡能拿到牌还算满意。现在作个总结。另外本次比赛我的所有代码（带注释）已经开源(戳我)，有兴趣的可以看看，顺便给个star。">
+<meta name="keywords" content="kaggle,classification">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Quick, Draw! Doodle Recognition Challenge 总结">
+<meta property="og:url" content="https://tangshusen.me/2018/12/05/kaggle-doodle-reco/index.html">
+<meta property="og:site_name" content="TangShusen">
+<meta property="og:description" content="这个比赛于12.05早上结束，最终结果是排在69/1316、铜牌，离银牌区差4名，还是比较遗憾的。不过这是我第一次花大量时间和精力在图像分类问题上，作为一个小菜鸡能拿到牌还算满意。现在作个总结。另外本次比赛我的所有代码（带注释）已经开源(戳我)，有兴趣的可以看看，顺便给个star。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://tangshusen.me/2018/12/05/kaggle-doodle-reco/cover.png">
+<meta property="og:image" content="https://tangshusen.me/2018/12/05/kaggle-doodle-reco/1.1.png">
+<meta property="og:image" content="https://tangshusen.me/2018/12/05/kaggle-doodle-reco/1.2.png">
+<meta property="og:image" content="https://tangshusen.me/2018/12/05/kaggle-doodle-reco/2.1.png">
+<meta property="og:image" content="https://tangshusen.me/2018/12/05/kaggle-doodle-reco/2.1_2.png">
+<meta property="og:image" content="https://tangshusen.me/2018/12/05/kaggle-doodle-reco/2.2.png">
+<meta property="og:updated_time" content="2019-01-04T12:28:03.949Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Quick, Draw! Doodle Recognition Challenge 总结">
+<meta name="twitter:description" content="这个比赛于12.05早上结束，最终结果是排在69/1316、铜牌，离银牌区差4名，还是比较遗憾的。不过这是我第一次花大量时间和精力在图像分类问题上，作为一个小菜鸡能拿到牌还算满意。现在作个总结。另外本次比赛我的所有代码（带注释）已经开源(戳我)，有兴趣的可以看看，顺便给个star。">
+<meta name="twitter:image" content="https://tangshusen.me/2018/12/05/kaggle-doodle-reco/cover.png">
+
+
+
+
+
+
+  <link rel="canonical" href="https://tangshusen.me/2018/12/05/kaggle-doodle-reco/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Quick, Draw! Doodle Recognition Challenge 总结 | TangShusen</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TangShusen</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2018/12/05/kaggle-doodle-reco/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="TangShusen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/assets/header.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TangShusen">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Quick, Draw! Doodle Recognition Challenge 总结
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-12-05 21:58:29" itemprop="dateCreated datePublished" datetime="2018-12-05T21:58:29+08:00">2018-12-05</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-01-04 20:28:03" itemprop="dateModified" datetime="2019-01-04T20:28:03+08:00">2019-01-04</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Competitions/" itemprop="url" rel="index"><span itemprop="name">Competitions</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <center><br><img src="/2018/12/05/kaggle-doodle-reco/cover.png" width="900" class="full-image"><br></center>
+
+<p>这个比赛于12.05早上结束，最终结果是排在69/1316、铜牌，离银牌区差4名，还是比较遗憾的。不过这是我第一次花大量时间和精力在图像分类问题上，作为一个小菜鸡能拿到牌还算满意。现在作个总结。另外本次比赛我的所有代码（带注释）已经开源(<a href="https://github.com/ShusenTang/kaggle-doodle-recognition" target="_blank" rel="noopener">戳我</a>)，有兴趣的可以看看，顺便给个star。</p>
+<a id="more"></a>
+<p>这篇博客主要记录我在这次比赛过程中学到的一些东西，由于是第一次花精力认真做图像类的比赛所以学到的东西还是很多的。此外还会总结一下排在前列的大佬们在讨论区分享的他们的方案，留作日后参考。</p>
+<h1 id="1-赛题简述"><a href="#1-赛题简述" class="headerlink" title="1. 赛题简述"></a>1. 赛题简述</h1><h2 id="1-1-数据集"><a href="#1-1-数据集" class="headerlink" title="1.1 数据集"></a>1.1 数据集</h2><p>还记得前段时间很火的微信小程序“猜画小歌”吗，<a href="https://www.kaggle.com/c/quickdraw-doodle-recognition" target="_blank" rel="noopener">这个比赛</a>的数据就来自这个小程序的网页版<a href="https://quickdraw.withgoogle.com/" target="_blank" rel="noopener">Quick, Draw!</a>，游戏提示用户绘制描绘特定类别的涂鸦，例如“香蕉”，“桌子”等，所以Google通过这个小游戏收集了来自世界各地的涂鸦数据, 数据集所有信息都可见此数据集的<a href="https://github.com/googlecreativelab/quickdraw-dataset#the-raw-moderated-dataset" target="_blank" rel="noopener">官方仓库</a>。本次比赛使用了340类一共约五千万个样本。</p>
+<p>主办方给了两个版本的训练集，raw 和 simplified，都是以csv文件的形式给出的。raw版本就是原始收集到的数据各字段如下所示:</p>
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>key_id</td>
+<td>64-bit unsigned integer</td>
+<td>独一无二的样本ID</td>
+</tr>
+<tr>
+<td>word</td>
+<td>string</td>
+<td>样本所属类别</td>
+</tr>
+<tr>
+<td>recognized</td>
+<td>bool</td>
+<td>样本是否被游戏识别</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>datetime</td>
+<td>样本创建时间</td>
+</tr>
+<tr>
+<td>countrycode</td>
+<td>string</td>
+<td>player所在国家代码(<a href="https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2" target="_blank" rel="noopener">ISO 3166-1 alpha-2</a>)</td>
+</tr>
+<tr>
+<td>drawing</td>
+<td>string</td>
+<td>涂鸦数据信息</td>
+</tr>
+</tbody>
+</table>
+<p>其中drawing字段就是涂鸦数据，包含坐标和时间信息，示例如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[ </span><br><span class="line">  [  // First stroke </span><br><span class="line">    [x0, x1, x2, x3, ...],</span><br><span class="line">    [y0, y1, y2, y3, ...],</span><br><span class="line">    [t0, t1, t2, t3, ...]</span><br><span class="line">  ],</span><br><span class="line">  [  // Second stroke</span><br><span class="line">    [x0, x1, x2, x3, ...],</span><br><span class="line">    [y0, y1, y2, y3, ...],</span><br><span class="line">    [t0, t1, t2, t3, ...]</span><br><span class="line">  ],</span><br><span class="line">  ... // Additional strokes</span><br><span class="line">]</span><br></pre></td></tr></table></figure></p>
+<p>raw版本的数据集很大而且很多冗余信息，所以大多数选手(包括我)都是用的simplified版本作为主要训练集，simplified数据集去掉了时间信息和冗余的坐标信息(比如两点确定一条线段，那么线段中间的点就是冗余的)并将坐标进行了scale，具体处理方式如下:   </p>
+<ul>
+<li>scaled 的坐标数据进行了左上对齐，最小值为0最大值为255.</li>
+<li>进行了重采样使坐标都是0-255的整数.</li>
+<li>去除冗余坐标使用的是Ramer–Douglas–Peucker算法，epsilon设为2.0；</li>
+</ul>
+<p>simplified数据集示例如下图所示:</p>
+<center><br>    <img src="/2018/12/05/kaggle-doodle-reco/1.1.png" width="700" class="full-image"><br>    <br><br>    <div style="border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;">图1.1</div><br></center>
+
+<p>更多信息可见此数据集的<a href="https://github.com/googlecreativelab/quickdraw-dataset#the-raw-moderated-dataset" target="_blank" rel="noopener">官方仓库</a>，这里就不赘述了。</p>
+<h2 id="1-2-赛题任务"><a href="#1-2-赛题任务" class="headerlink" title="1.2 赛题任务"></a>1.2 赛题任务</h2><p>本题的任务就是预测测试集涂鸦属于哪个类别，是一个单分类问题。此题的难度在于，由于训练数据来自游戏本身，涂鸦样本可能不完整而且可能与标签不符，噪声比较多，如图1.2所示(<a href="https://www.kaggle.com/gaborfodor/un-recognized-drawings/output" target="_blank" rel="noopener">图片来源</a>)。选手需要构建一个识别器，可以有效地从这些噪声数据中学习得到模型。</p>
+<center><br>    <img src="/2018/12/05/kaggle-doodle-reco/1.2.png" width="500" class="full-image"><br>    <br><br>    <div style="border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;">图1.2</div><br></center>
+
+<p>上图就是训练集中属于“蚊子”类别的数据示例，绿色是被标记为”可识别”的样本，红色是被标记为”不可识别”的样本，可以看到不管是可识别还是不可识别的样本，都存在噪声的情况。</p>
+<h2 id="1-3-评价指标"><a href="#1-3-评价指标" class="headerlink" title="1.3 评价指标"></a>1.3 评价指标</h2><p>虽然是一个单分类问题，但是对于每一个样本，我们需要提交最有可能的3个预测结果(按可能性从大到小排)，评价指标是Mean Average Precision @ 3 (MAP@3):<br>$$<br>\text{MAP@3} = \frac { 1 } { U } \sum _ { u = 1 } ^ { U } \sum _ { k = 1 } ^ { m i n ( n , 3 ) } P ( k )<br>$$<br>其中 $U$ 是测试集样本总数，$n$ 是每个样本的预测值总数，$P(k)$ 是前 $k$ 个结果中准确率, 具体可参见<a href="https://www.kaggle.com/wendykan/map-k-demo" target="_blank" rel="noopener">这个kernel</a>，另外计算代码可参考<a href="https://github.com/benhamner/Metrics/blob/master/Python/ml_metrics/average_precision.py" target="_blank" rel="noopener">这里</a>。简单点讲，在提交的三个预测结果中，真实结果越靠前分数就越高。</p>
+<h1 id="2-我的方案"><a href="#2-我的方案" class="headerlink" title="2. 我的方案"></a>2. 我的方案</h1><p>可见此题的数据是序列数据，所以最先想到可以用RNN，当然把数据渲染成图片也可以用CNN。根据我的实际实验，RNN的效果并不好（应该是我网络结构没设计好，讨论区有人提到用RNN也可以达到不错的效果），所以就采用了CNN相关模型，后来又merge了队友，最终的69名(PB 0.94223)是队友的提交结果，我的提交结果(PB 0.94185)应该是73名。</p>
+<h2 id="2-1-数据相关"><a href="#2-1-数据相关" class="headerlink" title="2.1 数据相关"></a>2.1 数据相关</h2><h3 id="2-1-1-打乱原始文件"><a href="#2-1-1-打乱原始文件" class="headerlink" title="2.1.1 打乱原始文件"></a>2.1.1 打乱原始文件</h3><p>题目给的数据是每一类一个csv文件，一共有340类，每一类有十多万个样本，即使是使用simplified数据集，总的csv文件大小也达到了20G+的级别，所以一次性读进内存肯定是不行的。<br>我首先采用了<a href="https://www.kaggle.com/gaborfodor/shuffle-csvs" target="_blank" rel="noopener">这个kernel</a>将340个csv文件混合在一起然后再随机分成100份分别存储，这样每一份里面的每一个样本的类别都是随机的。思路就是根据key_id的值产生一个0-99的伪随机数cv，然后cv就觉定当前样本应该放在哪个文件，最后再将每个文件里的样本顺序打乱。其核心代码如下:</p>
+<p>(1) 决定某个样本应该存放在哪个文件:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> y, cat <span class="keyword">in</span> tqdm(enumerate(categories)): <span class="comment"># 共340个类别</span></span><br><span class="line">    df = s.read_training_csv(cat) <span class="comment"># df就为当前类别的csv</span></span><br><span class="line">    df[<span class="string">'y'</span>] = y <span class="comment"># y为 0~339 的数字，相当于对类别进行了LabelEncode</span></span><br><span class="line">    df[<span class="string">'cv'</span>] = (df.key_id // <span class="number">10</span> ** <span class="number">7</span>) % NCSVS  <span class="comment"># NCSVS = 100, cv决定了应该放在哪一个文件中</span></span><br><span class="line">    <span class="keyword">for</span> k <span class="keyword">in</span> range(NCSVS):</span><br><span class="line">        filename = INPUT_PATH + <span class="string">'/shuffled_csv/train_%d_%d.csv'</span>%(k+<span class="number">1</span>, NCSVS)</span><br><span class="line">        chunk = df[df.cv == k] <span class="comment"># 得到df中cv=k的样本，应该存放在当前文件中</span></span><br><span class="line">        chunk = chunk.drop([<span class="string">'key_id'</span>], axis=<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">if</span> y == <span class="number">0</span>: <span class="comment"># 新建文件</span></span><br><span class="line">            chunk.to_csv(filename, index=<span class="keyword">False</span>)</span><br><span class="line">        <span class="keyword">else</span>: <span class="comment"># mode='a': 附加写 方式打开文件</span></span><br><span class="line">            chunk.to_csv(filename, mode=<span class="string">'a'</span>, header=<span class="keyword">False</span>, index=<span class="keyword">False</span>) </span><br><span class="line">``` </span><br><span class="line">(<span class="number">2</span>) 将每个文件中的样本顺序打乱:</span><br><span class="line">``` python</span><br><span class="line"><span class="keyword">for</span> k <span class="keyword">in</span> tqdm(range(NCSVS)):</span><br><span class="line">    filename = INPUT_PATH + <span class="string">'/shuffled_csv/train_%d_%d.csv'</span>%(k+<span class="number">1</span>, NCSVS)</span><br><span class="line">    <span class="keyword">if</span> os.path.exists(filename):</span><br><span class="line">        df = pd.read_csv(filename)</span><br><span class="line">        df[<span class="string">'rnd'</span>] = np.random.rand(len(df)) <span class="comment"># 给每个样本一个随机数</span></span><br><span class="line">        df = df.sort_values(by=<span class="string">'rnd'</span>).drop(<span class="string">'rnd'</span>, axis=<span class="number">1</span>)</span><br><span class="line">        df.to_csv(filename + <span class="string">'.gz'</span>, compression=<span class="string">'gzip'</span>, index=<span class="keyword">False</span>) <span class="comment"># 以压缩的方式存储csv</span></span><br><span class="line">        os.remove(filename)</span><br></pre></td></tr></table></figure></p>
+<p>这样处理后，原始simplified数据集中340个共20G+的csv文件被处理成100个csv共7G+，而且每个文件里的样本不是属于同一类而是随机的，这就方便后续的数据读取了。上面完整的代码见我的<a href="https://github.com/ShusenTang/kaggle-doodle-recognition/blob/master/shuffle_csv.ipynb" target="_blank" rel="noopener">仓库</a>。</p>
+<h3 id="2-1-2-多进程读取"><a href="#2-1-2-多进程读取" class="headerlink" title="2.1.2 多进程读取"></a>2.1.2 多进程读取</h3><p>经过2.1.1处理后的数据就可以很方便地直接用了，我们可以考虑并行读取使读取更快:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">read_one_df_file</span><span class="params">(df_file)</span>:</span></span><br><span class="line">    <span class="string">"""定义一个读取一个csv的函数，这个函数会当做参数传入下面的并行处理的函数"""</span></span><br><span class="line">    unused_cols = [<span class="string">"countrycode"</span>, <span class="string">"recognized"</span>, <span class="string">"timestamp"</span>, <span class="string">"cv"</span>]</span><br><span class="line">    name = df_file.split(<span class="string">'_'</span>)[<span class="number">-2</span>]</span><br><span class="line">    print(<span class="string">'%s '</span> % (name), end = <span class="string">' '</span>, flush=<span class="keyword">True</span>)</span><br><span class="line">    df = pd.read_csv(df_file)</span><br><span class="line">    drop_cols = [col <span class="keyword">for</span> col <span class="keyword">in</span> unused_cols <span class="keyword">if</span> col <span class="keyword">in</span> df.columns]</span><br><span class="line">    <span class="keyword">if</span> len(drop_cols) &gt; <span class="number">0</span>:</span><br><span class="line">        df = df.drop(drop_cols, axis=<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">return</span> df</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">multi_thread_read_df_files</span><span class="params">(df_files, processes=<span class="number">32</span>)</span>:</span></span><br><span class="line">    <span class="string">"""并行读取多个csv并组成一个大的bigdf"""</span></span><br><span class="line">    start = dt.datetime.now()</span><br><span class="line">    pool = Pool(processes=processes) <span class="comment"># from multiprocessing import Pool</span></span><br><span class="line">    dfs = pool.map(read_one_df_file, df_files)</span><br><span class="line">    pool.close()</span><br><span class="line">    pool.join()</span><br><span class="line">    end = dt.datetime.now()</span><br><span class="line">    print(<span class="string">"\nTotal time:"</span>, (end - start).seconds, <span class="string">"seconds"</span>)</span><br><span class="line">    </span><br><span class="line">    big_df = pd.concat(dfs, ignore_index=<span class="keyword">False</span>, sort=<span class="keyword">False</span>)</span><br><span class="line">    big_df.reset_index(drop=<span class="keyword">True</span>, inplace=<span class="keyword">True</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> big_df</span><br></pre></td></tr></table></figure></p>
+<p>上面的完整代码见我的<a href="https://github.com/ShusenTang/kaggle-doodle-recognition/blob/master/data_loader.py" target="_blank" rel="noopener">仓库里的data_loader.py</a>，另外多进程的学习可参考<a href="https://morvanzhou.github.io/tutorials/python-basic/multiprocessing/5-pool/" target="_blank" rel="noopener">此处</a>。</p>
+<h2 id="2-1-3-outliers"><a href="#2-1-3-outliers" class="headerlink" title="2.1.3 outliers"></a>2.1.3 outliers</h2><p>由图1.2知训练数据中有很多噪声，如何衡量噪声并去除这些噪声数据（outliers）呢？<br>kernel <a href="https://www.kaggle.com/sorokin/sketch-entropy" target="_blank" rel="noopener">sketch entropy</a>提出用熵（entropy）来找出这些outliers, 即把entropy低于和高于某阈值的样本视为outliers。</p>
+<p>先来看看如何计算entropy：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">entropy_it</span><span class="params">(x)</span>:</span></span><br><span class="line">    counts = np.bincount(x) <span class="comment"># 计算x中 0-255这些数字的出现次数</span></span><br><span class="line">    p = counts[counts &gt; <span class="number">0</span>] / float(len(x)) <span class="comment"># 归一化成概率</span></span><br><span class="line">    <span class="comment"># compute Shannon entropy in bits</span></span><br><span class="line">    <span class="keyword">return</span> -np.sum(p * np.log2(p))</span><br></pre></td></tr></table></figure></p>
+<p>直观理解，如果一张图片上的信息很少例如像素值几乎完全一样，那么归一化后的概率p就几乎是一个one hot的向量，这样 <code>-np.sum(p * np.log2(p))</code> 就几乎得0；相反地，如果图片上的信息很丰富，像素分布比较均匀，那么p就是一个每个元素几乎都相等的向量，这样算出来的entropy就比较大。</p>
+<p>例如训练集样本entropy低于和高于99%样本的示例分别如下：</p>
+<center><br>    <img src="/2018/12/05/kaggle-doodle-reco/2.1.png" width="700" class="full-image"><br>    <img src="/2018/12/05/kaggle-doodle-reco/2.1_2.png" width="700" class="full-image"><br>    <br><br>    <div style="border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;">图2.1</div><br></center>
+
+<p>但是我最终并没有按照此方法去掉这些“outliers”，主要是出于以下考虑：</p>
+<ul>
+<li>训练集很大，接近五千万，所以数据噪声对模型的影响应该有限；</li>
+<li>按照此方法可得出测试集中也有一些噪声；</li>
+<li>按照此方法得出的不一定就是噪声，例如图2.1第一排第一个应该是‘雨滴’，最后一排第三个应该是‘龙卷风’。</li>
+<li>时间不够了，如果时间够的话我肯定会试一下。</li>
+</ul>
+<p>这个kernel的作者也在讨论中提到：</p>
+<blockquote>
+<p>Be careful, do not remove unusual samples from training. In my recipe I use a curriculum learning, i.e. increase the amount of outliers at each new epoch.</p>
+</blockquote>
+<p>虽然我最后并没有用这个方法，但是却提供了一个去噪的好思路。本节的完整代码见我的<a href="https://github.com/ShusenTang/kaggle-doodle-recognition/blob/master/sketch_entropy.ipynb" target="_blank" rel="noopener">仓库中的sketch_entropy notebook</a>。</p>
+<h2 id="2-2-模型"><a href="#2-2-模型" class="headerlink" title="2.2 模型"></a>2.2 模型</h2><h3 id="2-2-1-模型结构"><a href="#2-2-1-模型结构" class="headerlink" title="2.2.1 模型结构"></a>2.2.1 模型结构</h3><p>本次比赛我最后采用的结构是xception（完整代码见<a href="https://github.com/ShusenTang/kaggle-doodle-recognition/blob/master/xception.py" target="_blank" rel="noopener">此处</a>），用的是<a href="https://github.com/Cadene/pretrained-models.pytorch" target="_blank" rel="noopener">pretrainedmodels</a>库,这个库有主流模型的pytorch的实现，直接用就是，特别方便。代码如下<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pretrainedmodels.models.xception <span class="keyword">import</span> Xception</span><br><span class="line">xception_path = <span class="string">"/YOUR_PATH/pytorch/xception-43020ad28.pth"</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_model</span><span class="params">(num_classes=<span class="number">340</span>, model_func=Xception, pretrained_path=xception_path)</span>:</span></span><br><span class="line">    model = model_func(num_classes=<span class="number">1000</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># imageNet预训练参数，真的有用吗？</span></span><br><span class="line">    model.load_state_dict(torch.load(pretrained_path))</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 修改最后的fc层</span></span><br><span class="line">    fc_in_feas = model.fc.in_features</span><br><span class="line">    model.fc = nn.Linear(fc_in_feas, num_classes)</span><br><span class="line">    model.last_linear = model.fc <span class="comment"># pretrainedmodels这个包里的模型作forward时使用的是last_linear</span></span><br><span class="line">    <span class="keyword">return</span> model</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-2-2-梯度累积trick"><a href="#2-2-2-梯度累积trick" class="headerlink" title="2.2.2 梯度累积trick"></a>2.2.2 梯度累积trick</h3><p>我们知道，一般来说，增大batch size会使最终的预测效果变得更好，但是GPU显存是有限的不可能无限增大batch size，这时候梯度累积就派上用场了。<br>简单来说，梯度累积就是累积多个batch的梯度然后一次更新参数，而不是常用的一个batch更新一次，亲测在小数据集上是有效果提升的（本次比赛数据集size很大，但我也用了这个trick，没有和不用这个trick做比较）。参考<a href="https://discuss.pytorch.org/t/how-to-implement-accumulated-gradient/3822" target="_blank" rel="noopener">这里</a>Gopal_Sharma的系列回答，我写了如下代码：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># loss, preds, step_acc = train_step(model, inputs, labels, criterion, optimizer)</span></span><br><span class="line"><span class="comment">################# 将batch_accumulate_size个batch的梯度积累起来,只在最后一次更新网络参数 ###################</span></span><br><span class="line">inputs = inputs.to(DEVICE, dtype=torch.float)</span><br><span class="line">labels = labels.to(DEVICE, dtype=torch.float)</span><br><span class="line"><span class="keyword">if</span> step % batch_accumulate_size == <span class="number">0</span>: </span><br><span class="line">    optimizer.zero_grad()</span><br><span class="line"><span class="keyword">with</span> torch.set_grad_enabled(<span class="keyword">True</span>):</span><br><span class="line">    <span class="comment"># forward</span></span><br><span class="line">    outputs = model(inputs)</span><br><span class="line">    loss = criterion(outputs, labels.long()) / batch_accumulate_size <span class="comment"># 一定要除以这个size,原因见上面链接的讨论</span></span><br><span class="line">    loss.backward()</span><br><span class="line"></span><br><span class="line">    _, preds = torch.max(outputs, <span class="number">1</span>)</span><br><span class="line">correct_num = torch.sum(preds == labels.long())</span><br><span class="line">step_acc = correct_num.double() / inputs.size(<span class="number">0</span>) </span><br><span class="line">    </span><br><span class="line"><span class="keyword">if</span> (step + <span class="number">1</span>) % batch_accumulate_size == <span class="number">0</span>:</span><br><span class="line">    optimizer.step() <span class="comment"># 只在最后一次更新网络参数</span></span><br><span class="line"></span><br><span class="line">loss = batch_accumulate_size * loss.item() <span class="comment"># 转换为数字方便后面用visdom画图</span></span><br><span class="line">step_acc = step_acc.item()</span><br><span class="line"><span class="comment">########################################################################################</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="2-2-3-多GPU"><a href="#2-2-3-多GPU" class="headerlink" title="2.2.3 多GPU"></a>2.2.3 多GPU</h3><p>pytorch实现多GPU还是比较方便的，只需要加上一行代码即可：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">model = create_model()</span><br><span class="line">multi_gpu_model = nn.DataParallel(model)</span><br></pre></td></tr></table></figure></p>
+<p>需要注意的是，使用了<code>DataParallel(model)</code>的模型在保存的时候会在参数的key前面加上“module.”，所以如果使用单GPU时加载多GPU保存的模型参数时会报错<code>KeyError: &#39;unexpected key &quot;module.xx.weight&quot; in state_dict&#39;</code>，正确的处理方式如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> OrderedDict</span><br><span class="line"></span><br><span class="line">pretrained_net_dict = torch.load(best_model_path)</span><br><span class="line"><span class="keyword">if</span> hps.gpus == <span class="number">1</span> <span class="keyword">and</span> list(pretrained_net_dict.keys())[<span class="number">0</span>][:<span class="number">6</span>] == <span class="string">"module"</span>:</span><br><span class="line"><span class="comment"># 如果当前是单GPU但是保存的模型是多GPU，那就要去掉每个key的前缀"module."</span></span><br><span class="line">    new_state_dict = OrderedDict()</span><br><span class="line">    <span class="keyword">for</span> k, v <span class="keyword">in</span> pretrained_net_dict.items():</span><br><span class="line">        name = k[<span class="number">7</span>:] <span class="comment"># remove "module."</span></span><br><span class="line">        new_state_dict[name] = v</span><br><span class="line">    <span class="comment"># load params</span></span><br><span class="line">    model.load_state_dict(new_state_dict)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    model.load_state_dict(pretrained_net_dict)</span><br></pre></td></tr></table></figure></p>
+<h3 id="2-2-4-图像数据的一个坑"><a href="#2-2-4-图像数据的一个坑" class="headerlink" title="2.2.4 图像数据的一个坑"></a>2.2.4 图像数据的一个坑</h3><p>本节的notebook见<a href="https://github.com/ShusenTang/kaggle-doodle-recognition/blob/master/bug.ipynb" target="_blank" rel="noopener">此处</a>。</p>
+<p>事情的起因是这样的，我在训练的时候没有进行数据增强(只用了<code>toTensor</code>和<code>Normalize</code>两个transform)，而我在测试的时候想用一下用<a href="https://pytorch.org/docs/stable/torchvision/transforms.html" target="_blank" rel="noopener">torchvision</a>自带的一些图片增强的transform(例如<code>CenterCrop、RandomHorizontalFlip、RandomRotation</code>等等)，但是这些transform要求输入的是PIL图片，所以我在测试的时候就用了如下代码将image array转成了PIL图片：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PIL_image = Image.fromarray(image_array.astype(<span class="string">'uint8'</span>), <span class="string">'RGB'</span>)</span><br></pre></td></tr></table></figure></p>
+<p>但最后测试出来的结果与验证时完全不一样，模型基本上是靠猜。这是为什么呢？仔细看看下面这个图就知道了。</p>
+<center><br>    <img src="/2018/12/05/kaggle-doodle-reco/2.2.png" width="800" class="full-image"><br>    <br><br>    <div style="border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;">图2.2</div><br></center>
+
+<p>由图2.2可知，训练和测试的时候数据取值范围都变了，网络预测结果当然就很差了。<br>先来看看<code>ToTensor</code>的<a href="https://pytorch.org/docs/stable/torchvision/transforms.html" target="_blank" rel="noopener">官方文档</a>:</p>
+<blockquote>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">torchvision.transforms.ToTensor</span><br><span class="line">Convert a PIL Image or numpy.ndarray to tensor.</span><br><span class="line">Converts a PIL Image or numpy.ndarray (H x W x C) in the range [0, 255] to a torch.FloatTensor of shape (C x H x W) in the range [0.0, 1.0].</span><br></pre></td></tr></table></figure>
+<p>可见<code>ToTensor</code>将输入的0-255的数据scale到0-1并且还调整了一下维度顺序，那为什么图2.2的训练输入还是0-255呢? 问题就出在数据的类型上面，训练时，原始图片数据<code>iamge_array</code>的类型是float64(而不是<code>ToTensor</code>期待的uint8)，经过<code>ToTensor</code>转换后数值大小不会变依然是0-255只是调了一下维度顺序。而测试的时候，由于<code>ToPILImage</code>强制要求输入类型是uint8，所以先将输入转换成了uint8格式，所以就正确的被scale到了0-1。</p>
+<p>总结一下，由于像素值为0到255的整数，所以刚好是uint8所能表示的范围，而很多关于图片的函数就默认输入的是uint8型，若不是，可能不会报错但的可能得不到想要的结果。<font color="red">所以，如果用像素值(0-255整数)表示图片数据，那么一律将其类型设置成uint8，避免不必要的bug </font>。</p>
+<h1 id="3-top方案"><a href="#3-top方案" class="headerlink" title="3. top方案"></a>3. top方案</h1><h2 id="3-1-1st-place-solution"><a href="#3-1-1st-place-solution" class="headerlink" title="3.1 1st place solution"></a>3.1 1st place solution</h2><p>第一名的方案由现在排在所有kaggle用户第五的超级大佬<a href="https://www.kaggle.com/ppleskov" target="_blank" rel="noopener">Pavel Pleskov</a>贡献，原文见<a href="https://www.kaggle.com/c/quickdraw-doodle-recognition/discussion/73738" target="_blank" rel="noopener">此处</a>。</p>
+<h3 id="3-1-1-模型结构"><a href="#3-1-1-模型结构" class="headerlink" title="3.1.1 模型结构"></a>3.1.1 模型结构</h3><p>刚开始，Pavel训练了很多分类模型：resnet18, resnet34, resnet50, resnet101, resnet152, resnext50, resnext101, densenet121, densenet201, vgg11, pnasnet, incresnet, polynet, nasnetmobile, senet154, seresnet50, seresnext50, seresnext101。<br>此外，数据预处理尝试了1个和3个通道的输入、image size从112逐渐增大到256。<br>大约40个模型中，最优的模型得到了0.946的分数，这个单一模型就可以拿到金牌了。</p>
+<blockquote>
+<p>可以看到，这种类型的比赛如果前期能花大量时间尝试不同的模型，那基本就能保证奖牌了，甚至金牌。</p>
+</blockquote>
+<h3 id="3-1-2-ensemble"><a href="#3-1-2-ensemble" class="headerlink" title="3.1.2 ensemble"></a>3.1.2 ensemble</h3><p>为了将多个模型的输出集成起来，粗暴一点就是直接将输出的概率值求平均再取top3即得到最终的输出(也就是blend)。怎样将多个模型的结果ensemble在一起呢？<br>因为一共340类，所以每一个模型对每个样本都会输出340个概率值，如果将每个概率值作为ensemble的feature，假设一共有8个模型，那么一个样本就有340x8个feature，这个特征维度有点大了而且其中很多都是接近0的值。</p>
+<p>Pavel的思路是:</p>
+<blockquote>
+<p>for each sample and for each model you collect top 10 probabilities with the labels, then convert them into 10 samples with the binary outcome - whether this is a correct label or not (9 negative examples + 1 positive). It’s easy to feed such a dataset to any booster because the number of features will be small (equal to the number of models). </p>
+</blockquote>
+<p>大概意思是将ensemble转换成一个二分类问题: 根据8(模型数)个概率值判断是不是label(例如这8个概率值都大于0.8，那么几乎可以肯定这就是label)。详细来讲，LGBM的特征维度等于模型数(每个特征就代表一个模型的输出概率)，而样本数将会是原始样本数的10倍。<a href="https://www.kaggle.com/c/quickdraw-doodle-recognition/discussion/73754" target="_blank" rel="noopener">21st place solution</a>也用到了这个方法，比直接平均得到的分数要高。</p>
+<blockquote>
+<p>但是我有一点不明白的是如何找这个top10，因为对于mode1它的输出概率值top10可能是class0-9，对于model2它的输出概率值top10可能是class1-10，这样就对应不上了。但是我倒是有一个思路那就是先对8个模型的输出概率求个平均再取top10(<a href="https://www.kaggle.com/c/quickdraw-doodle-recognition/discussion/73754" target="_blank" rel="noopener">21st place solution</a>貌似使用的最好的model来预测出top10)。例如8个模型对于某张涂鸦图片的平均输出概率top10是O1、O2…O10，那么这就能产生10个LGBM的输入样本，会得到10个输出(是0-1的概率值)，取最大的三个即最终这个涂鸦样本的结果。</p>
+</blockquote>
+<h3 id="3-1-3-Predictions-balancing-trick"><a href="#3-1-3-Predictions-balancing-trick" class="headerlink" title="3.1.3 Predictions balancing trick"></a>3.1.3 Predictions balancing trick</h3><p>Heng CherKeng发现，测试集中的groundtruth分布应该是均匀的，而且发现 (112199+1)/340=330 (训练集样本数加1除以类别数得330)。这一点很重要，通过对模型输出的概率按照此规律进行后处理，平均给每个模型带来了0.7%的提升。那么如何进行后处理呢? Pavel给出的算法是：对于当前最多的预测类别,将所有这个类别对应的概率不断减去一个很小的数直到这个类别不是最多的，重复上述过程直到预测类别差不多均匀。Pavel在之前的比赛也用到了这个算法(<a href="https://github.com/PavelOstyakov/camera_identification/blob/master/camera/postprocessing.py" target="_blank" rel="noopener">代码见此处</a>)，代码原理和刚刚说的略有不同，算法步骤如下:</p>
+<ol>
+<li>先对每一种类别赋一个初始为1的系数coefficients，当前预测概率等于实际概率乘以对应的系数；</li>
+<li>计算每种类别的数目，按照这个数目再计算一个score，逻辑是预测越均匀score就越大;</li>
+<li>对最多的类别label，执行<code>coefficients[label] -= alpha</code>；</li>
+<li>若还没达到最大迭代次数，就继续执行2、3，执行过程中记录最大的score对应的coefficients，迭代完成后返回这个coefficients。</li>
+</ol>
+<p>上述的score计算过程如下:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_compute_score_with_coefficients</span><span class="params">(predicts, coefficients)</span>:</span></span><br><span class="line">    _, counter = _get_labels_distribution(predicts, coefficients) <span class="comment"># 计算每种类别的数目</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 按照下面的计算过程，当预测是均匀的时，score达到最大340</span></span><br><span class="line">    score = <span class="number">0.</span></span><br><span class="line">    <span class="keyword">for</span> label <span class="keyword">in</span> range(NCATS): <span class="comment"># NCATS=340</span></span><br><span class="line">        score += min(NCATS * float(counter[label]) / len(predicts), <span class="number">1.0</span>)</span><br><span class="line">    <span class="keyword">return</span> score</span><br></pre></td></tr></table></figure></p>
+<p>Pavel Ostyakov写的此算法的pytorch版<a href="https://github.com/PavelOstyakov/predictions_balancing" target="_blank" rel="noopener">见此处</a>。</p>
+<h2 id="3-2-5th-place-solution"><a href="#3-2-5th-place-solution" class="headerlink" title="3.2 5th place solution"></a>3.2 5th place solution</h2><h3 id="3-2-1-总体流程"><a href="#3-2-1-总体流程" class="headerlink" title="3.2.1 总体流程"></a>3.2.1 总体流程</h3><p>第五名的方案由<a href="https://www.kaggle.com/aispiriants" target="_blank" rel="noopener">Artur Ispiriants</a>和<a href="https://www.kaggle.com/firenero" target="_blank" rel="noopener">Mykhailo Matviiv</a>贡献，原文见<a href="https://www.kaggle.com/c/quickdraw-doodle-recognition/discussion/73708" target="_blank" rel="noopener">此处</a>。</p>
+<p>Artur Ispiriants先将每个样本从CSV文件提取出来，每个样本用一个二进制文件存放，这占用了大约400G的SSD，比较耗空间，但是方便后续各种模型的使用。</p>
+<p>Artur一共训练了三个模型:</p>
+<ul>
+<li>Se-Resnext50</li>
+<li>DPN-92</li>
+<li>Se-Resnext101</li>
+</ul>
+<p>每个模型都使用了在ImageNet上预训练的权重。图片尺寸使用了128、192、224、256，实验显示图片尺寸越大分数就越高，但是由于显存限制，尺寸越大就越难训练了。使用128的尺寸就能达到0.944的LB。</p>
+<p>后来Artur Ispiriants merge了队友Mykhailo Matviiv，LB达到了约0.948，后来又使用了完整数据集里的时间信息:</p>
+<ol>
+<li>延迟时间</li>
+<li>每一笔的时间</li>
+<li>笔画数量</li>
+</ol>
+<p>上述三个数据都被scale到0-255。使用了这三个信息后，LB提升到了0.951。</p>
+<h3 id="3-2-2-训练流程"><a href="#3-2-2-训练流程" class="headerlink" title="3.2.2 训练流程"></a>3.2.2 训练流程</h3><p>由于数据集巨大，所以训练一个epoch就需要很长的时间，所以要经常保存模型，大约4-6个小时保存一下checkpoint。下面是Mykhailo Matviiv训练SE-ResNext101的流程：</p>
+<ul>
+<li>图片尺寸取128x128训练网络直到收敛，这大概需要20个checkpoint，能达到0.945.</li>
+<li>上一步得不到提升时，使用2.2.2节的梯度累积技术使batch size达到约3-4k，继续训练，模型进一步提升；</li>
+<li>更进一步的提升就是在更大的图片尺寸(192然后256)进行fine tune。</li>
+</ul>
+<h3 id="3-2-3-trick"><a href="#3-2-3-trick" class="headerlink" title="3.2.3 trick"></a>3.2.3 trick</h3><p>比赛使用的一些trick如下：</p>
+<ul>
+<li>经常保存checkpoint带来的一个提升就是snapshot ensembling，即一个模型最终的预测输出是这个模型的几个checkpoint的综合。最后的输出是多个模型的平均blend。</li>
+<li>伪标签。这个方法是比赛最后阶段的主要提分点。此时blend模型的分数为0.951，使用这个输出给测试集加上了label（预测的top1），然后(只)用这些带label的测试集fine tune所有模型10个epoch，挑选3个最佳的epoch blend得到了0.952的LB。然后再用新的输出给测试集加上label，再fine tune，分数就达到了0.953，然后由于种种原因没再进行了(作者说再进行可能会进一步提升)。我认为这个方法要避免过拟合，作者也说了要谨慎使用，可以考虑将带伪标签的测试集混合在训练集进行训练以减少过拟合的风险。</li>
+</ul>
+<h2 id="3-3-其他"><a href="#3-3-其他" class="headerlink" title="3.3 其他"></a>3.3 其他</h2><h3 id="3-3-1-RNN模型"><a href="#3-3-1-RNN模型" class="headerlink" title="3.3.1 RNN模型"></a>3.3.1 RNN模型</h3><p>单模型0.941的RNN模型: <a href="https://www.kaggle.com/c/quickdraw-doodle-recognition/discussion/73816#434040" target="_blank" rel="noopener">1d CNN+LSTM</a></p>
+<h3 id="3-3-2-11th-place-solution"><a href="#3-3-2-11th-place-solution" class="headerlink" title="3.3.2 11th place solution"></a>3.3.2 11th place solution</h3><p>资源有限的情况下达到<a href="https://www.kaggle.com/c/quickdraw-doodle-recognition/discussion/73808" target="_blank" rel="noopener">第11名的方案</a>。</p>
+<h3 id="3-3-3-21st-place-solution"><a href="#3-3-3-21st-place-solution" class="headerlink" title="3.3.3 21st place solution"></a>3.3.3 21st place solution</h3><p>也使用了3.1.2所示的ensemble方法，<a href="https://www.kaggle.com/c/quickdraw-doodle-recognition/discussion/73754" target="_blank" rel="noopener">评论处</a>有具体的ensemble方法。</p>
+<h3 id="3-3-4-24th-place-solution"><a href="#3-3-4-24th-place-solution" class="headerlink" title="3.3.4 24th place solution"></a>3.3.4 24th place solution</h3><p><a href="https://www.kaggle.com/c/quickdraw-doodle-recognition/discussion/73701" target="_blank" rel="noopener">24th solution</a>, 用的keras，并用了keras封装好的梯度累积trick</p>
+<h3 id="3-3-5-10-lessons"><a href="#3-3-5-10-lessons" class="headerlink" title="3.3.5 10 lessons"></a>3.3.5 10 lessons</h3><p>46th的团队在<a href="https://towardsdatascience.com/10-lessons-learned-from-participating-to-google-ai-challenge-268b4aa87efa" target="_blank" rel="noopener">这里</a>给出了参加这个比赛得出的10条教训，有兴趣的可以去看看。</p>
+<h1 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h1><ol>
+<li>比赛前期应该多多尝试不同的网络结构；</li>
+<li>这种超大数据集的图像类比赛，一般来讲就是网络越深、图片尺寸越大、batchsize越大，效果就越好；</li>
+<li>注意积累一些trick，例如梯度累积、伪标签、Predictions balancing等等；</li>
+<li>由于训练一个epoch时间漫长，所以每隔几个小时就保存一下模型是很有必要的，一个模型的预测输出应该是该模型几个checkpoint的输出的融合；</li>
+<li>多逛逛讨论区。</li>
+</ol>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/assets/wechatpay.jpg" alt="TangShusen 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/assets/alipay.jpg" alt="TangShusen 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/kaggle-classification/" rel="tag"># kaggle,classification</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/12/01/Longest-Palindromic-Substring/" rel="next" title="Longest Palindromic Substring(最长回文子串)">
+                <i class="fa fa-chevron-left"></i> Longest Palindromic Substring(最长回文子串)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/12/08/size-t/" rel="prev" title="实际应用中关于size_t的一个容易忽略的坑">
+                实际应用中关于size_t的一个容易忽略的坑 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/assets/header.jpg"
+                alt="TangShusen" />
+            
+              <p class="site-author-name" itemprop="name">TangShusen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/shusentang" title="GitHub &rarr; https://github.com/shusentang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.zhihu.com/people/tang-shu-sen-77/activities" title="知乎 &rarr; https://www.zhihu.com/people/tang-shu-sen-77/activities" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://github.com/ShusenTang/LeetCode" title="https://github.com/ShusenTang/LeetCode" rel="noopener" target="_blank">LeetCode题解</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-赛题简述"><span class="nav-text">1. 赛题简述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-数据集"><span class="nav-text">1.1 数据集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-赛题任务"><span class="nav-text">1.2 赛题任务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-评价指标"><span class="nav-text">1.3 评价指标</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-我的方案"><span class="nav-text">2. 我的方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-数据相关"><span class="nav-text">2.1 数据相关</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-1-打乱原始文件"><span class="nav-text">2.1.1 打乱原始文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-2-多进程读取"><span class="nav-text">2.1.2 多进程读取</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-3-outliers"><span class="nav-text">2.1.3 outliers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-模型"><span class="nav-text">2.2 模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-1-模型结构"><span class="nav-text">2.2.1 模型结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-2-梯度累积trick"><span class="nav-text">2.2.2 梯度累积trick</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-3-多GPU"><span class="nav-text">2.2.3 多GPU</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-4-图像数据的一个坑"><span class="nav-text">2.2.4 图像数据的一个坑</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-top方案"><span class="nav-text">3. top方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-1st-place-solution"><span class="nav-text">3.1 1st place solution</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-1-模型结构"><span class="nav-text">3.1.1 模型结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-2-ensemble"><span class="nav-text">3.1.2 ensemble</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-3-Predictions-balancing-trick"><span class="nav-text">3.1.3 Predictions balancing trick</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-5th-place-solution"><span class="nav-text">3.2 5th place solution</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-1-总体流程"><span class="nav-text">3.2.1 总体流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-2-训练流程"><span class="nav-text">3.2.2 训练流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-3-trick"><span class="nav-text">3.2.3 trick</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-其他"><span class="nav-text">3.3 其他</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-1-RNN模型"><span class="nav-text">3.3.1 RNN模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-2-11th-place-solution"><span class="nav-text">3.3.2 11th place solution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-3-21st-place-solution"><span class="nav-text">3.3.3 21st place solution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-4-24th-place-solution"><span class="nav-text">3.3.4 24th place solution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-5-10-lessons"><span class="nav-text">3.3.5 10 lessons</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-总结"><span class="nav-text">4. 总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TangShusen</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
