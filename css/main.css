@@ -1973,7 +1973,7 @@ pre .javascript .function {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #bfff16;
+  background: #82ba34;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -3017,12 +3017,13 @@ body {
   background: url("/images/background.png");
   background-repeat: no-repeat;
   background-attachment: fixed;
-  background-position: 50% 50%;
+  background-position: center;
   background-size: cover;
 }
 .main-inner {
   margin-top: 60px;
-  padding: 60px 60px 60px 60px;
+  padding: 30px 30px 30px 30px;
   background: #fff;
   opacity: 0.9;
+  min-height: 500px;
 }
