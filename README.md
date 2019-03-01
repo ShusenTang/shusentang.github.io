@@ -11,4 +11,6 @@
 [Hexo个人博客站点被百度谷歌收录](https://blog.csdn.net/qq_32454537/article/details/79482914)      
 [Add https to your Namecheap Domain hosted on Github Pages](https://medium.com/@goelanirudh/add-https-to-your-namecheap-domain-hosted-on-github-pages-d66fd96308b5)
 
-
+### 文章访问量统计
+[Leancloud访客统计插件重大安全漏洞修复指南](https://leaferx.online/2018/02/11/lc-security/)       
+[关于Hexo在NexT主题更新到6.0+之后出现的有关Leancloud的问题](https://hexawater.ink/2018/11/15/About-Leancloud/)

@@ -79,12 +79,20 @@ theme: next
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type: git
-  repo: https://github.com/ShusenTang/shusentang.github.io.git
-  branch: master
+  - type: git
+    repo: https://github.com/ShusenTang/shusentang.github.io.git
+    branch: master
+  - type: leancloud_counter_security_sync
 
 # 自动生成sitemap
 sitemap:
   path: sitemap.xml
 baidusitemap:
   path: baidusitemap.xml
+
+leancloud_counter_security:
+  enable_sync: true
+  app_id: TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz
+  app_key: zK9lN00t9W1flFbM75hsjojR
+  username: SMON
+  password: 
