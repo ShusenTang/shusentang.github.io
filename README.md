@@ -9,7 +9,9 @@
 [Mathjax公式快速参考](https://colobu.com/2014/08/17/MathJax-quick-reference/)   
 [各种图标](https://fontawesome.com/v4.7.0/icons/)   
 [Hexo个人博客站点被百度谷歌收录](https://blog.csdn.net/qq_32454537/article/details/79482914)      
-[Add https to your Namecheap Domain hosted on Github Pages](https://medium.com/@goelanirudh/add-https-to-your-namecheap-domain-hosted-on-github-pages-d66fd96308b5)
+[Add https to your Namecheap Domain hosted on Github Pages](https://medium.com/@goelanirudh/add-https-to-your-namecheap-domain-hosted-on-github-pages-d66fd96308b5)      
+[hexo 主题优化](https://keung.asia/posts/17051/)
+
 
 ### 文章访问量统计
 [Leancloud访客统计插件重大安全漏洞修复指南](https://leaferx.online/2018/02/11/lc-security/)       
