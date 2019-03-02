@@ -95,4 +95,14 @@ leancloud_counter_security:
   app_id: TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz
   app_key: zK9lN00t9W1flFbM75hsjojR
   username: SMON
-  password: 
+  password:
+
+feed:
+  type: atom
+  path: atom.xml
+  limit: 20
+  hub:
+  content:
+  content_limit:
+  content_limit_delim: ' '
+  order_by: -date 
