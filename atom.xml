@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>TangShusen</title>
+  
+  
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="https://tangshusen.me/"/>
+  <updated>2018-12-30T09:16:22.473Z</updated>
+  <id>https://tangshusen.me/</id>
+  
+  <author>
+    <name>TangShusen</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>统计学习理论之VC维究竟是什么</title>
+    <link href="https://tangshusen.me/2018/12/09/vc-dimension/"/>
+    <id>https://tangshusen.me/2018/12/09/vc-dimension/</id>
+    <published>2018-12-09T04:23:52.000Z</published>
+    <updated>2018-12-30T09:16:22.473Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;学习机器学习不可避免的会接触到VC维，它在机器学习领域是一个很基础但很重要的概念，它给机器学习提供了坚实的理论基础。但直到在我写这篇博客之前，我对VC的理解还只停留在它能刻画假设空间的复杂度这样浅显的层次。本文就来理一理VC维(Vapnik–Chervonenkis dimension)的来龙去脉，搞清楚其本质。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Machine Learning" scheme="https://tangshusen.me/categories/Machine-Learning/"/>
+    
+    
+      <category term="VC维" scheme="https://tangshusen.me/tags/VC%E7%BB%B4/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>实际应用中关于size_t的一个容易忽略的坑</title>
+    <link href="https://tangshusen.me/2018/12/08/size-t/"/>
+    <id>https://tangshusen.me/2018/12/08/size-t/</id>
+    <published>2018-12-08T13:42:13.000Z</published>
+    <updated>2018-12-30T09:15:20.196Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;今天在LeetCode上做&lt;a href=&quot;https://leetcode.com/problems/3sum/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;3Sum&lt;/a&gt;的时候，遇到了一个一开始令我百思不得其解的bug，最后发现还是自己太菜了😭，在此记录一下以加深印象。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="C++" scheme="https://tangshusen.me/categories/C/"/>
+    
+    
+      <category term="语法" scheme="https://tangshusen.me/tags/%E8%AF%AD%E6%B3%95/"/>
+    
+      <category term="坑" scheme="https://tangshusen.me/tags/%E5%9D%91/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Quick, Draw! Doodle Recognition Challenge 总结</title>
+    <link href="https://tangshusen.me/2018/12/05/kaggle-doodle-reco/"/>
+    <id>https://tangshusen.me/2018/12/05/kaggle-doodle-reco/</id>
+    <published>2018-12-05T13:58:29.000Z</published>
+    <updated>2019-01-04T12:28:03.949Z</updated>
+    
+    <summary type="html">
+    
+      &lt;center&gt;&lt;br&gt;&lt;img src=&quot;/2018/12/05/kaggle-doodle-reco/cover.png&quot; width=&quot;900&quot; class=&quot;full-image&quot;&gt;&lt;br&gt;&lt;/center&gt;
+
+&lt;p&gt;这个比赛于12.05早上结束，最终结果是排在69/1316、铜牌，离银牌区差4名，还是比较遗憾的。不过这是我第一次花大量时间和精力在图像分类问题上，作为一个小菜鸡能拿到牌还算满意。现在作个总结。另外本次比赛我的所有代码（带注释）已经开源(&lt;a href=&quot;https://github.com/ShusenTang/kaggle-doodle-recognition&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;戳我&lt;/a&gt;)，有兴趣的可以看看，顺便给个star。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Competitions" scheme="https://tangshusen.me/categories/Competitions/"/>
+    
+    
+      <category term="kaggle,classification" scheme="https://tangshusen.me/tags/kaggle-classification/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Longest Palindromic Substring(最长回文子串)</title>
+    <link href="https://tangshusen.me/2018/12/01/Longest-Palindromic-Substring/"/>
+    <id>https://tangshusen.me/2018/12/01/Longest-Palindromic-Substring/</id>
+    <published>2018-12-01T14:23:15.000Z</published>
+    <updated>2018-12-30T09:14:45.273Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;1-问题描述&quot;&gt;&lt;a href=&quot;#1-问题描述&quot; class=&quot;headerlink&quot; title=&quot;1. 问题描述&quot;&gt;&lt;/a&gt;1. 问题描述&lt;/h1&gt;&lt;p&gt;Given a string s, find the longest palindromic substring in s. You may assume that the maximum length of s is 1000.&lt;br&gt;给定一个字符串s，找出s中的最长回文子串。s的长度不超过1000.&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="LeetCode" scheme="https://tangshusen.me/categories/LeetCode/"/>
+    
+    
+      <category term="动态规划" scheme="https://tangshusen.me/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/"/>
+    
+      <category term="马拉车算法" scheme="https://tangshusen.me/tags/%E9%A9%AC%E6%8B%89%E8%BD%A6%E7%AE%97%E6%B3%95/"/>
+    
+      <category term="字符串" scheme="https://tangshusen.me/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>AdaBoost算法详解与python实现</title>
+    <link href="https://tangshusen.me/2018/11/18/adaboost/"/>
+    <id>https://tangshusen.me/2018/11/18/adaboost/</id>
+    <published>2018-11-18T14:05:04.000Z</published>
+    <updated>2018-12-30T09:14:14.935Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;目前网上大多数博客只介绍了AdaBoost算法是什么，但是鲜有人介绍为什么Adaboost长这样，本文对此给出了详细的解释。&lt;br&gt;&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Machine Learning" scheme="https://tangshusen.me/categories/Machine-Learning/"/>
+    
+    
+      <category term="AdaBoost" scheme="https://tangshusen.me/tags/AdaBoost/"/>
+    
+      <category term="集成学习(ensemble)" scheme="https://tangshusen.me/tags/%E9%9B%86%E6%88%90%E5%AD%A6%E4%B9%A0-ensemble/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>TensorFlow实现多层RNN的一个大坑</title>
+    <link href="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/"/>
+    <id>https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/</id>
+    <published>2018-11-13T14:30:02.000Z</published>
+    <updated>2018-12-30T09:15:56.162Z</updated>
+    
+    <summary type="html">
+    
+      &lt;center&gt;&lt;br&gt;&lt;img src=&quot;/2018/11/13/tf-multi-rnn-bug/cover.jpg&quot; width=&quot;400&quot; class=&quot;full-image&quot;&gt;&lt;br&gt;&lt;/center&gt;
+    
+    </summary>
+    
+      <category term="Deep Learning" scheme="https://tangshusen.me/categories/Deep-Learning/"/>
+    
+    
+      <category term="tensorflow" scheme="https://tangshusen.me/tags/tensorflow/"/>
+    
+      <category term="RNN" scheme="https://tangshusen.me/tags/RNN/"/>
+    
+      <category term="attention" scheme="https://tangshusen.me/tags/attention/"/>
+    
+      <category term="seq2seq" scheme="https://tangshusen.me/tags/seq2seq/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>看了这篇文章你还不懂SVM你就来打我</title>
+    <link href="https://tangshusen.me/2018/10/27/SVM/"/>
+    <id>https://tangshusen.me/2018/10/27/SVM/</id>
+    <published>2018-10-27T15:19:45.000Z</published>
+    <updated>2018-12-30T09:15:43.822Z</updated>
+    
+    <summary type="html">
+    
+      &lt;center&gt;&lt;br&gt;&lt;img src=&quot;/2018/10/27/SVM/cover.png&quot; width=&quot;300&quot; class=&quot;full-image&quot;&gt;&lt;br&gt;&lt;/center&gt;
+    
+    </summary>
+    
+      <category term="Machine Learning" scheme="https://tangshusen.me/categories/Machine-Learning/"/>
+    
+    
+      <category term="SVM" scheme="https://tangshusen.me/tags/SVM/"/>
+    
+      <category term="kernel trick" scheme="https://tangshusen.me/tags/kernel-trick/"/>
+    
+      <category term="classification" scheme="https://tangshusen.me/tags/classification/"/>
+    
+  </entry>
+  
+</feed>
