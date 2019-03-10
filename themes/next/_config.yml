@@ -73,7 +73,7 @@ footer:
     color: "#808080"
 
   # If not defined, will be used `author` from Hexo main config.
-  copyright: TangShusen tips:本博客在电脑端食用更佳~
+  copyright: TangShusen tip:本博客在电脑端食用更佳~
   # -------------------------------------------------------------
   powered:
     # Hexo link (Powered by Hexo).
