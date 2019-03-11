@@ -74,11 +74,17 @@ $$
 \alpha _ { i j } = \frac { \exp \left( e _ { i j } \right) } { \sum _ { k = 1 } ^ { T _ { x } } \exp \left( e _ { i k } \right) } \tag{1.4}
 $$
 $$
-e _ { i j } = a \left( h_{i-1}' , h _ { j } \right) = v _ { a } ^ { T } \tanh \left( W _ { a } h_{i-1}' + U _ { a } h _ { j } \right) \tag{1.5}
+e _ { i j } = a \left( h_{i-1}' , h _ { j } \right) = v _ { a } ^ { T } \tanh \left( \boldsymbol{W_a} h_{i-1}' + \boldsymbol{U_ a} h _ { j } \right) \tag{1.5}
 $$
 也就是说，权重 $\alpha_{ij}$ 就是解码器隐藏态 $h_{i-1}'$ 和编码器隐藏态 $h_j$ 计算得到一个数值 $e_{ij}$ （一般称为得分，score）再经过softmax归一化得到的。
 
 ### 1.2.2 Luong attention
+Luong attention[4]与Bahdanau attention最大的不同就是计算得分的方式不同，论文[4]中给出了一下三种计算方式：
+$$
+e_{ij} = \text{score} (h_i', h_j) = \left\{ \begin{array} { l l } {  h_i'^ { \top } h_j } & { \text { dot } } \\ 
+{ h_i'^ { \top } \boldsymbol {W_a} h_j } & { \text { general } } \\ { v_a ^ { \top } \tanh \left( \boldsymbol { W_a } \left[ h_i' ; h_j \right] \right) } & { \text { concat} } \end{array} \right. \tag{1.6}
+$$
+常用的计算方式就是式 $(1.6)$ 中的"general"，即用 $\boldsymbol { W_a }$ 统一 $h_i$ 和 $h_j$ 的维度再作內积（"dot"相当于是"general"的特殊情况，即 $h_i$ 和 $h_j$ 的维度已经统一了）。
 
 ### 1.2.3 小节
 综上，attention机制的大致原理就是通过在解码的每一步计算一下此刻应该对编码器每时刻的输入赋予多少注意力，然后再有针对性地进行解码。但除了计算分数的方式有很多方式，attention的具体细节花样还有很多，例如是否将解码器前一步得到的 $c_{i-1}$ 作为此刻解码器的输入，是否将编码器所有隐藏态都参与注意力计算等等。下一节我们通过对TensorFlow的源码进行剖析来看看TensorFlow是怎么实现的。
@@ -99,6 +105,9 @@ $$
 在进一步分析之前，我们先来明确代码中一些术语的意思：
 * key & query: Attention的本质可以被描述为一个查询（query）与一系列（键key-值value）对一起映射成一个输出：将query和每个key进行相似度计算得到权重并进行归一化，将权重和相应的键值value进行加权求和得到最后的attention，这里key=value。简单理解就是，query相当于前面说的解码器的隐藏态 $h_i'$ ，而key就是编码器的隐藏态 $h_i$。
 * memory: 这个memory其实才是编码器的所有隐藏态，与前面的key区别就是key可能是memory经过处理（例如线性变换）后得到的。
+* alignments: 计算得到的每步编码器隐藏态 $h$ 的权重，即 $\alpha_{i1}, \alpha_{i2},..., \alpha_{iT_x}$。
+
+后面会遇到这些术语，如果现在还不是很懂的可以结合后面再仔细看看。
 
 ## 2.2 `_BaseAttentionMechanism`
 先来看看最基础的attention类`_BaseAttentionMechanism`。它的初始化方法如下：
@@ -142,7 +151,7 @@ def __init__(self,
             dtype=None,
             name="BahdanauAttention"):
 ```
-这些参数中，除了`num_units`其他都在`_BaseAttentionMechanism`出现过这里不再赘述。主要说一下`num_units`，我们知道在计算式$(1.5)$的时候，需要使用 $h_{i-1}'$ 和 $h_i$ 来进行计算，而二者的维度可能并不是统一的，需要进行变换和统一，所以就有了 $W_a$ 和 $U_a$ 这两个系数，所以在代码中就是用`num_units`来声明了一个全连接 Dense 网络，用于统一二者的维度：
+这些参数中，除了`num_units`和`normalize`其他都在`_BaseAttentionMechanism`出现过这里不再赘述。先说一下`num_units`，我们知道在计算式$(1.5)$的时候，需要使用 $h_{i-1}'$ 和 $h_i$ 来进行计算，而二者的维度可能并不是统一的，需要进行变换和统一，所以就有了 $W_a$ 和 $U_a$ 这两个系数，对应在代码中就是用`num_units`来声明了两个全连接 Dense 网络，用于统一二者的维度：
 ``` python
 super(BahdanauAttention, self).__init__(
         query_layer=layers_core.Dense(num_units, name="query_layer", use_bias=False, dtype=dtype),
@@ -153,8 +162,175 @@ super(BahdanauAttention, self).__init__(
         score_mask_value=score_mask_value,
         name=name)
 ```
-即这里的`num_units`确定了需要传进`_BaseAttentionMechanism`构造函数的参数`query_layer`和`memory_layer`。
+即这里的`num_units`设置成任何值都可以，它确定了需要传进其父类`_BaseAttentionMechanism`构造函数的参数`query_layer`和`memory_layer`。
 
+然后`normalize`即是否要在计算分数score时实现标准化，出自论文[5]，默认设为False。这个参数在接下来要说的`__call__`方法中用到。
+
+接下来就是`__call__`方法了:
+```python
+def __call__(self, query, state):
+    with variable_scope.variable_scope(None, "bahdanau_attention", [query]):
+        processed_query = self.query_layer(query) if self.query_layer else query
+        score = _bahdanau_score(processed_query, self._keys, self._normalize) # 前面定义了query_layer是一个Dense层
+    alignments = self._probability_fn(score, state)
+    next_state = alignments
+    return alignments, next_state
+```
+输入的是`query`和`state`(先不管这里的state是啥)，然后先把`query`用`query_layer`（即前面说的全连接层）进行处理，然后再按照Bahdanau Attention的规则调用函数`_bahdanau_score`计算分数score，这个计算过程中可设置是否需要标准化。得到分数后再调用`_probability_fn`(这里就是softmax，所以第二个参数`state`没有用到)计算得到权重向量`alignments`，然后最后返回的`next_state`其实也是这个`alignments`，所以`__call__`的参数`state`其实就是上个时间步的`alignments`向量。
+
+总结一下就是，`BahdanauAttention`（调用`__call__`）就是根据此刻的`query`（即 $h_i'$）和每个key根据式 $(1.4)(1.5)$ 计算得到每个key的权重 `alignments`。
+
+## 2.4 `LuongAttention`
+`LuongAttention`同样是继承自2.2节的`_BaseAttentionMechanism`，它的构造函数如下所示：
+``` python
+def __init__(self,
+            num_units,
+            memory,
+            memory_sequence_length=None,
+            scale=False,
+            probability_fn=None,
+            score_mask_value=None,
+            dtype=None,
+            name="LuongAttention"):
+```
+出现了一个新参数`scale`，该参数在计算分数的函数`_luong_score`中会用到，代表是否对得到的分数进行scale操作。2.3节中提到`BahdanauAttention`构造函数中参数`num_units`设置成任何值都可以，但是这里并不是这样，因为：
+``` python
+super(LuongAttention, self).__init__(
+        query_layer=None,
+        memory_layer=layers_core.Dense(num_units, name="memory_layer", use_bias=False, dtype=dtype),
+        memory=memory,
+        probability_fn=wrapped_probability_fn,
+        memory_sequence_length=memory_sequence_length,
+        score_mask_value=score_mask_value,
+        name=name)
+```
+注意这里只传入了`memory_layer`（对应式$(1.6)$中的 $\boldsymbol { W_a }$），所以只对`memory`（即 式子$(1.6)$中的 $h_j$）进行了变换得到 $\boldsymbol {W_a}h_j$，因此**这里`num_units`必须等于`query`的深度（即query.get_shape()[-1]）**。
+
+总结一下，和`BahdanauAttention`类似的，`LuongAttention`（调用`__call__`）就是根据此刻的`query`（即 $h_i'$）和每个key根据式 $(1.6)(1.4)$ 计算得到每个key的权重 `alignments`。和`BahdanauAttention`不同的是这里要合理设置参数 `num_units`否则`query`和`key`维度不匹配。
+
+## 2.5 `AttentionWrapperState`
+接下来我们再看下 `AttentionWrapperState` 这个类，这个类其实类似`RNNCell`有隐藏态（hidden state），就是定义了attention计算过程中可能需要保存的变量，如 cell_state（这个cell_state就是被`AttentionWrapper`包裹的内部RNNCell的隐藏态）、attention、time、alignments 等内容，同时也便于后期的可视化呈现，代码实现如下：
+``` python
+class AttentionWrapperState(
+    collections.namedtuple("AttentionWrapperState",
+                           ("cell_state", "attention", "time", "alignments",
+                            "alignment_history", "attention_state"))):
+```
+可见它就是继承了`namedtuple`这个数据结构，其实可以把这个 `AttentionWrapperState`看成一个结构体，可以传入需要的字段生成这个对象。
+
+## 2.6 `AttentionWrapper`
+为了方便使用了attention，TensorFlow提供了一个wrapper，这和其他的Wrapper例如`DropoutWrapper`、`ResidualWrapper` 等等类似，它们都是 `RNNCell`的实例。即`AttentionWrapper`它对`RNNCell`进行了封装，封装后依然还是`RNNCell`的实例。如果你想给一个普通的RNN模型加入attention功能，只需要在`RNNCell`外面套一层`AttentionWrapper`并指定 `AttentionMechanism`的实例就好了。
+
+我们还是来看看其构造函数：
+``` python
+class AttentionWrapper(rnn_cell_impl.RNNCell):
+  def __init__(self,
+               cell,
+               attention_mechanism,
+               attention_layer_size=None,
+               alignment_history=False,
+               cell_input_fn=None,
+               output_attention=True,
+               initial_cell_state=None,
+               name=None,
+               attention_layer=None):
+```
+下面对其参数一一说明：
+* `cell`: 被包裹的`RNNCell`实例；
+* `attention_mechanism`: attention机制实例，例如`BahdanauAttention`，也可以是多个attention实例组成的列表；
+* `attention_layer_size`: 是数字或者数字做成的列表，如果是 None（默认），直接使用加权求和得到的上下文向量 $c_i$ 作为输出，如果不是None，那么将 $c_i$ 和`cell`的输出 `cell_output`进行concat并做线性变换（输出维度为`attention_layer_size`）再输出。
+    > 这里所说的"输出"在代码里是用"attention"表示的。
+* `alignment_history`: 即是否将之前的`alignments`存储到 state 中，以便于后期进行可视化展示，默认False，一般设置为True。
+* `cell_input_fn`: 怎样处理输入。默认会将上一步的得到的输出与的实际输入进行concat操作作为输入。代码：
+    ``` python
+    if cell_input_fn is None:
+        cell_input_fn = (lambda inputs, attention: array_ops.concat([inputs, attention], -1))
+    ```
+
+* `output_attention`: 默认false，如果为true，则输出不是attention的计算结果，而是`cell`得到的`cell_output`。
+* `initial_cell_state`: 初始状态，默认即可。
+* `attention_layer`: 这个参数其实是和`attention_layer_size`是互斥的，如果设置了`attention_layer_size`不为None，那么这个参数必须为None。因为他俩功能类似，它也可以是一个`tf.layers.Layer`的列表，定义输出要经过的变换。若为None，直接使用加权求和得到的上下文向量 $c_i$ 作为输出，如果不是None，那么将 $c_i$ 和`cell`的输出 `cell_output`进行concat再经过`attention_layer`后输出。
+
+构造函数中关于`attention_layer`的代码如下：
+``` python
+if attention_layer_size is not None:
+    attention_layer_sizes = tuple(attention_layer_size
+        if isinstance(attention_layer_size, (list, tuple)) else (attention_layer_size,))
+    
+    self._attention_layers = tuple(layers_core.Dense(
+            attention_layer_size,
+            name="attention_layer",
+            use_bias=False,
+            dtype=attention_mechanisms[i].dtype)
+        for i, attention_layer_size in enumerate(attention_layer_sizes))
+    self._attention_layer_size = sum(attention_layer_sizes)
+elif attention_layer is not None:
+    self._attention_layers = tuple( attention_layer
+        if isinstance(attention_layer, (list, tuple))
+        else (attention_layer,))
+    
+    self._attention_layer_size = sum(
+        tensor_shape.dimension_value(layer.compute_output_shape(
+            [None, cell.output_size + tensor_shape.dimension_value(
+                mechanism.values.shape[-1])])[-1])
+        for layer, mechanism in zip(
+            self._attention_layers, attention_mechanisms))
+else:
+    self._attention_layers = None
+    self._attention_layer_size = sum(
+        tensor_shape.dimension_value(attention_mechanism.values.shape[-1])
+        for attention_mechanism in attention_mechanisms)
+```
+
+接下来看看其`call`方法，这根`RNNCell`中的`call`其实是类似的，都是通过上一步的`inputs`和`state`计算得到`output`和`next_state`。
+``` python
+def call(self, inputs, state):
+    # Step 1: 根据输入和上一步的输出计算真正的输入
+    cell_inputs = self._cell_input_fn(inputs, state.attention) # 默认是concat操作
+
+    # Step 2: 调用内部被包裹的RNNCell得到cell_output和next_cell_state
+    cell_state = state.cell_state
+    cell_output, next_cell_state = self._cell(cell_inputs, cell_state) 
+ 
+    if self._is_multi:
+      previous_attention_state = state.attention_state
+      previous_alignment_history = state.alignment_history
+    else:
+      previous_attention_state = [state.attention_state]
+      previous_alignment_history = [state.alignment_history]
+
+    all_alignments = []
+    all_attentions = []
+    all_attention_states = []
+    maybe_all_histories = []
+
+    # Step 3: 根据attention_mechanism计算得到alignments
+    for i, attention_mechanism in enumerate(self._attention_mechanisms):
+      attention, alignments, next_attention_state = _compute_attention(
+          attention_mechanism, cell_output, previous_attention_state[i],
+          self._attention_layers[i] if self._attention_layers else None)
+      alignment_history = previous_alignment_history[i].write(
+          state.time, alignments) if self._alignment_history else ()
+
+      all_attention_states.append(next_attention_state)
+      all_alignments.append(alignments)
+      all_attentions.append(attention)
+      maybe_all_histories.append(alignment_history)
+
+    attention = array_ops.concat(all_attentions, 1)
+    next_state = AttentionWrapperState(
+        time=state.time + 1,
+        cell_state=next_cell_state,
+        attention=attention,
+        attention_state=self._item_or_tuple(all_attention_states),
+        alignments=self._item_or_tuple(all_alignments),
+        alignment_history=self._item_or_tuple(maybe_all_histories))
+
+    if self._output_attention:
+      return attention, next_state
+    else:
+      return cell_output, next_state
+```
 
 # 参考文献
 [1] Cho K, Van Merriënboer B, Gulcehre C, et al. Learning phrase representations using RNN encoder-decoder for statistical machine translation[J]. arXiv preprint arXiv:1406.1078, 2014.
@@ -164,6 +340,8 @@ super(BahdanauAttention, self).__init__(
 [3] Bahdanau D, Cho K, Bengio Y. Neural machine translation by jointly learning to align and translate[J]. arXiv preprint arXiv:1409.0473, 2014.
 
 [4] Luong M T, Pham H, Manning C D. Effective approaches to attention-based neural machine translation[J]. arXiv preprint arXiv:1508.04025, 2015.
+
+[5] Salimans T, Kingma D P. Weight normalization: A simple reparameterization to accelerate training of deep neural networks[C]//Advances in Neural Information Processing Systems. 2016: 901-909.
 
 
 
