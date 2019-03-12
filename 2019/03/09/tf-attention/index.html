@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="UM_oWjkmpNS4sC6N8fDEsgSTPTOong_3Muz7XL_l-bQ" />
+
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="NntzqnjuUs" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/my_apple-touch-icon-next.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/my_favicon-32x32.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/my_favicon-16x16.jpg?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/my_logo.jpg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Attention在seq2seq模型中是一个很有用的机制，由于TensorFlow烂成翔的官方文档以及网上很少而且晦涩难懂的教程，我在如何正确使用TensorFlow现成attention接口上面费了很大一番功夫。本文用详细图解的方式清晰展现了其源代码构成，方便大家学习使用。本文会先简略的介绍一下seq2seq attention的原理，然后详细剖析TensorFlow相关的源代码，懒得看文">
+<meta name="keywords" content="tensorflow,attention,seq2seq">
+<meta property="og:type" content="article">
+<meta property="og:title" content="TensorFlow AttentionWrapper源码超详细图解">
+<meta property="og:url" content="https://tangshusen.me/2019/03/09/tf-attention/index.html">
+<meta property="og:site_name" content="TangShusen">
+<meta property="og:description" content="Attention在seq2seq模型中是一个很有用的机制，由于TensorFlow烂成翔的官方文档以及网上很少而且晦涩难懂的教程，我在如何正确使用TensorFlow现成attention接口上面费了很大一番功夫。本文用详细图解的方式清晰展现了其源代码构成，方便大家学习使用。本文会先简略的介绍一下seq2seq attention的原理，然后详细剖析TensorFlow相关的源代码，懒得看文">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://tangshusen.me/2019/03/09/tf-attention/cover.png">
+<meta property="og:image" content="https://tangshusen.me/2019/03/09/tf-attention/1.1.png">
+<meta property="og:image" content="https://tangshusen.me/2019/03/09/tf-attention/1.2.png">
+<meta property="og:image" content="https://tangshusen.me/2019/03/09/tf-attention/2.1.png">
+<meta property="og:updated_time" content="2019-03-12T15:32:04.555Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="TensorFlow AttentionWrapper源码超详细图解">
+<meta name="twitter:description" content="Attention在seq2seq模型中是一个很有用的机制，由于TensorFlow烂成翔的官方文档以及网上很少而且晦涩难懂的教程，我在如何正确使用TensorFlow现成attention接口上面费了很大一番功夫。本文用详细图解的方式清晰展现了其源代码构成，方便大家学习使用。本文会先简略的介绍一下seq2seq attention的原理，然后详细剖析TensorFlow相关的源代码，懒得看文">
+<meta name="twitter:image" content="https://tangshusen.me/2019/03/09/tf-attention/cover.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="TangShusen" type="application/atom+xml" />
+
+
+
+
+  <link rel="canonical" href="https://tangshusen.me/2019/03/09/tf-attention/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>TensorFlow AttentionWrapper源码超详细图解 | TangShusen</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TangShusen</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br />首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br />标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br />分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br />归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br />关于</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2019/03/09/tf-attention/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="TangShusen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/assets/header.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TangShusen">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">TensorFlow AttentionWrapper源码超详细图解
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-03-09 18:37:19" itemprop="dateCreated datePublished" datetime="2019-03-09T18:37:19+08:00">2019-03-09</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-03-12 23:32:04" itemprop="dateModified" datetime="2019-03-12T23:32:04+08:00">2019-03-12</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/Deep-Learning/" itemprop="url" rel="index"><span itemprop="name">Deep Learning</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/03/09/tf-attention/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/03/09/tf-attention/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/03/09/tf-attention/" class="leancloud_visitors" data-flag-title="TensorFlow AttentionWrapper源码超详细图解">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <center><br><img src="/2019/03/09/tf-attention/cover.png" width="500" class="full-image"><br></center>
+
+<p>Attention在seq2seq模型中是一个很有用的机制，由于TensorFlow烂成翔的官方文档以及网上很少而且晦涩难懂的教程，我在如何正确使用TensorFlow现成attention接口上面费了很大一番功夫。本文用详细图解的方式清晰展现了其源代码构成，方便大家学习使用。本文会先简略的介绍一下seq2seq attention的原理，然后详细剖析TensorFlow相关的源代码，懒得看文字分析的可以直接跳到2.7节看图。</p>
+<a id="more"></a>
+<h1 id="1-原理简介"><a href="#1-原理简介" class="headerlink" title="1. 原理简介"></a>1. 原理简介</h1><h2 id="1-1-seq2seq"><a href="#1-1-seq2seq" class="headerlink" title="1.1 seq2seq"></a>1.1 seq2seq</h2><p>seq2seq是”Sequence to Sequence”的简写，seq2seq模型的核心就是编码器（Encoder）和解码器（Decoder）组成的，该架构相继在论文[1][2]提出，后来[3]又提出了在seq2seq结构中加入Attention机制，使seq2seq的性能大大提升，现在seq2seq被广泛地用于机器翻译、对话生成、人体姿态序列生成等各种任务上，并取得了非常好的效果。</p>
+<center><br>    <img src="/2019/03/09/tf-attention/1.1.png" width="500" class="full-image"><br>    <br><br>    <div style="border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;">图1.1 seq2seq基本结构</div><br></center>
+
+<p>未加入attention机制的seq2seq基本模型如上图所示，左侧的RNN编码器将输入编码成一个中间状态c向量，右侧的解码器在每一个时间步都会接收c的输入然后进行解码，得到输出结果。例如如果编码器的输入为“我爱你”，编码器的期望输出为“I love you”，那么seq2seq就实现了翻译任务，以上就是最基本的seq2seq模型原理。</p>
+<h2 id="1-2-attention"><a href="#1-2-attention" class="headerlink" title="1.2 attention"></a>1.2 attention</h2><p>仔细观察图1.1所示的模型就可以发现一个问题，c向量是连接编码器和解码器唯一的桥梁，那么c向量中必须包含了原始序列中的所有信息，当编码器输入序列很长的时候，由于RNN并不能很好地对很长的序列进行建模，c向量就很难囊括输入序列所有信息了，此时解码器也就很难正确地生成了。</p>
+<p>Attention机制解决了这个问题，它可以使得在输入序列长的时候精确率也不会有明显下降，它是怎么做的呢？既然一个c向量存不了，那么就引入多个c向量: $c_1, c_2, …$，称为context vector。</p>
+<center><br>    <img src="/2019/03/09/tf-attention/1.2.png" width="500" class="full-image"><br>    <br><br>    <div style="border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;">图1.2 带attention的seq2seq结构</div><br></center>
+
+<p>带attention的seq2seq结构如图1.2所示，attention机制跟人类翻译句子时候的思路有些类似，即将注意力关注于我们翻译词语对应的上下文（context）。而 $c_i$ 就存放了此刻输入的上下文信息，这样当解码器解码到第 $i$ 步的时候通过分析此时输入序列的上下文信息即可精准地进行解码。</p>
+<p>下面用公式化的语言叙述一下加入attention与否的seq2seq结构。<br>在没有引入attention之前，编码器在某个时刻解码的时候实际上是依赖于三个部分的（图1.1没有画出），首先我们知道RNN中，每次输出结果会依赖于隐藏态和输入（在训练过程中这个输入就是ground truth，在测试时这个输入就是上一步的输出），在seq2seq模型中，还需要依赖于c向量，所以这里我们设在 $i$ 时刻，解码器解码的期望输出是 $y_i$，上一次解码结果（的ground truth）是 $y_{i-1}$，此时刻隐藏态是 $h_i’$，所以它们满足这样的关系：<br>$$<br>y_i = f(y_{i-1}, h_i’, c) \tag{1.1}<br>$$<br>即每次的解码输出是上一个隐藏态和上一个输出结果和c向量共同计算得出的。</p>
+<p>那么加入attention机制后，将每时刻固定的c向量换成 $c_i$，有<br>$$<br>y_i = f(y_{i-1}, h_i’, c_i) \tag{1.2}<br>$$</p>
+<p>那么上下文信息 $c_i$ 是怎么计算得来的呢？目前常用的两种方式就是Bahdanau attention[3]和Luong attention[4]，下面就分别来介绍一下。</p>
+<h3 id="1-2-1-Bahdanau-attention"><a href="#1-2-1-Bahdanau-attention" class="headerlink" title="1.2.1 Bahdanau attention"></a>1.2.1 Bahdanau attention</h3><p>假设编码器的所有时刻的隐藏态（hidden state）为 $h_1, h_2, …, h_{T_x}$，则有<br>$$<br>c_i = \sum_{j = 1}^{T_x} \alpha_{ij}h_j \tag{1.3}<br>$$<br>这里 $\alpha_{ij}$ 为每一个编码器输出的隐藏态 $h_j$ 被分配到的权重，它的值越大代表对编码器 $j$ 时刻输入的注意力就越大。而 $\alpha_{ij}$ 的计算法方式如下：<br>$$<br>\alpha _ { i j } = \frac { \exp \left( e _ { i j } \right) } { \sum _ { k = 1 } ^ { T _ { x } } \exp \left( e _ { i k } \right) } \tag{1.4}<br>$$<br>$$<br>e _ { i j } = a \left( h_{i-1}’ , h _ { j } \right) = v _ { a } ^ { T } \tanh \left( \boldsymbol{W_a} h_{i-1}’ + \boldsymbol{U_ a} h _ { j } \right) \tag{1.5}<br>$$<br>也就是说，权重 $\alpha_{ij}$ 就是解码器隐藏态 $h_{i-1}’$ 和编码器隐藏态 $h_j$ 计算得到一个数值 $e_{ij}$ （一般称为得分，score）再经过softmax归一化得到的。</p>
+<h3 id="1-2-2-Luong-attention"><a href="#1-2-2-Luong-attention" class="headerlink" title="1.2.2 Luong attention"></a>1.2.2 Luong attention</h3><p>Luong attention[4]与Bahdanau attention最大的不同就是计算得分的方式不同，论文[4]中给出了一下三种计算方式：<br>$$<br>e_{ij} = \text{score} (h_i’, h_j) = \begin{cases} \begin{array} { l l } {  h_i’^ { \top } h_j } &amp; { \text { dot } } \\<br>{ h_i’^ { \top } \boldsymbol {W_a} h_j } &amp; { \text { general } } \\ { v_a ^ { \top } \tanh \left( \boldsymbol { W_a } \left[ h_i’ ; h_j \right] \right) } &amp; { \text { concat} } \end{array} \end{cases} \tag{1.6}<br>$$<br>常用的计算方式就是式 $(1.6)$ 中的”general”，即用 $\boldsymbol { W_a }$ 统一 $h_i$ 和 $h_j$ 的维度再作內积（”dot”相当于是”general”的特殊情况，即 $h_i$ 和 $h_j$ 的维度已经统一了）。</p>
+<h3 id="1-2-3-小节"><a href="#1-2-3-小节" class="headerlink" title="1.2.3 小节"></a>1.2.3 小节</h3><p>综上，attention机制的大致原理就是通过在解码的每一步计算一下此刻应该对编码器每时刻的输入赋予多少注意力，然后再有针对性地进行解码。但除了计算分数的方式有很多方式，attention的具体细节花样还有很多，例如是否将解码器前一步得到的 $c_{i-1}$ 作为此刻解码器的输入，是否将编码器所有隐藏态都参与注意力计算等等。下一节我们通过对TensorFlow的源码进行剖析来看看TensorFlow是怎么实现的。</p>
+<h1 id="2-TensorFlow源码剖析"><a href="#2-TensorFlow源码剖析" class="headerlink" title="2. TensorFlow源码剖析"></a>2. TensorFlow源码剖析</h1><h2 id="2-1-概览"><a href="#2-1-概览" class="headerlink" title="2.1 概览"></a>2.1 概览</h2><p>在TensorFlow中，Attention 的相关实现代码是在<a href="https://github.com/tensorflow/tensorflow/blob/r1.13/tensorflow/contrib/seq2seq/python/ops/attention_wrapper.py" target="_blank" rel="noopener">tensorflow/contrib/seq2seq/python/ops/attention_wrapper.py</a>文件中，这里面我们需要关注的有如下几个类：</p>
+<ul>
+<li><code>AttentionMechanism</code>: 所有attention机制的父类，内部没有任何实现。</li>
+<li><code>_BaseAttentionMechanism</code>: 继承自<code>AttentionMechanism</code>，定义了attention机制的一些公共方法实现和属性。</li>
+<li><code>BahdanauAttention</code>和<code>LuongAttention</code>：均继承自<code>_BaseAttentionMechanism</code>，分别实现了1.2节所述的两种attention机制。</li>
+<li><code>AttentionWrapper</code>: 用于封装RNNCell的类，继承自<code>RNNCell</code>，所以被它封装后依然是一个RNNCell类，只不过是带了attention的功能。</li>
+<li><code>AttentionWrapperState</code>：用来存放计算过程中的state，前面说了<code>AttentionWrapper</code>其实也是一个RNNCell，那么它也有隐藏态（hidden state）信息，<code>AttentionWrapperState</code>就是这个state。除了RNN cell state，其中还额外存放了一些信息。</li>
+</ul>
+<p>此外还有<code>_BaseMonotonicAttentionMechanism</code>、<code>BahdanauMonotonicAttention</code>、<code>LuongMonotonicAttention</code>以实现单调（monotonic）attention机制，以及一些公共的方法，如<code>_luong_score</code>、<code>_bahdanau_score</code>、<code>_prepare_memory</code>等等。</p>
+<p>在进一步分析之前，我们先来明确代码中一些术语的意思：</p>
+<ul>
+<li>key &amp; query: Attention的本质可以被描述为一个查询（query）与一系列（键key-值value）对一起映射成一个输出：将query和每个key进行相似度计算得到权重并进行归一化，将权重和相应的键值value进行加权求和得到最后的attention，这里key=value。简单理解就是，query相当于前面说的解码器的隐藏态 $h_i’$ ，而key就是编码器的隐藏态 $h_i$。</li>
+<li>memory: 这个memory其实才是编码器的所有隐藏态，与前面的key区别就是key可能是memory经过处理（例如线性变换）后得到的。</li>
+<li>alignments: 计算得到的每步编码器隐藏态 $h$ 的权重向量，即 $[\alpha_{i1}, \alpha_{i2},…, \alpha_{iT_x}]$。</li>
+</ul>
+<p>后面会遇到这些术语，如果现在还不是很懂的可以结合后面再仔细看看。</p>
+<p>我们先来分析分析这些类，然后2.7节给出了整个AttentionWrapper的代码流程图。</p>
+<h2 id="2-2-BaseAttentionMechanism"><a href="#2-2-BaseAttentionMechanism" class="headerlink" title="2.2 _BaseAttentionMechanism"></a>2.2 <code>_BaseAttentionMechanism</code></h2><p>先来看看最基础的attention类<code>_BaseAttentionMechanism</code>。它的初始化方法如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,</span></span></span><br><span class="line"><span class="function"><span class="params">            query_layer,</span></span></span><br><span class="line"><span class="function"><span class="params">            memory,</span></span></span><br><span class="line"><span class="function"><span class="params">            probability_fn,</span></span></span><br><span class="line"><span class="function"><span class="params">            memory_sequence_length=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            memory_layer=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            check_inner_dims_defined=True,</span></span></span><br><span class="line"><span class="function"><span class="params">            score_mask_value=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            name=None)</span>:</span></span><br></pre></td></tr></table></figure></p>
+<p>这里有很多参数，下面一一说明这些参数的作用：</p>
+<ul>
+<li><code>query_layer</code>: 一个<code>tf.layers.Layer</code>实例，query会首先经过这一层；</li>
+<li><code>memory</code>: 解码时用到的所有上下文信息，可简单理解为编码器的所有隐藏态，维度一般为[batch, max_time, enc_rnn_size]；</li>
+<li><code>probability_fn</code>: 将score $e_{ij}$ 计算成概率用的函数，默认使用softmax，还可以指定hardmax等函数；</li>
+<li><code>memory_sequence_length</code>: 即memory变量的实际长度信息，类似<code>dynamic_rnn</code>中的<code>sequence_length</code>，维度为[batch]，这会被用作mask来去除超过实际长度的无用信息；</li>
+<li><code>memory_layer</code>: 类似<code>query_layer</code>，也是一个<code>tf.layers.Layer</code>实例（或None），memory会经过这一层然后得到keys。需要注意的是，<strong>（经过<code>memory_layer</code>处理后得到的）key应该和（经过<code>query_layer</code>处理得到的）query的维度相匹配</strong>，用式$(1.5)$为例就是 $W_a h_{i-1}’$ 要和 $U_ah_j$ 的维度要一致，不然没法相加。</li>
+<li><code>check_inner_dims_defined</code>: bool型，是否检查memory除了最外面两维其他维度是否是有定义的。</li>
+<li><code>score_mask_value</code>: 在使用<code>probability_fn</code>计算概率之前，对<code>score</code>预先进行mask使用的值，默认是负无穷。但这个只有在<code>memory_sequence_length</code>参数定义的时候有效。</li>
+</ul>
+<p>其构造函数完成的主要功能就是将输入的memory进行mask然后经过<code>memory_layer</code>处理称为<code>keys</code>方便后面使用，如下面代码所示：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">self._values = _prepare_memory(memory, memory_sequence_length,</span><br><span class="line">          check_inner_dims_defined=check_inner_dims_defined)</span><br><span class="line">self._keys = (self.memory_layer(self._values) <span class="keyword">if</span> self.memory_layer  <span class="keyword">else</span> self._values)</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-3-BahdanauAttention"><a href="#2-3-BahdanauAttention" class="headerlink" title="2.3 BahdanauAttention"></a>2.3 <code>BahdanauAttention</code></h2><p><code>BahdanauAttention</code>是继承自2.2节的<code>_BaseAttentionMechanism</code>，它的构造函数如下所示：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,</span></span></span><br><span class="line"><span class="function"><span class="params">            num_units,</span></span></span><br><span class="line"><span class="function"><span class="params">            memory,</span></span></span><br><span class="line"><span class="function"><span class="params">            memory_sequence_length=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            normalize=False,</span></span></span><br><span class="line"><span class="function"><span class="params">            probability_fn=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            score_mask_value=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            dtype=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            name=<span class="string">"BahdanauAttention"</span>)</span>:</span></span><br></pre></td></tr></table></figure></p>
+<p>这些参数中，除了<code>num_units</code>和<code>normalize</code>其他都在<code>_BaseAttentionMechanism</code>出现过这里不再赘述。先说一下<code>num_units</code>，我们知道在计算式$(1.5)$的时候，需要使用 $h_{i-1}’$ 和 $h_i$ 来进行计算，而二者的维度可能并不是统一的，需要进行变换和统一，所以就有了 $W_a$ 和 $U_a$ 这两个系数，对应在代码中就是用<code>num_units</code>来声明了两个全连接 Dense 网络，用于统一二者的维度：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">super(BahdanauAttention, self).__init__(</span><br><span class="line">        query_layer=layers_core.Dense(num_units, name=<span class="string">"query_layer"</span>, use_bias=<span class="keyword">False</span>, dtype=dtype),</span><br><span class="line">        memory_layer=layers_core.Dense(num_units, name=<span class="string">"memory_layer"</span>, use_bias=<span class="keyword">False</span>, dtype=dtype),</span><br><span class="line">        memory=memory,</span><br><span class="line">        probability_fn=wrapped_probability_fn,</span><br><span class="line">        memory_sequence_length=memory_sequence_length,</span><br><span class="line">        score_mask_value=score_mask_value,</span><br><span class="line">        name=name)</span><br></pre></td></tr></table></figure></p>
+<p>即这里的<code>num_units</code>设置成任何值都可以，它确定了需要传进其父类<code>_BaseAttentionMechanism</code>构造函数的参数<code>query_layer</code>和<code>memory_layer</code>。</p>
+<p>然后<code>normalize</code>即是否要在计算分数score时实现标准化，出自论文[5]，默认设为False。这个参数在接下来要说的<code>__call__</code>方法中用到。</p>
+<p>接下来就是<code>__call__</code>方法了:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, query, state)</span>:</span></span><br><span class="line">    <span class="keyword">with</span> variable_scope.variable_scope(<span class="keyword">None</span>, <span class="string">"bahdanau_attention"</span>, [query]):</span><br><span class="line">        processed_query = self.query_layer(query) <span class="keyword">if</span> self.query_layer <span class="keyword">else</span> query</span><br><span class="line">        score = _bahdanau_score(processed_query, self._keys, self._normalize) <span class="comment"># 前面定义了query_layer是一个Dense层</span></span><br><span class="line">    alignments = self._probability_fn(score, state)</span><br><span class="line">    next_state = alignments</span><br><span class="line">    <span class="keyword">return</span> alignments, next_state</span><br></pre></td></tr></table></figure></p>
+<p>输入的是<code>query</code>和<code>state</code>(先不管这里的state是啥)，然后先把<code>query</code>用<code>query_layer</code>（即前面说的全连接层）进行处理，然后再按照Bahdanau Attention的规则调用函数<code>_bahdanau_score</code>计算分数score，这个计算过程中可设置是否需要标准化。得到分数后再调用<code>_probability_fn</code>(这里就是softmax，所以第二个参数<code>state</code>没有用到)计算得到权重向量<code>alignments</code>，然后最后返回的<code>next_state</code>其实也是这个<code>alignments</code>，所以<code>__call__</code>的参数<code>state</code>其实就是上个时间步的<code>alignments</code>向量。</p>
+<p>总结一下就是，<code>BahdanauAttention</code>（调用<code>__call__</code>）就是根据此刻的<code>query</code>（即 $h_i’$）和每个key根据式 $(1.4)(1.5)$ 计算得到每个key的权重 <code>alignments</code>。</p>
+<h2 id="2-4-LuongAttention"><a href="#2-4-LuongAttention" class="headerlink" title="2.4 LuongAttention"></a>2.4 <code>LuongAttention</code></h2><p><code>LuongAttention</code>同样是继承自2.2节的<code>_BaseAttentionMechanism</code>，它的构造函数如下所示：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,</span></span></span><br><span class="line"><span class="function"><span class="params">            num_units,</span></span></span><br><span class="line"><span class="function"><span class="params">            memory,</span></span></span><br><span class="line"><span class="function"><span class="params">            memory_sequence_length=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            scale=False,</span></span></span><br><span class="line"><span class="function"><span class="params">            probability_fn=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            score_mask_value=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            dtype=None,</span></span></span><br><span class="line"><span class="function"><span class="params">            name=<span class="string">"LuongAttention"</span>)</span>:</span></span><br></pre></td></tr></table></figure></p>
+<p>出现了一个新参数<code>scale</code>，该参数在计算分数的函数<code>_luong_score</code>中会用到，代表是否对得到的分数进行scale操作。2.3节中提到<code>BahdanauAttention</code>构造函数中参数<code>num_units</code>设置成任何值都可以，但是这里并不是这样，因为：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">super(LuongAttention, self).__init__(</span><br><span class="line">        query_layer=<span class="keyword">None</span>,</span><br><span class="line">        memory_layer=layers_core.Dense(num_units, name=<span class="string">"memory_layer"</span>, use_bias=<span class="keyword">False</span>, dtype=dtype),</span><br><span class="line">        memory=memory,</span><br><span class="line">        probability_fn=wrapped_probability_fn,</span><br><span class="line">        memory_sequence_length=memory_sequence_length,</span><br><span class="line">        score_mask_value=score_mask_value,</span><br><span class="line">        name=name)</span><br></pre></td></tr></table></figure></p>
+<p>注意这里只传入了<code>memory_layer</code>（对应式$(1.6)$中的 $\boldsymbol { W_a }$），所以只对<code>memory</code>（即 式子$(1.6)$中的 $h_j$）进行了变换得到 $\boldsymbol {W_a}h_j$，因此<strong>这里<code>num_units</code>必须等于<code>query</code>的深度（即query.get_shape()[-1]）</strong>。</p>
+<p>总结一下，和<code>BahdanauAttention</code>类似的，<code>LuongAttention</code>（调用<code>__call__</code>）就是根据此刻的<code>query</code>（即 $h_i’$）和每个key根据式 $(1.6)(1.4)$ 计算得到每个key的权重 <code>alignments</code>。和<code>BahdanauAttention</code>不同的是这里要合理设置参数 <code>num_units</code>否则<code>query</code>和<code>key</code>维度不匹配。</p>
+<h2 id="2-5-AttentionWrapperState"><a href="#2-5-AttentionWrapperState" class="headerlink" title="2.5 AttentionWrapperState"></a>2.5 <code>AttentionWrapperState</code></h2><p>接下来我们再看下 <code>AttentionWrapperState</code> 这个类，这个类其实类似<code>RNNCell</code>有隐藏态（hidden state），就是定义了attention计算过程中可能需要保存的变量，如 cell_state（这个cell_state就是被<code>AttentionWrapper</code>包裹的内部RNNCell的隐藏态）、attention、time、alignments 等内容，同时也便于后期的可视化呈现，代码实现如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AttentionWrapperState</span><span class="params">(</span></span></span><br><span class="line"><span class="class"><span class="params">    collections.namedtuple<span class="params">(<span class="string">"AttentionWrapperState"</span>,</span></span></span></span><br><span class="line"><span class="class"><span class="params"><span class="params">                           <span class="params">(<span class="string">"cell_state"</span>, <span class="string">"attention"</span>, <span class="string">"time"</span>, <span class="string">"alignments"</span>,</span></span></span></span></span><br><span class="line"><span class="class"><span class="params"><span class="params"><span class="params">                            <span class="string">"alignment_history"</span>, <span class="string">"attention_state"</span>)</span>)</span>)</span>:</span></span><br></pre></td></tr></table></figure></p>
+<p>可见它就是继承了<code>namedtuple</code>这个数据结构，其实可以把这个 <code>AttentionWrapperState</code>看成一个结构体，可以传入需要的字段生成这个对象。</p>
+<h2 id="2-6-AttentionWrapper"><a href="#2-6-AttentionWrapper" class="headerlink" title="2.6 AttentionWrapper"></a>2.6 <code>AttentionWrapper</code></h2><p>为了方便使用了attention，TensorFlow提供了一个wrapper，这和其他的Wrapper例如<code>DropoutWrapper</code>、<code>ResidualWrapper</code> 等等类似，它们都是 <code>RNNCell</code>的实例。即<code>AttentionWrapper</code>它对<code>RNNCell</code>进行了封装，封装后依然还是<code>RNNCell</code>的实例。如果你想给一个普通的RNN模型加入attention功能，只需要在<code>RNNCell</code>外面套一层<code>AttentionWrapper</code>并指定 <code>AttentionMechanism</code>的实例就好了。</p>
+<p>我们还是来看看其构造函数：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">AttentionWrapper</span><span class="params">(rnn_cell_impl.RNNCell)</span>:</span></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self,</span></span></span><br><span class="line"><span class="function"><span class="params">               cell,</span></span></span><br><span class="line"><span class="function"><span class="params">               attention_mechanism,</span></span></span><br><span class="line"><span class="function"><span class="params">               attention_layer_size=None,</span></span></span><br><span class="line"><span class="function"><span class="params">               alignment_history=False,</span></span></span><br><span class="line"><span class="function"><span class="params">               cell_input_fn=None,</span></span></span><br><span class="line"><span class="function"><span class="params">               output_attention=True,</span></span></span><br><span class="line"><span class="function"><span class="params">               initial_cell_state=None,</span></span></span><br><span class="line"><span class="function"><span class="params">               name=None,</span></span></span><br><span class="line"><span class="function"><span class="params">               attention_layer=None)</span>:</span></span><br></pre></td></tr></table></figure></p>
+<p>下面对其参数一一说明：</p>
+<ul>
+<li><code>cell</code>: 被包裹的<code>RNNCell</code>实例；</li>
+<li><code>attention_mechanism</code>: attention机制实例，例如<code>BahdanauAttention</code>，也可以是多个attention实例组成的列表；</li>
+<li><code>attention_layer_size</code>: 是数字或者数字做成的列表，如果是 None（默认），直接使用加权求和得到的上下文向量 $c_i$ 作为输出（详见本小节最后的<code>_compute_attention</code>代码），如果不是None，那么将 $c_i$ 和<code>cell</code>的输出 <code>cell_output</code>进行concat并做线性变换（输出维度为<code>attention_layer_size</code>）再输出。<blockquote>
+<p>这里所说的”输出”在代码里是用”attention”表示的，见本小节最后的<code>_compute_attention</code>函数代码。</p>
+</blockquote>
+</li>
+<li><code>alignment_history</code>: 即是否将之前的<code>alignments</code>存储到 state 中，以便于后期进行可视化展示，默认False，一般设置为True。</li>
+<li><p><code>cell_input_fn</code>: 怎样处理输入。默认会将上一步的得到的输出与的实际输入进行concat操作作为输入。代码：</p>
+  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> cell_input_fn <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">    cell_input_fn = (<span class="keyword">lambda</span> inputs, attention: array_ops.concat([inputs, attention], <span class="number">-1</span>))</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>output_attention</code>: 默认false，如果为true，则输出不是attention的计算结果，而是<code>cell</code>得到的<code>cell_output</code>。</p>
+</li>
+<li><code>initial_cell_state</code>: 初始状态，默认即可。</li>
+<li><code>attention_layer</code>: 这个参数其实是和<code>attention_layer_size</code>是互斥的，如果设置了<code>attention_layer_size</code>不为None，那么这个参数必须为None。因为他俩功能类似，它也可以是一个<code>tf.layers.Layer</code>的列表，定义输出要经过的变换。若为None，直接使用加权求和得到的上下文向量 $c_i$ 作为输出，如果不是None，那么将 $c_i$ 和<code>cell</code>的输出 <code>cell_output</code>进行concat再经过<code>attention_layer</code>后输出。</li>
+</ul>
+<p>构造函数中关于<code>attention_layer</code>的代码如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> attention_layer_size <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">    attention_layer_sizes = tuple(attention_layer_size</span><br><span class="line">        <span class="keyword">if</span> isinstance(attention_layer_size, (list, tuple)) <span class="keyword">else</span> (attention_layer_size,))</span><br><span class="line">    </span><br><span class="line">    self._attention_layers = tuple(layers_core.Dense(</span><br><span class="line">            attention_layer_size,</span><br><span class="line">            name=<span class="string">"attention_layer"</span>,</span><br><span class="line">            use_bias=<span class="keyword">False</span>,</span><br><span class="line">            dtype=attention_mechanisms[i].dtype)</span><br><span class="line">        <span class="keyword">for</span> i, attention_layer_size <span class="keyword">in</span> enumerate(attention_layer_sizes))</span><br><span class="line">    self._attention_layer_size = sum(attention_layer_sizes)</span><br><span class="line"><span class="keyword">elif</span> attention_layer <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">    self._attention_layers = tuple( attention_layer</span><br><span class="line">        <span class="keyword">if</span> isinstance(attention_layer, (list, tuple))</span><br><span class="line">        <span class="keyword">else</span> (attention_layer,))</span><br><span class="line">    </span><br><span class="line">    self._attention_layer_size = sum(</span><br><span class="line">        tensor_shape.dimension_value(layer.compute_output_shape(</span><br><span class="line">            [<span class="keyword">None</span>, cell.output_size + tensor_shape.dimension_value(</span><br><span class="line">                mechanism.values.shape[<span class="number">-1</span>])])[<span class="number">-1</span>])</span><br><span class="line">        <span class="keyword">for</span> layer, mechanism <span class="keyword">in</span> zip(</span><br><span class="line">            self._attention_layers, attention_mechanisms))</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    self._attention_layers = <span class="keyword">None</span></span><br><span class="line">    self._attention_layer_size = sum(</span><br><span class="line">        tensor_shape.dimension_value(attention_mechanism.values.shape[<span class="number">-1</span>])</span><br><span class="line">        <span class="keyword">for</span> attention_mechanism <span class="keyword">in</span> attention_mechanisms)</span><br></pre></td></tr></table></figure></p>
+<p>可见参数<code>attention_layer_size</code>和<code>attention_layer</code>都会影响<code>self._attention_layers</code>的值，只有在它俩都为<code>None</code>（默认）时<code>self._attention_layers</code>才为<code>None</code>。</p>
+<p>接下来看看其<code>call</code>方法，其输入输出和<code>RNNCell</code>中的<code>call</code>其实是类似的，都是通过上一步的<code>inputs</code>和<code>state</code>计算得到<code>output</code>和<code>next_state</code>。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">call</span><span class="params">(self, inputs, state)</span>:</span></span><br><span class="line">    <span class="comment"># Step 1: 根据输入和上一步的输出计算真正的输入</span></span><br><span class="line">    cell_inputs = self._cell_input_fn(inputs, state.attention) <span class="comment"># 默认是concat操作</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Step 2: 调用内部被包裹的RNNCell得到cell_output和next_cell_state</span></span><br><span class="line">    cell_state = state.cell_state</span><br><span class="line">    cell_output, next_cell_state = self._cell(cell_inputs, cell_state) </span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> self._is_multi:</span><br><span class="line">      previous_attention_state = state.attention_state</span><br><span class="line">      previous_alignment_history = state.alignment_history</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">      previous_attention_state = [state.attention_state]</span><br><span class="line">      previous_alignment_history = [state.alignment_history]</span><br><span class="line"></span><br><span class="line">    all_alignments = [] <span class="comment"># 用列表存放，因为attention_mechanism是列表</span></span><br><span class="line">    all_attentions = []</span><br><span class="line">    all_attention_states = []</span><br><span class="line">    maybe_all_histories = []</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Step 3: 根据attention_mechanism计算得到attention, alignments</span></span><br><span class="line">    <span class="keyword">for</span> i, attention_mechanism <span class="keyword">in</span> enumerate(self._attention_mechanisms):</span><br><span class="line">      attention, alignments, next_attention_state = _compute_attention(</span><br><span class="line">          attention_mechanism, cell_output, previous_attention_state[i],</span><br><span class="line">          self._attention_layers[i] <span class="keyword">if</span> self._attention_layers <span class="keyword">else</span> <span class="keyword">None</span>)</span><br><span class="line">      alignment_history = previous_alignment_history[i].write(</span><br><span class="line">          state.time, alignments) <span class="keyword">if</span> self._alignment_history <span class="keyword">else</span> ()</span><br><span class="line"></span><br><span class="line">      all_attention_states.append(next_attention_state)</span><br><span class="line">      all_alignments.append(alignments)</span><br><span class="line">      all_attentions.append(attention)</span><br><span class="line">      maybe_all_histories.append(alignment_history)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Step 4: 组合成 AttentionWrapperState 作为下一步的状态</span></span><br><span class="line">    attention = array_ops.concat(all_attentions, <span class="number">1</span>)</span><br><span class="line">    next_state = AttentionWrapperState(</span><br><span class="line">        time=state.time + <span class="number">1</span>,</span><br><span class="line">        cell_state=next_cell_state,</span><br><span class="line">        attention=attention,</span><br><span class="line">        attention_state=self._item_or_tuple(all_attention_states),</span><br><span class="line">        alignments=self._item_or_tuple(all_alignments),</span><br><span class="line">        alignment_history=self._item_or_tuple(maybe_all_histories))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Step 5: 输出</span></span><br><span class="line">    <span class="keyword">if</span> self._output_attention:</span><br><span class="line">      <span class="keyword">return</span> attention, next_state</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">      <span class="keyword">return</span> cell_output, next_state</span><br></pre></td></tr></table></figure></p>
+<p>来一步一步地分析：</p>
+<ol>
+<li>Step 1: 调用了<code>_cell_input_fn()</code>方法，对<code>inputs</code>和<code>state.attention</code>进行处理，默认是使用<code>concat</code>函数拼接，作为当前时间步的输入。</li>
+<li>Step 2: 调用其内部被包裹的<code>RNNCell</code>的<code>call</code>方法，得到cell的输出和下一状态。</li>
+<li><p>Step 3: 这一步就是调用<code>_compute_attention</code>进行计算操作，如下面的代码所示，先调用了<code>attention_mechanism</code>进行对应类型的注意力计算得到 $\alpha_{ij}$，然后进行加权求和操作得到上下文向量 $c_i$，然后再通过<code>attention_layer</code>进行对应的变换操作，最后再返回。</p>
+ <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_compute_attention</span><span class="params">(attention_mechanism, cell_output, attention_state, attention_layer)</span>:</span></span><br><span class="line"><span class="string">"""Computes the attention and alignments for a given attention_mechanism."""</span></span><br><span class="line"><span class="comment"># 这里的(next_)attention_state其实就是alignments, 详见2.3节中的call方法</span></span><br><span class="line">alignments, next_attention_state = attention_mechanism(cell_output, state=attention_state)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Reshape from [batch_size, memory_time] to [batch_size, 1, memory_time]</span></span><br><span class="line">expanded_alignments = array_ops.expand_dims(alignments, <span class="number">1</span>)</span><br><span class="line">context = math_ops.matmul(expanded_alignments, attention_mechanism.values) <span class="comment"># 加权求和操作, 即式(1.3)</span></span><br><span class="line">context = array_ops.squeeze(context, [<span class="number">1</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> attention_layer <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">    attention = attention_layer(array_ops.concat([cell_output, context], <span class="number">1</span>))</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    attention = context</span><br><span class="line"></span><br><span class="line"><span class="keyword">return</span> attention, alignments, next_attention_state</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Step 4: 根据前面的构建新的state作为<code>next_state</code>。</p>
+</li>
+<li>Step 5: 若<code>output_attention</code>为True，则输出<code>attention</code>和<code>next_state</code>，否则输出<code>cell_output</code>和<code>next_state</code>。</li>
+</ol>
+<p>综上，<code>AttentionWrapper</code>的<code>call</code>函数接收input和state然后输出output和下一个state，这就符合<code>RNNCell</code>的调用函数，即<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">output, next_state = RNNCell(input, state)</span><br></pre></td></tr></table></figure></p>
+<p>所以就可以像使用普通<code>RNNCell</code>一样使用带注意力机制的<code>RNNCell</code>了。</p>
+<h2 id="2-7-图解"><a href="#2-7-图解" class="headerlink" title="2.7 图解"></a>2.7 图解</h2><center><br>    <img src="/2019/03/09/tf-attention/2.1.png" width="700" class="full-image"><br>    <br><br>    <div style="border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;">图2.1 AttentionWrapper工作流程</div><br></center>
+
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p>[1] Cho K, Van Merriënboer B, Gulcehre C, et al. Learning phrase representations using RNN encoder-decoder for statistical machine translation[J]. arXiv preprint arXiv:1406.1078, 2014.</p>
+<p>[2] Sutskever I, Vinyals O, Le Q V. Sequence to sequence learning with neural networks[C]//Advances in neural information processing systems. 2014: 3104-3112.</p>
+<p>[3] Bahdanau D, Cho K, Bengio Y. Neural machine translation by jointly learning to align and translate[J]. arXiv preprint arXiv:1409.0473, 2014.</p>
+<p>[4] Luong M T, Pham H, Manning C D. Effective approaches to attention-based neural machine translation[J]. arXiv preprint arXiv:1508.04025, 2015.</p>
+<p>[5] Salimans T, Kingma D P. Weight normalization: A simple reparameterization to accelerate training of deep neural networks[C]//Advances in Neural Information Processing Systems. 2016: 901-909.</p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/assets/wechatpay.jpg" alt="TangShusen 微信支付"/>
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/assets/alipay.jpg" alt="TangShusen 支付宝"/>
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/tensorflow/" rel="tag"># tensorflow</a>
+          
+            <a href="/tags/attention/" rel="tag"># attention</a>
+          
+            <a href="/tags/seq2seq/" rel="tag"># seq2seq</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/12/09/vc-dimension/" rel="next" title="统计学习理论之VC维究竟是什么">
+                <i class="fa fa-chevron-left"></i> 统计学习理论之VC维究竟是什么
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image"
+                src="/assets/header.jpg"
+                alt="TangShusen" />
+            
+              <p class="site-author-name" itemprop="name">TangShusen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/shusentang" title="GitHub &rarr; https://github.com/shusentang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.zhihu.com/people/tang-shu-sen-77/activities" title="知乎 &rarr; https://www.zhihu.com/people/tang-shu-sen-77/activities" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://github.com/ShusenTang/LeetCode" title="https://github.com/ShusenTang/LeetCode" rel="noopener" target="_blank">LeetCode题解</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-原理简介"><span class="nav-text">1. 原理简介</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-seq2seq"><span class="nav-text">1.1 seq2seq</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-attention"><span class="nav-text">1.2 attention</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-1-Bahdanau-attention"><span class="nav-text">1.2.1 Bahdanau attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-2-Luong-attention"><span class="nav-text">1.2.2 Luong attention</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-3-小节"><span class="nav-text">1.2.3 小节</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-TensorFlow源码剖析"><span class="nav-text">2. TensorFlow源码剖析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-概览"><span class="nav-text">2.1 概览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-BaseAttentionMechanism"><span class="nav-text">2.2 _BaseAttentionMechanism</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-BahdanauAttention"><span class="nav-text">2.3 BahdanauAttention</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-LuongAttention"><span class="nav-text">2.4 LuongAttention</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-AttentionWrapperState"><span class="nav-text">2.5 AttentionWrapperState</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-6-AttentionWrapper"><span class="nav-text">2.6 AttentionWrapper</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-7-图解"><span class="nav-text">2.7 图解</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考文献"><span class="nav-text">参考文献</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TangShusen tip:本博客在电脑端食用更佳~</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">total view times: <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: true,
+        appId: 'Bi7QlJPklJ2hjFFoWMd1D2gB-gzGzoHsz',
+        appKey: 'yMWxfGo3ABn8yS13Ytq43Rdk',
+        placeholder: '请在此输入你的留言',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text('Counter not initialized! See more at console err msg.');
+              console.error('ATTENTION! LeanCloud counter has security bug, see here how to solve it: https://github.com/theme-next/hexo-leancloud-counter-security. \n But you also can use LeanCloud without security, by set \'security\' option to \'false\'.');
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz",
+                'X-LC-Key': "zK9lN00t9W1flFbM75hsjojR",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

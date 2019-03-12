@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://tangshusen.me/"/>
-  <updated>2018-12-30T09:16:22.473Z</updated>
+  <updated>2019-03-12T15:32:04.555Z</updated>
   <id>https://tangshusen.me/</id>
   
   <author>
@@ -15,6 +15,32 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>TensorFlow AttentionWrapper源码超详细图解</title>
+    <link href="https://tangshusen.me/2019/03/09/tf-attention/"/>
+    <id>https://tangshusen.me/2019/03/09/tf-attention/</id>
+    <published>2019-03-09T10:37:19.000Z</published>
+    <updated>2019-03-12T15:32:04.555Z</updated>
+    
+    <summary type="html">
+    
+      &lt;center&gt;&lt;br&gt;&lt;img src=&quot;/2019/03/09/tf-attention/cover.png&quot; width=&quot;500&quot; class=&quot;full-image&quot;&gt;&lt;br&gt;&lt;/center&gt;
+
+&lt;p&gt;Attention在seq2seq模型中是一个很有用的机制，由于TensorFlow烂成翔的官方文档以及网上很少而且晦涩难懂的教程，我在如何正确使用TensorFlow现成attention接口上面费了很大一番功夫。本文用详细图解的方式清晰展现了其源代码构成，方便大家学习使用。本文会先简略的介绍一下seq2seq attention的原理，然后详细剖析TensorFlow相关的源代码，懒得看文字分析的可以直接跳到2.7节看图。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Deep Learning" scheme="https://tangshusen.me/categories/Deep-Learning/"/>
+    
+    
+      <category term="tensorflow" scheme="https://tangshusen.me/tags/tensorflow/"/>
+    
+      <category term="attention" scheme="https://tangshusen.me/tags/attention/"/>
+    
+      <category term="seq2seq" scheme="https://tangshusen.me/tags/seq2seq/"/>
+    
+  </entry>
   
   <entry>
     <title>统计学习理论之VC维究竟是什么</title>
