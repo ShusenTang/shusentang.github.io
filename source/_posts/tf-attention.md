@@ -1,5 +1,5 @@
 ---
-title: TensorFlow Attention源码终极解析(超详细图解)
+title: TensorFlow AttentionWrapper源码超详细图解
 date: 2019-03-09 18:37:19
 toc: true
 mathjax: true
@@ -15,7 +15,7 @@ tags:
 <img src="./tf-attention/cover.png" width="500" class="full-image">
 </center>
 
-Attention在seq2seq模型中是一个很有用的机制，由于TensorFlow烂成翔的官方文档以及网上很少而且晦涩难懂的教程，我在如何正确使用TensorFlow现成attention接口上面费了很大一番功夫。本文用详细图解的方式清晰展现了其源代码构成，方便大家学习使用。本文会简略的介绍一下seq2seq attention的原理，然后详细剖析TensorFlow相关的源代码。
+Attention在seq2seq模型中是一个很有用的机制，由于TensorFlow烂成翔的官方文档以及网上很少而且晦涩难懂的教程，我在如何正确使用TensorFlow现成attention接口上面费了很大一番功夫。本文用详细图解的方式清晰展现了其源代码构成，方便大家学习使用。本文会先简略的介绍一下seq2seq attention的原理，然后详细剖析TensorFlow相关的源代码，懒得看文字分析的可以直接跳到2.7节看图。
 
 <!-- more -->
 
@@ -81,8 +81,8 @@ $$
 ### 1.2.2 Luong attention
 Luong attention[4]与Bahdanau attention最大的不同就是计算得分的方式不同，论文[4]中给出了一下三种计算方式：
 $$
-e_{ij} = \text{score} (h_i', h_j) = \left\{ \begin{array} { l l } {  h_i'^ { \top } h_j } & { \text { dot } } \\ 
-{ h_i'^ { \top } \boldsymbol {W_a} h_j } & { \text { general } } \\ { v_a ^ { \top } \tanh \left( \boldsymbol { W_a } \left[ h_i' ; h_j \right] \right) } & { \text { concat} } \end{array} \right. \tag{1.6}
+e_{ij} = \text{score} (h_i', h_j) = \begin{cases} \begin{array} { l l } {  h_i'^ { \top } h_j } & { \text { dot } } \\ 
+{ h_i'^ { \top } \boldsymbol {W_a} h_j } & { \text { general } } \\ { v_a ^ { \top } \tanh \left( \boldsymbol { W_a } \left[ h_i' ; h_j \right] \right) } & { \text { concat} } \end{array} \end{cases} \tag{1.6}
 $$
 常用的计算方式就是式 $(1.6)$ 中的"general"，即用 $\boldsymbol { W_a }$ 统一 $h_i$ 和 $h_j$ 的维度再作內积（"dot"相当于是"general"的特殊情况，即 $h_i$ 和 $h_j$ 的维度已经统一了）。
 
@@ -105,9 +105,11 @@ $$
 在进一步分析之前，我们先来明确代码中一些术语的意思：
 * key & query: Attention的本质可以被描述为一个查询（query）与一系列（键key-值value）对一起映射成一个输出：将query和每个key进行相似度计算得到权重并进行归一化，将权重和相应的键值value进行加权求和得到最后的attention，这里key=value。简单理解就是，query相当于前面说的解码器的隐藏态 $h_i'$ ，而key就是编码器的隐藏态 $h_i$。
 * memory: 这个memory其实才是编码器的所有隐藏态，与前面的key区别就是key可能是memory经过处理（例如线性变换）后得到的。
-* alignments: 计算得到的每步编码器隐藏态 $h$ 的权重，即 $\alpha_{i1}, \alpha_{i2},..., \alpha_{iT_x}$。
+* alignments: 计算得到的每步编码器隐藏态 $h$ 的权重向量，即 $[\alpha_{i1}, \alpha_{i2},..., \alpha_{iT_x}]$。
 
 后面会遇到这些术语，如果现在还不是很懂的可以结合后面再仔细看看。
+
+我们先来分析分析这些类，然后2.7节给出了整个AttentionWrapper的代码流程图。
 
 ## 2.2 `_BaseAttentionMechanism`
 先来看看最基础的attention类`_BaseAttentionMechanism`。它的初始化方法如下：
@@ -238,8 +240,8 @@ class AttentionWrapper(rnn_cell_impl.RNNCell):
 下面对其参数一一说明：
 * `cell`: 被包裹的`RNNCell`实例；
 * `attention_mechanism`: attention机制实例，例如`BahdanauAttention`，也可以是多个attention实例组成的列表；
-* `attention_layer_size`: 是数字或者数字做成的列表，如果是 None（默认），直接使用加权求和得到的上下文向量 $c_i$ 作为输出，如果不是None，那么将 $c_i$ 和`cell`的输出 `cell_output`进行concat并做线性变换（输出维度为`attention_layer_size`）再输出。
-    > 这里所说的"输出"在代码里是用"attention"表示的。
+* `attention_layer_size`: 是数字或者数字做成的列表，如果是 None（默认），直接使用加权求和得到的上下文向量 $c_i$ 作为输出（详见本小节最后的`_compute_attention`代码），如果不是None，那么将 $c_i$ 和`cell`的输出 `cell_output`进行concat并做线性变换（输出维度为`attention_layer_size`）再输出。
+    > 这里所说的"输出"在代码里是用"attention"表示的，见本小节最后的`_compute_attention`函数代码。
 * `alignment_history`: 即是否将之前的`alignments`存储到 state 中，以便于后期进行可视化展示，默认False，一般设置为True。
 * `cell_input_fn`: 怎样处理输入。默认会将上一步的得到的输出与的实际输入进行concat操作作为输入。代码：
     ``` python
@@ -281,8 +283,9 @@ else:
         tensor_shape.dimension_value(attention_mechanism.values.shape[-1])
         for attention_mechanism in attention_mechanisms)
 ```
+可见参数`attention_layer_size`和`attention_layer`都会影响`self._attention_layers`的值，只有在它俩都为`None`（默认）时`self._attention_layers`才为`None`。
 
-接下来看看其`call`方法，这根`RNNCell`中的`call`其实是类似的，都是通过上一步的`inputs`和`state`计算得到`output`和`next_state`。
+接下来看看其`call`方法，其输入输出和`RNNCell`中的`call`其实是类似的，都是通过上一步的`inputs`和`state`计算得到`output`和`next_state`。
 ``` python
 def call(self, inputs, state):
     # Step 1: 根据输入和上一步的输出计算真正的输入
@@ -299,12 +302,12 @@ def call(self, inputs, state):
       previous_attention_state = [state.attention_state]
       previous_alignment_history = [state.alignment_history]
 
-    all_alignments = []
+    all_alignments = [] # 用列表存放，因为attention_mechanism是列表
     all_attentions = []
     all_attention_states = []
     maybe_all_histories = []
 
-    # Step 3: 根据attention_mechanism计算得到alignments
+    # Step 3: 根据attention_mechanism计算得到attention, alignments
     for i, attention_mechanism in enumerate(self._attention_mechanisms):
       attention, alignments, next_attention_state = _compute_attention(
           attention_mechanism, cell_output, previous_attention_state[i],
@@ -317,6 +320,7 @@ def call(self, inputs, state):
       all_attentions.append(attention)
       maybe_all_histories.append(alignment_history)
 
+    # Step 4: 组合成 AttentionWrapperState 作为下一步的状态
     attention = array_ops.concat(all_attentions, 1)
     next_state = AttentionWrapperState(
         time=state.time + 1,
@@ -326,11 +330,51 @@ def call(self, inputs, state):
         alignments=self._item_or_tuple(all_alignments),
         alignment_history=self._item_or_tuple(maybe_all_histories))
 
+    # Step 5: 输出
     if self._output_attention:
       return attention, next_state
     else:
       return cell_output, next_state
 ```
+来一步一步地分析：
+1. Step 1: 调用了`_cell_input_fn()`方法，对`inputs`和`state.attention`进行处理，默认是使用`concat`函数拼接，作为当前时间步的输入。
+2. Step 2: 调用其内部被包裹的`RNNCell`的`call`方法，得到cell的输出和下一状态。
+3. Step 3: 这一步就是调用`_compute_attention`进行计算操作，如下面的代码所示，先调用了`attention_mechanism`进行对应类型的注意力计算得到 $\alpha_{ij}$，然后进行加权求和操作得到上下文向量 $c_i$，然后再通过`attention_layer`进行对应的变换操作，最后再返回。
+    ``` python
+    def _compute_attention(attention_mechanism, cell_output, attention_state, attention_layer):
+    """Computes the attention and alignments for a given attention_mechanism."""
+    # 这里的(next_)attention_state其实就是alignments, 详见2.3节中的call方法
+    alignments, next_attention_state = attention_mechanism(cell_output, state=attention_state)
+
+    # Reshape from [batch_size, memory_time] to [batch_size, 1, memory_time]
+    expanded_alignments = array_ops.expand_dims(alignments, 1)
+    context = math_ops.matmul(expanded_alignments, attention_mechanism.values) # 加权求和操作, 即式(1.3)
+    context = array_ops.squeeze(context, [1])
+
+    if attention_layer is not None:
+        attention = attention_layer(array_ops.concat([cell_output, context], 1))
+    else:
+        attention = context
+
+    return attention, alignments, next_attention_state
+    ```
+4. Step 4: 根据前面的构建新的state作为`next_state`。
+5. Step 5: 若`output_attention`为True，则输出`attention`和`next_state`，否则输出`cell_output`和`next_state`。
+
+综上，`AttentionWrapper`的`call`函数接收input和state然后输出output和下一个state，这就符合`RNNCell`的调用函数，即
+``` python
+output, next_state = RNNCell(input, state)
+```
+所以就可以像使用普通`RNNCell`一样使用带注意力机制的`RNNCell`了。
+
+## 2.7 图解 
+<center>
+    <img src="./tf-attention/2.1.png" width="700" class="full-image">
+    <br>
+    <div style="border-bottom: 1px solid #d9d9d9;
+    display: inline-block;
+    color: #999;">图2.1 AttentionWrapper工作流程</div>
+</center>
 
 # 参考文献
 [1] Cho K, Van Merriënboer B, Gulcehre C, et al. Learning phrase representations using RNN encoder-decoder for statistical machine translation[J]. arXiv preprint arXiv:1406.1078, 2014.
