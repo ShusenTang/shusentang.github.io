@@ -204,7 +204,7 @@ links_layout: block
 #links_layout: inline
 links:
   LeetCode题解: https://github.com/ShusenTang/LeetCode
-  《动手学深度学习》(PyTorch版): https://github.com/ShusenTang/Dive-into-DL-PyTorch
+  《动手学深度学习》(PyTorch版): https://shusentang.github.io/Dive-into-DL-PyTorch
 
 # Sidebar Avatar # 侧栏头像设置
 avatar:
