@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+  <meta name="google-site-verification" content="UM_oWjkmpNS4sC6N8fDEsgSTPTOong_3Muz7XL_l-bQ">
+
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="NntzqnjuUs">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/my_apple-touch-icon-next.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/my_favicon-32x32.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/my_favicon-16x16.jpg?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/my_logo.jpg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="股票买卖系列是动态规划的经典题目，Leetcode上有六道关于股票买卖相关的问题，本文对这六道题作一个分析与总结。">
+<meta name="keywords" content="动态规划">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动态规划之股票买卖系列">
+<meta property="og:url" content="https://tangshusen.me/2019/11/03/Buy-and-Sell-Stock/index.html">
+<meta property="og:site_name" content="TangShusen">
+<meta property="og:description" content="股票买卖系列是动态规划的经典题目，Leetcode上有六道关于股票买卖相关的问题，本文对这六道题作一个分析与总结。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://tangshusen.me/2019/11/03/Buy-and-Sell-Stock/cover.png">
+<meta property="og:updated_time" content="2019-11-05T07:14:21.724Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="动态规划之股票买卖系列">
+<meta name="twitter:description" content="股票买卖系列是动态规划的经典题目，Leetcode上有六道关于股票买卖相关的问题，本文对这六道题作一个分析与总结。">
+<meta name="twitter:image" content="https://tangshusen.me/2019/11/03/Buy-and-Sell-Stock/cover.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="TangShusen" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://tangshusen.me/2019/11/03/Buy-and-Sell-Stock/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>动态规划之股票买卖系列 | TangShusen</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TangShusen</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2019/11/03/Buy-and-Sell-Stock/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="TangShusen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/assets/header.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TangShusen">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">动态规划之股票买卖系列
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-11-03 17:53:05" itemprop="dateCreated datePublished" datetime="2019-11-03T17:53:05+08:00">2019-11-03</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-05 15:14:21" itemprop="dateModified" datetime="2019-11-05T15:14:21+08:00">2019-11-05</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/LeetCode/" itemprop="url" rel="index"><span itemprop="name">LeetCode</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/11/03/Buy-and-Sell-Stock/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/11/03/Buy-and-Sell-Stock/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/11/03/Buy-and-Sell-Stock/" class="leancloud_visitors" data-flag-title="动态规划之股票买卖系列">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <center><br><img src="/2019/11/03/Buy-and-Sell-Stock/cover.png" width="500" class="full-image"><br></center>
+
+<p>股票买卖系列是动态规划的经典题目，Leetcode上有六道关于股票买卖相关的问题，本文对这六道题作一个分析与总结。</p>
+<a id="more"></a>
+<h1 id="1-总体分析"><a href="#1-总体分析" class="headerlink" title="1. 总体分析"></a>1. 总体分析</h1><h2 id="1-1-题意"><a href="#1-1-题意" class="headerlink" title="1.1 题意"></a>1.1 题意</h2><p>给定一个大小为n的数组<code>prices</code>代表连续n天某支股票的股价，<code>prices[i]</code>即第i天的股价，且必须在买进后才能卖出。再给定一些限制条件，问最大收益。一般有如下几种限制条件，对于LeetCode上六道题：</p>
+<ol>
+<li>买卖一次: <a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" target="_blank" rel="noopener">121. Best Time to Buy and Sell Stock</a></li>
+<li>不限买卖次数: <a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/" target="_blank" rel="noopener">122. Best Time to Buy and Sell Stock II</a></li>
+<li>买卖两次: <a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/" target="_blank" rel="noopener">123. Best Time to Buy and Sell Stock III</a></li>
+<li>买卖k次:<a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/" target="_blank" rel="noopener">188. Best Time to Buy and Sell Stock IV</a></li>
+<li>带有冷却的股票买卖问题:<a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/" target="_blank" rel="noopener">309. Best Time to Buy and Sell Stock with Cooldown</a></li>
+<li>带有交易费用的股票买卖问题:<a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/" target="_blank" rel="noopener">714. Best Time to Buy and Sell Stock with Transaction Fee</a></li>
+</ol>
+<h2 id="1-2-分析"><a href="#1-2-分析" class="headerlink" title="1.2 分析"></a>1.2 分析</h2><p>前两种情况比较简单，属于LeetCode中的easy题，所以我们考虑普遍情况：可买卖k次。动态规划的关键在于状态以及状态转移方程如何定义。首先考虑影响状态的变量：</p>
+<ul>
+<li>当前处于第几天；</li>
+<li>已经交易的次数；</li>
+<li>手头是否持有股票；</li>
+</ul>
+<p>即根据手头是否持有股票，我们定义两个二维数组来定义状态：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dp0[i][j]: 第i天结束，已有j次买卖，手头没有股票时的最大利润</span><br><span class="line">dp1[i][j]: 第i天结束，已有j次买卖，手头有股票时的最大利润</span><br></pre></td></tr></table></figure></p>
+<p>因此，<code>dp0[0][j]</code>对于所有j都要初始化为0，而<code>dp1[0][j]</code>对于所有j都要初始化为<code>-prices[i]</code>。如果我们将dp0所有值都求出来了，那么很明显<code>dp0[n-1][k]</code>就是在最后一天结束时已进行k次交易且手头无股票时的最大收益，也即返回结果。<br>先看初始状态:</p>
+<ul>
+<li>当<code>i==0 &amp;&amp; j&gt;=0</code>: <code>dp0[0][j] = 0</code>, <code>dp1[0][j] = -prices[0]</code>;</li>
+<li>当<code>i&gt;0 &amp;&amp; j==0</code>: <code>dp0[i][0] = 0</code>, <code>dp1[i][0] = max(dp1[i-1][0],  -prices[i])</code>;</li>
+</ul>
+<p>再来考虑状态转移方程，当<code>i&gt;0</code>且<code>j&gt;0</code>时有<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dp0[i][j] = max(dp0[i-1][j], dp1[i-1][j-1] + prices[i]) # 保持 or 卖出</span><br><span class="line">dp1[i][j] = max(dp1[i-1][j], dp0[i-1][j] - prices[i]) # 保持 or 买入</span><br></pre></td></tr></table></figure></p>
+<p>有了状态定义及转移方程，剩下就好办了。接下来针对具体问题具体分析。</p>
+<h1 id="2-具体分析"><a href="#2-具体分析" class="headerlink" title="2. 具体分析"></a>2. 具体分析</h1><h2 id="2-1-买卖一次"><a href="#2-1-买卖一次" class="headerlink" title="2.1 买卖一次"></a>2.1 买卖一次</h2><p><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" target="_blank" rel="noopener">121. Best Time to Buy and Sell Stock</a></p>
+<p>此题比较简单，可以不按照上述思考进行分析。要想获益最大，肯定是低价买入高价卖出，所以最简单的方法就是从前向后遍历数组，记录当前出现过的最低价格<code>cur_min_price</code>，作为买入价格，并计算以当天价格出售的收益，作为可能的最大收益，整个遍历过程中，出现过的最大收益就是所求。此代码略。</p>
+<p>我们看看此题对应1.2节分析的情况，此时只能买卖一次，k = 1，此时代码就为<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">maxProfit</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n = prices.size();</span><br><span class="line">    <span class="keyword">if</span>(!n) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt;dp0(n, <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;(<span class="number">2</span>, <span class="number">0</span>));</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt;dp1(n, <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;(<span class="number">2</span>, <span class="number">0</span>));</span><br><span class="line">    </span><br><span class="line">    dp1[<span class="number">0</span>][<span class="number">0</span>] = -prices[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)&#123;</span><br><span class="line">        <span class="comment">// j = 0</span></span><br><span class="line">        dp1[i][<span class="number">0</span>] = max(dp1[i<span class="number">-1</span>][<span class="number">0</span>], -prices[i]);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// j=1</span></span><br><span class="line">        dp0[i][<span class="number">1</span>] = max(dp0[i<span class="number">-1</span>][<span class="number">1</span>], dp1[i<span class="number">-1</span>][<span class="number">0</span>] + prices[i]); <span class="comment">// 保持 or 卖出</span></span><br><span class="line">        <span class="comment">// dp1[i][1] = max(dp1[i-1][1], dp0[i-1][1] - prices[i]);</span></span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp0[n<span class="number">-1</span>][<span class="number">1</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>代码中注释部分是一些没有必要的部分，另外空间还可以进行优化，因为dp[i]只与dp[i-1]有关，所以i这一维是没必要的。这是动态规划空间复杂度优化的常用思路，优化后的代码如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">maxProfit</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n = prices.size();</span><br><span class="line">    <span class="keyword">if</span>(!n) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;dp0(<span class="number">2</span>, <span class="number">0</span>);</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;dp1(<span class="number">2</span>, <span class="number">0</span>);</span><br><span class="line">    </span><br><span class="line">    dp1[<span class="number">0</span>] = -prices[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)&#123;</span><br><span class="line">        <span class="keyword">int</span> tmp = dp1[<span class="number">0</span>];</span><br><span class="line">        <span class="comment">// j = 0</span></span><br><span class="line">        dp1[<span class="number">0</span>] = max(dp1[<span class="number">0</span>], -prices[i]);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// j=1</span></span><br><span class="line">        dp0[<span class="number">1</span>] = max(dp0[<span class="number">1</span>], tmp + prices[i]); <span class="comment">// 保持 or 卖出</span></span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp0[<span class="number">1</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>由于此题比较简单，所以上述代码显得有些繁琐，其实有更加简洁的动态规划方法解此题：定义<code>dp[i]</code>代表”在第i天卖出时的最大获益”，则<code>dp[i]</code>的值该如何得到？根据在哪一天买入我们可以分成两种情况：</p>
+<ol>
+<li>在第i天买入在第i天卖出；</li>
+<li>在第i天前某一天买入在第i天卖出；</li>
+</ol>
+<p>对于第1种情况，即在同一天买入卖出，获益0；对于第2种情况，因为<code>dp[i-1]</code>代表在第i-1天卖出时的最大获益，那如果我在第i-1天不卖而是在第i天卖不就是这种情况下的最大获益吗，此时获益为<code>dp[i-1] + prices[i] - prices[i-1]</code>。所以状态转移方程为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dp[i] = max(0, dp[i-1] + prices[i] - prices[i-1])</span><br></pre></td></tr></table></figure></p>
+<p>在从前往后更新dp时我们还需要用一个变量记录全局的最大获益，时空复杂度均为O(n)。代码如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">maxProfit</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(prices.size() == <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;dp(prices.size(), <span class="number">0</span>);</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">int</span> max_profit = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; prices.size(); i++)&#123;</span><br><span class="line">        dp[i] = max(<span class="number">0</span>, prices[i] - prices[i<span class="number">-1</span>] + dp[i<span class="number">-1</span>]);</span><br><span class="line">        max_profit = max(max_profit, dp[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> max_profit;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>从状态转移方程看出，<code>dp[i-1]</code>只与前一天<code>dp[i-1]</code>有关，所以也可采取前面类似的思路对空间进行优化，优化后代码如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">maxProfit</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(prices.size() == <span class="number">0</span>) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> dp = <span class="number">0</span>;</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">int</span> max_profit = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; prices.size(); i++)&#123;</span><br><span class="line">        dp = max(<span class="number">0</span>, prices[i] - prices[i<span class="number">-1</span>] + dp);</span><br><span class="line">        max_profit = max(max_profit, dp);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> max_profit;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-2-不限买卖次数"><a href="#2-2-不限买卖次数" class="headerlink" title="2.2 不限买卖次数"></a>2.2 不限买卖次数</h2><p><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii/" target="_blank" rel="noopener">122. Best Time to Buy and Sell Stock II</a></p>
+<p>此时不考虑买卖次数，所以我们采用1.2分析的话dp数组就只需要两维:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dp0[i]: 第i天结束，手头没有股票时的最大利润</span><br><span class="line">dp1[i]: 第i天结束，手头有股票时的最大利润</span><br></pre></td></tr></table></figure></p>
+<p>此时代码如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">maxProfit</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n = prices.size();</span><br><span class="line">    <span class="keyword">if</span>(!n) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;dp0(n, <span class="number">0</span>);</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;dp1(n, <span class="number">0</span>);</span><br><span class="line">    </span><br><span class="line">    dp1[<span class="number">0</span>] = -prices[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)&#123;             </span><br><span class="line">        dp0[i] = max(dp0[i<span class="number">-1</span>], dp1[i<span class="number">-1</span>] + prices[i]);</span><br><span class="line">        dp1[i] = max(dp1[i<span class="number">-1</span>], dp0[i<span class="number">-1</span>] - prices[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp0[n<span class="number">-1</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>同理，这里空间也可优化，这里就不贴代码了。</p>
+<p>类似上一题，此题比较简单，所以采用1.2的思路显得很繁琐，有更加简洁的动归方法：用<code>dp[i]</code>代表”在第i天卖出时的最大获益”（那么此时<code>dp[i]</code>肯定是单调增数组），状态转移方程为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dp[i] = dp[i-1] + max(0, prices[i] - prices[i-1])</span><br></pre></td></tr></table></figure></p>
+<p>在更新完毕后，<code>dp[n-1]</code>即最终结果，时空复杂度均为O(n)。我们依然可以采用上一题提到的方法将空间复杂度优化到常数，代码如下。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">maxProfit</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n = prices.size();</span><br><span class="line">    <span class="keyword">if</span>(!n) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">int</span> dp =  <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">int</span> max_profit = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)</span><br><span class="line">        dp = dp + max(<span class="number">0</span>, prices[i] - prices[i<span class="number">-1</span>]);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> dp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-3-买卖两次"><a href="#2-3-买卖两次" class="headerlink" title="2.3 买卖两次"></a>2.3 买卖两次</h2><p><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/" target="_blank" rel="noopener">123. Best Time to Buy and Sell Stock III</a></p>
+<p>此题要求最多买买两次，即k=2，按照1.2的分析，我们有代码：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">maxProfit</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n = prices.size();</span><br><span class="line">    <span class="keyword">if</span>(!n) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt;dp0(n, <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;(<span class="number">3</span>,  <span class="number">0</span>));</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt;dp1(n, <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;(<span class="number">3</span>,  <span class="number">0</span>));</span><br><span class="line">    </span><br><span class="line">    dp1[<span class="number">0</span>][<span class="number">0</span>] = -prices[<span class="number">0</span>]; dp1[<span class="number">0</span>][<span class="number">1</span>] = -prices[<span class="number">0</span>]; <span class="comment">// i = 0</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)&#123;</span><br><span class="line">        dp1[i][<span class="number">0</span>] = max(dp1[i<span class="number">-1</span>][<span class="number">0</span>], -prices[i]); <span class="comment">// j = 0</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// j = 1</span></span><br><span class="line">        dp0[i][<span class="number">1</span>] = max(dp0[i<span class="number">-1</span>][<span class="number">1</span>], dp1[i<span class="number">-1</span>][<span class="number">0</span>] + prices[i]); <span class="comment">// 保持 or 卖出</span></span><br><span class="line">        dp1[i][<span class="number">1</span>] = max(dp1[i<span class="number">-1</span>][<span class="number">1</span>], dp0[i<span class="number">-1</span>][<span class="number">1</span>] - prices[i]); <span class="comment">// 保持 or 买入</span></span><br><span class="line">        <span class="comment">// j = 2</span></span><br><span class="line">        dp0[i][<span class="number">2</span>] = max(dp0[i<span class="number">-1</span>][<span class="number">2</span>], dp1[i<span class="number">-1</span>][<span class="number">1</span>] + prices[i]); <span class="comment">// 保持 or 卖出</span></span><br><span class="line">        <span class="comment">// dp1[i][2] = max(dp0[i-1][2], dp0[i-1][2] - prices[i]); // 保持 or 买入</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp0[n<span class="number">-1</span>][<span class="number">2</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>代码中注释部分是一些没有必要的部分，另外空间也可以进行优化，优化后的代码就不贴了。</p>
+<p>此题还有一个常见的解法，将在2.4节介绍。</p>
+<h2 id="2-4-买卖k次"><a href="#2-4-买卖k次" class="headerlink" title="2.4 买卖k次"></a>2.4 买卖k次</h2><p>此时就是1.2节分析的一般情况了，代码如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">maxProfit</span><span class="params">(<span class="keyword">int</span> k, <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n = prices.size();</span><br><span class="line">    <span class="keyword">if</span>(!n || !k) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (k &gt; n / <span class="number">2</span>) &#123; <span class="comment">// 当k很大时相当于不限制次数</span></span><br><span class="line">        <span class="keyword">int</span> res = <span class="number">0</span>; <span class="keyword">int</span> hold = prices[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)</span><br><span class="line">            res += max(<span class="number">0</span>, prices[i] - prices[i - <span class="number">1</span>]);</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt;dp0(n, <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;(k+<span class="number">1</span>,  <span class="number">0</span>));</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&gt;dp1(n, <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;(k+<span class="number">1</span>,  <span class="number">0</span>));</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>; j &lt;= k; j++) dp1[<span class="number">0</span>][j] = -prices[<span class="number">0</span>]; <span class="comment">// i = 0</span></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)&#123;</span><br><span class="line">        dp1[i][<span class="number">0</span>] = max(dp1[i<span class="number">-1</span>][<span class="number">0</span>], -prices[i]); <span class="comment">// j = 0</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">1</span>; j &lt;= k; j++)&#123; <span class="comment">// j &gt; 0</span></span><br><span class="line">            dp0[i][j] = max(dp0[i<span class="number">-1</span>][j], dp1[i<span class="number">-1</span>][j<span class="number">-1</span>] + prices[i]); <span class="comment">// 保持 or 卖出</span></span><br><span class="line">            dp1[i][j] = max(dp1[i<span class="number">-1</span>][j], dp0[i<span class="number">-1</span>][j] - prices[i]); <span class="comment">// 保持 or 买入</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp0[n<span class="number">-1</span>][k];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>需要注意的是，LeetCode给了非常极端的测试样例，就是 k 非常大，但是我们稍加思考就知道当<code>k &gt; n/2</code> 时就相当于不限制买卖次数了，因为我们最多进行<code>n/2</code>次有效的买卖，即第0天买第1天卖、第2天买第3天卖…，所以在上面代码中，我们先判断是否满足<code>k &gt; n/2</code>，若是则直接按照不限制次数（2.2节）的思路返回结果。</p>
+<p>前面提到，由于当前状态的值只与上一个状态有关，所以我们可以进行空间优化，优化后空间复杂度为O(k)，代码如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">maxProfit</span><span class="params">(<span class="keyword">int</span> k, <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n = prices.size();</span><br><span class="line">    <span class="comment">// k = min(n / 2, k);</span></span><br><span class="line">    <span class="keyword">if</span>(!n || !k) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (k &gt; n / <span class="number">2</span>) &#123; <span class="comment">// 当k很大时相当于不限制次数</span></span><br><span class="line">        <span class="keyword">int</span> res = <span class="number">0</span>; <span class="keyword">int</span> hold = prices[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)</span><br><span class="line">            res += max(<span class="number">0</span>, prices[i] - prices[i - <span class="number">1</span>]);</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;dp0(k+<span class="number">1</span>,  <span class="number">0</span>);</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;dp1(k+<span class="number">1</span>,  <span class="number">0</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>; j &lt;= k; j++) dp1[j] = -prices[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)&#123;</span><br><span class="line">        dp1[<span class="number">0</span>] = max(dp1[<span class="number">0</span>], -prices[i]); <span class="comment">// j = 0</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">1</span>; j &lt;= k; j++)&#123; <span class="comment">// j &gt; 0</span></span><br><span class="line">            <span class="keyword">int</span> pre_dp0 = dp0[j]; <span class="comment">// 上一次循环的dp0[j]备份</span></span><br><span class="line">            dp0[j] = max(dp0[j], dp1[j<span class="number">-1</span>] + prices[i]); <span class="comment">// 保持 or 卖出</span></span><br><span class="line">            dp1[j] = max(dp1[j], pre_dp0 - prices[i]); <span class="comment">// 保持 or 买入</span></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp0[k];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>此外，此题还有一个常见的解法，也是用两个动归数组：local和global，意义如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">local[i][j]: 已买卖j次且在最后一次是在i天卖出的最大获益；</span><br><span class="line">global[i][j]: 截止到第i天，买卖j次的最大获益；</span><br></pre></td></tr></table></figure></p>
+<p>在进行状态计算时只可能有两种情况：</p>
+<ol>
+<li>保持现状（或理解成在第i天买入后当天就卖出）</li>
+<li>在第i天前某一天买入，在第i天卖出；</li>
+</ol>
+<p>所以状态转移方程为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">local[i][j] = max(global[i-1][j-1], prices[i] - prices[i-1] + local[i-1][j]); // 情况1 or 情况2</span><br><span class="line">global[i][j] = max(global[i-1][j], local[i][j]);</span><br></pre></td></tr></table></figure></p>
+<p>所以代码如下（进行了空间优化）：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">maxProfit</span><span class="params">(<span class="keyword">int</span> k, <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n = prices.size();</span><br><span class="line">    <span class="keyword">if</span>(!n || !k) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (k &gt; n / <span class="number">2</span>) &#123; <span class="comment">// 当k很大时相当于不限制次数</span></span><br><span class="line">        <span class="keyword">int</span> res = <span class="number">0</span>; <span class="keyword">int</span> hold = prices[<span class="number">0</span>];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)</span><br><span class="line">            res += max(<span class="number">0</span>, prices[i] - prices[i - <span class="number">1</span>]);</span><br><span class="line">        <span class="keyword">return</span> res;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;local(k+<span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;global(k+<span class="number">1</span>, <span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)&#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">1</span>; j &lt;= k; j++)&#123;</span><br><span class="line">            local[j] = max(global[j<span class="number">-1</span>], prices[i] - prices[i<span class="number">-1</span>] + local[j]);</span><br><span class="line">            global[j] = max(global[j], local[j]);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> global[k];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>以上两种解法都很巧妙，注意区别与联系。</p>
+<h2 id="2-5-带有冷却的股票买卖问题"><a href="#2-5-带有冷却的股票买卖问题" class="headerlink" title="2.5 带有冷却的股票买卖问题"></a>2.5 带有冷却的股票买卖问题</h2><p><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/" target="_blank" rel="noopener">309. Best Time to Buy and Sell Stock with Cooldown</a></p>
+<p>这道题在买卖不受限制题目的基础上，加了新的限制：卖出后必须至少隔一天才能继续买，也即新增了一个状态：”处于冷却期”。此时，”手头有股票”只能从”处于冷却期”转移而来，而不是之前那样从”手头无股票”转移而来。我们需要开辟三个动归数组:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dp0[i]: 第i天结束，手头没有股票时的最大利润</span><br><span class="line">dp1[i]: 第i天结束，手头有股票时的最大利润</span><br><span class="line">cool[i]: 第i天结束且第i天处于冷冻期时的最大利润</span><br></pre></td></tr></table></figure></p>
+<p>状态转移方程为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">dp0[i] = max(dp0[i-1], dp1[i-1] + prices[i]); // 保持 or 卖出</span><br><span class="line">dp1[i] = max(dp1[i-1], cool[i-1] - prices[i]); // 保持 or (冷却 -&gt; 买入)</span><br><span class="line">cool[i] = max(cool[i-1], dp0[i-1]); // 第i-1天结束时没有股票说明第i天可以是冷却期</span><br></pre></td></tr></table></figure></p>
+<p>所以有如下代码（进行了空间优化）：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">maxProfit</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; prices)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n = prices.size();</span><br><span class="line">    <span class="keyword">if</span>(!n) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// vector&lt;int&gt;dp0(n, 0);</span></span><br><span class="line">    <span class="comment">// vector&lt;int&gt;dp1(n, 0);</span></span><br><span class="line">    <span class="comment">// vector&lt;int&gt;cool(n, 0);</span></span><br><span class="line">    <span class="comment">// dp1[0] = - prices[0]; // i = 0</span></span><br><span class="line">    <span class="comment">// for(int i = 1; i &lt; n; i++)&#123;</span></span><br><span class="line">    <span class="comment">//     dp0[i] = max(dp0[i-1], dp1[i-1] + prices[i]); </span></span><br><span class="line">    <span class="comment">//     dp1[i] = max(dp1[i-1], cool[i-1] - prices[i]);</span></span><br><span class="line">    <span class="comment">//     cool[i] = max(cool[i-1], dp0[i-1]);</span></span><br><span class="line">    <span class="comment">// &#125;</span></span><br><span class="line">    <span class="comment">// return dp0[n-1];</span></span><br><span class="line">    <span class="comment">// 空间优化后:</span></span><br><span class="line">    <span class="keyword">int</span> dp0 = <span class="number">0</span>, dp1 = - prices[<span class="number">0</span>], cool = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)&#123;</span><br><span class="line">        <span class="keyword">int</span> pre_dp0 = dp0;</span><br><span class="line">        dp0 = max(dp0, dp1 + prices[i]);</span><br><span class="line">        dp1 = max(dp1, cool - prices[i]);</span><br><span class="line">        cool = max(cool, pre_dp0);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="2-6-带有交易费用的股票买卖问题"><a href="#2-6-带有交易费用的股票买卖问题" class="headerlink" title="2.6. 带有交易费用的股票买卖问题"></a>2.6. 带有交易费用的股票买卖问题</h2><p><a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/" target="_blank" rel="noopener">714. Best Time to Buy and Sell Stock with Transaction Fee</a></p>
+<p>这道题在买卖不受限制题目的基础上，加了新的条件：每买卖一次需要交一次交易费用。那其实在买卖不受限制题目的基础上，唯一需要改变的就是在卖出（或买入）的时候减去交易费用。代码如下（进行了空间优化）：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">maxProfit</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; prices, <span class="keyword">int</span> fee)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> n = prices.size();</span><br><span class="line">    <span class="keyword">if</span>(!n) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// vector&lt;int&gt;dp0(n, 0);</span></span><br><span class="line">    <span class="comment">// vector&lt;int&gt;dp1(n, 0);</span></span><br><span class="line">    <span class="comment">// dp1[0] = - prices[0]; // i = 0</span></span><br><span class="line">    <span class="comment">// for(int i = 1; i &lt; n; i++)&#123;</span></span><br><span class="line">    <span class="comment">//     // 唯一和122不限次数不同就是减去fee</span></span><br><span class="line">    <span class="comment">//     dp0[i] = max(dp0[i-1], dp1[i-1] + prices[i] - fee); </span></span><br><span class="line">    <span class="comment">//     dp1[i] = max(dp1[i-1], dp0[i-1] - prices[i]);</span></span><br><span class="line">    <span class="comment">// &#125;</span></span><br><span class="line">    <span class="comment">// return dp0[n-1];</span></span><br><span class="line">    <span class="comment">// 空间优化:</span></span><br><span class="line">    <span class="keyword">int</span> dp0 = <span class="number">0</span>, dp1 = - prices[<span class="number">0</span>];</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt; n; i++)&#123;</span><br><span class="line">        <span class="keyword">int</span> pre_dp0 = dp0;</span><br><span class="line">        <span class="comment">// 唯一和122不限次数不同就是减去fee</span></span><br><span class="line">        dp0 = max(dp0, dp1 + prices[i] - fee); </span><br><span class="line">        dp1 = max(dp1, pre_dp0 - prices[i]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> dp0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="3-总结"><a href="#3-总结" class="headerlink" title="3 总结"></a>3 总结</h1><p>以上六道题就是 LeetCode 当中股票系列的全部内容，此类问题关键就是如何定义状态及状态转移方程，上述设定状态和定义转移方程的思想是可以复用到其他类型的动归问题当中去的，总的来说就是根据有所有不确定的变量（例如这里就是手头是否持有股票等）来定义状态，根据当前状态和之前状态的关系来确定转移方程，这个需要平时的积累和大量的刷题练习。另外上面用到的空间优化方法是动归里很常用的方法，务必掌握。</p>
+<h1 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h1><p><a href="https://juejin.im/post/5cc501e7e51d456e2d69a7f4" target="_blank" rel="noopener">[1] 股票问题汇总.</a><br><a href="https://blog.csdn.net/Dr_Unknown/article/details/51939121" target="_blank" rel="noopener">[2]【Leetcode 动态规划】 买卖股票 I II III IV 冷却，共5题.</a></p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/assets/wechatpay.jpg" alt="TangShusen 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/assets/alipay.jpg" alt="TangShusen 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/动态规划/" rel="tag"># 动态规划</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/03/09/tf-attention/" rel="next" title="TensorFlow AttentionWrapper源码超详细图解">
+                <i class="fa fa-chevron-left"></i> TensorFlow AttentionWrapper源码超详细图解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/assets/header.jpg" alt="TangShusen">
+            
+              <p class="site-author-name" itemprop="name">TangShusen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/shusentang" title="GitHub &rarr; https://github.com/shusentang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.zhihu.com/people/tang-shu-sen-77/activities" title="知乎 &rarr; https://www.zhihu.com/people/tang-shu-sen-77/activities" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://github.com/ShusenTang/LeetCode" title="https://github.com/ShusenTang/LeetCode" rel="noopener" target="_blank">LeetCode题解</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Dive-into-DL-PyTorch" title="https://shusentang.github.io/Dive-into-DL-PyTorch" rel="noopener" target="_blank">《动手学深度学习》(PyTorch版)</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-总体分析"><span class="nav-text">1. 总体分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-题意"><span class="nav-text">1.1 题意</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-分析"><span class="nav-text">1.2 分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-具体分析"><span class="nav-text">2. 具体分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-买卖一次"><span class="nav-text">2.1 买卖一次</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-不限买卖次数"><span class="nav-text">2.2 不限买卖次数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-买卖两次"><span class="nav-text">2.3 买卖两次</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-买卖k次"><span class="nav-text">2.4 买卖k次</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-5-带有冷却的股票买卖问题"><span class="nav-text">2.5 带有冷却的股票买卖问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-6-带有交易费用的股票买卖问题"><span class="nav-text">2.6. 带有交易费用的股票买卖问题</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-总结"><span class="nav-text">3 总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考文献"><span class="nav-text">参考文献</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TangShusen tip:本博客在电脑端食用更佳~</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">total view times: <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: true,
+        appId: 'Bi7QlJPklJ2hjFFoWMd1D2gB-gzGzoHsz',
+        appKey: 'yMWxfGo3ABn8yS13Ytq43Rdk',
+        placeholder: '请在此输入你的留言',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text('Counter not initialized! See more at console err msg.');
+              console.error('ATTENTION! LeanCloud counter has security bug, see here how to solve it: https://github.com/theme-next/hexo-leancloud-counter-security. \n But you also can use LeanCloud without security, by set \'security\' option to \'false\'.');
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz",
+                'X-LC-Key': "zK9lN00t9W1flFbM75hsjojR",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
