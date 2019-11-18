@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://tangshusen.me/"/>
-  <updated>2019-11-05T07:14:21.724Z</updated>
+  <updated>2019-11-18T13:06:12.169Z</updated>
   <id>https://tangshusen.me/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Range Sum Query - Mutable (区间查询)</title>
+    <link href="https://tangshusen.me/2019/11/17/range-sum-query-mutable/"/>
+    <id>https://tangshusen.me/2019/11/17/range-sum-query-mutable/</id>
+    <published>2019-11-17T09:53:12.000Z</published>
+    <updated>2019-11-18T13:06:12.169Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文是&lt;a href=&quot;https://leetcode.com/problems/range-sum-query-mutable/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;LeetCode 307. Range Sum Query - Mutable&lt;/a&gt;的题解，主要是对树状数组（Binary Indexed Tree）和线段树（Segment Tree）的学习。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="LeetCode" scheme="https://tangshusen.me/categories/LeetCode/"/>
+    
+    
+      <category term="树状数组" scheme="https://tangshusen.me/tags/%E6%A0%91%E7%8A%B6%E6%95%B0%E7%BB%84/"/>
+    
+      <category term="线段树" scheme="https://tangshusen.me/tags/%E7%BA%BF%E6%AE%B5%E6%A0%91/"/>
+    
+  </entry>
   
   <entry>
     <title>动态规划之股票买卖系列</title>

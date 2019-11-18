@@ -7,4 +7,5 @@
 {"title":"实际应用中关于size_t的一个容易忽略的坑","url":"/2018/12/08/size-t/"},
 {"title":"统计学习理论之VC维究竟是什么","url":"/2018/12/09/vc-dimension/"},
 {"title":"TensorFlow AttentionWrapper源码超详细图解","url":"/2019/03/09/tf-attention/"},
+{"title":"动态规划之股票买卖系列","url":"/2019/11/03/Buy-and-Sell-Stock/"},
 ]
