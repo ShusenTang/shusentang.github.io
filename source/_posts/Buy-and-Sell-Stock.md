@@ -221,6 +221,8 @@ int maxProfit(vector<int>& prices) {
 
 
 ## 2.4 买卖k次
+[188. Best Time to Buy and Sell Stock IV](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iv/)
+
 此时就是1.2节分析的一般情况了，代码如下：
 ``` C++
 int maxProfit(int k, vector<int>& prices) {
