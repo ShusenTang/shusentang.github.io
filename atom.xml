@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://tangshusen.me/"/>
-  <updated>2019-11-18T13:06:12.169Z</updated>
+  <updated>2019-11-24T15:55:41.831Z</updated>
   <id>https://tangshusen.me/</id>
   
   <author>
@@ -15,6 +15,28 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>动态规划之背包问题系列</title>
+    <link href="https://tangshusen.me/2019/11/24/knapsack-problem/"/>
+    <id>https://tangshusen.me/2019/11/24/knapsack-problem/</id>
+    <published>2019-11-24T03:05:44.000Z</published>
+    <updated>2019-11-24T15:55:41.831Z</updated>
+    
+    <summary type="html">
+    
+      &lt;center&gt;&lt;br&gt;&lt;img src=&quot;/2019/11/24/knapsack-problem/cover.png&quot; width=&quot;200&quot; class=&quot;full-image&quot;&gt;&lt;br&gt;&lt;/center&gt;
+
+&lt;p&gt;背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文对背包问题的几种常见类型作一个总结。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="LeetCode" scheme="https://tangshusen.me/categories/LeetCode/"/>
+    
+    
+      <category term="动态规划" scheme="https://tangshusen.me/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/"/>
+    
+  </entry>
   
   <entry>
     <title>Range Sum Query - Mutable (区间查询)</title>

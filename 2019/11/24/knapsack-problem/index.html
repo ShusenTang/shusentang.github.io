@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+  <meta name="google-site-verification" content="UM_oWjkmpNS4sC6N8fDEsgSTPTOong_3Muz7XL_l-bQ">
+
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="NntzqnjuUs">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/my_apple-touch-icon-next.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/my_favicon-32x32.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/my_favicon-16x16.jpg?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/my_logo.jpg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文对背包问题的几种常见类型作一个总结。">
+<meta name="keywords" content="动态规划">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动态规划之背包问题系列">
+<meta property="og:url" content="https://tangshusen.me/2019/11/24/knapsack-problem/index.html">
+<meta property="og:site_name" content="TangShusen">
+<meta property="og:description" content="背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文对背包问题的几种常见类型作一个总结。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://tangshusen.me/2019/11/24/knapsack-problem/cover.png">
+<meta property="og:image" content="https://tangshusen.me/2019/11/24/knapsack-problem/4.1.png">
+<meta property="og:updated_time" content="2019-11-24T15:55:41.831Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="动态规划之背包问题系列">
+<meta name="twitter:description" content="背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文对背包问题的几种常见类型作一个总结。">
+<meta name="twitter:image" content="https://tangshusen.me/2019/11/24/knapsack-problem/cover.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="TangShusen" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://tangshusen.me/2019/11/24/knapsack-problem/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>动态规划之背包问题系列 | TangShusen</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TangShusen</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2019/11/24/knapsack-problem/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="TangShusen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/assets/header.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TangShusen">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">动态规划之背包问题系列
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-11-24 11:05:44 / 修改时间：23:55:41" itemprop="dateCreated datePublished" datetime="2019-11-24T11:05:44+08:00">2019-11-24</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/LeetCode/" itemprop="url" rel="index"><span itemprop="name">LeetCode</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/11/24/knapsack-problem/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2019/11/24/knapsack-problem/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/11/24/knapsack-problem/" class="leancloud_visitors" data-flag-title="动态规划之背包问题系列">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <center><br><img src="/2019/11/24/knapsack-problem/cover.png" width="200" class="full-image"><br></center>
+
+<p>背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文对背包问题的几种常见类型作一个总结。</p>
+<a id="more"></a>
+<p>根据<a href="https://zh.wikipedia.org/wiki/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98" target="_blank" rel="noopener">维基百科</a>，背包问题（Knapsack problem）是一种组合优化的NP完全（NP-Complete，NPC）问题。问题可以描述为：给定一组物品，每种物品都有自己的重量和价格，在限定的总重量内，我们如何选择，才能使得物品的总价格最高。NPC问题是没有多项式时间复杂度的解法的，但是利用动态规划，我们可以以伪多项式时间复杂度求解背包问题。一般来讲，背包问题有以下几种分类：</p>
+<ol>
+<li>01背包问题</li>
+<li>完全背包问题</li>
+<li>多重背包问题</li>
+</ol>
+<p>此外，还存在一些其他考法，例如恰好装满、求方案总数、求所有的方案等。本文接下来就分别讨论一下这些问题。</p>
+<h1 id="1-01背包"><a href="#1-01背包" class="headerlink" title="1. 01背包"></a>1. 01背包</h1><h2 id="1-1-题目"><a href="#1-1-题目" class="headerlink" title="1.1 题目"></a>1.1 题目</h2><p>最基本的背包问题就是01背包问题（01 knapsack problem）：一共有N件物品，第i（i从1开始）件物品的重量为w[i]，价值为v[i]。在总重量不超过背包承载上限W的情况下，能够装入背包的最大价值是多少？</p>
+<h2 id="1-2-分析"><a href="#1-2-分析" class="headerlink" title="1.2 分析"></a>1.2 分析</h2><p>如果采用暴力穷举的方式，每件物品都存在装入和不装入两种情况，所以总的时间复杂度是O(2^N)，这是不可接受的。而使用动态规划可以将复杂度降至O(NW)。我们的目标是书包内物品的总价值，而变量是物品和书包的限重，所以我们可定义状态dp:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dp[i][j]表示将前i件物品装进限重为j的背包可以获得的最大价值, 0&lt;=i&lt;=N, 0&lt;=j&lt;=W</span><br></pre></td></tr></table></figure></p>
+<p>那么我们可以将dp[0][0…W]初始化为0，表示将前0个物品（即没有物品）装入书包的最大价值为0。那么当 i &gt; 0 时<code>dp[i][j]</code>有两种情况：</p>
+<ol>
+<li>不装入第i件物品，即<code>dp[i−1][j]</code>；</li>
+<li>装入第i件物品（前提是能装下），即<code>dp[i−1][j−w[i]] + v[i]</code>。</li>
+</ol>
+<p>即状态转移方程为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dp[i][j] = max(dp[i−1][j], dp[i−1][j−w[i]]+v[i]) // j &gt;= w[i]</span><br></pre></td></tr></table></figure></p>
+<p>由上述状态转移方程可知，<code>dp[i][j]</code>的值只与<code>dp[i-1][0,...,j-1]</code>有关，所以我们可以采用动态规划常用的方法（滚动数组）对空间进行优化（即去掉dp的第一维）。需要注意的是，为了防止上一层循环的<code>dp[0,...,j-1]</code>被覆盖，循环的时候 j 只能<strong>逆向枚举</strong>（空间优化前没有这个限制），伪代码为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 01背包问题伪代码(空间优化版)</span><br><span class="line">dp[0,...,W] = 0</span><br><span class="line">for i = 1,...,N</span><br><span class="line">    for j = W,...,w[i] // 必须逆向枚举!!!</span><br><span class="line">        dp[j] = max(dp[j], dp[j−w[i]]+v[i])</span><br></pre></td></tr></table></figure></p>
+<p>时间复杂度为O(NW), 空间复杂度为O(W)。由于W的值是W的位数的幂，所以这个时间复杂度是伪多项式时间。</p>
+<p>动态规划的核心思想<strong>避免重复计算</strong>在01背包问题中体现得淋漓尽致。第i件物品装入或者不装入而获得的最大价值完全可以由前面i-1件物品的最大价值决定，暴力枚举忽略了这个事实。</p>
+<h1 id="2-完全背包"><a href="#2-完全背包" class="headerlink" title="2. 完全背包"></a>2. 完全背包</h1><h2 id="2-1-题目"><a href="#2-1-题目" class="headerlink" title="2.1 题目"></a>2.1 题目</h2><p>完全背包（unbounded knapsack problem）与01背包不同就是每种物品可以有无限多个：一共有N种物品，每种物品有无限多个，第i（i从1开始）种物品的重量为w[i]，价值为v[i]。在总重量不超过背包承载上限W的情况下，能够装入背包的最大价值是多少？</p>
+<h2 id="2-2-分析一"><a href="#2-2-分析一" class="headerlink" title="2.2 分析一"></a>2.2 分析一</h2><p>我们的目标和变量和01背包没有区别，所以我们可定义与01背包问题几乎完全相同的状态dp:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dp[i][j]表示将前i种物品装进限重为j的背包可以获得的最大价值, 0&lt;=i&lt;=N, 0&lt;=j&lt;=W</span><br></pre></td></tr></table></figure></p>
+<p>初始状态也是一样的，我们将dp[0][0…W]初始化为0，表示将前0种物品（即没有物品）装入书包的最大价值为0。那么当 i &gt; 0 时<code>dp[i][j]</code>也有两种情况：</p>
+<ol>
+<li>不装入第i种物品，即<code>dp[i−1][j]</code>，同01背包；</li>
+<li>装入第i种物品，此时和01背包不太一样，因为每种物品有无限个（但注意书包限重是有限的），所以此时不应该转移到<code>dp[i−1][j−w[i]]</code>而应该转移到<code>dp[i][j−w[i]]</code>，即装入第i种商品后还可以再继续装入第种商品。</li>
+</ol>
+<p>所以状态转移方程为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dp[i][j] = max(dp[i−1][j], dp[i][j−w[i]]+v[i]) // j &gt;= w[i]</span><br></pre></td></tr></table></figure></p>
+<p>这个状态转移方程与01背包问题唯一不同就是max第二项不是dp[i-1]而是dp[i]。</p>
+<p>和01背包问题类似，也可进行空间优化，优化后不同点在于这里的 j 只能<strong>正向枚举</strong>而01背包只能逆向枚举，因为这里的max第二项是<code>dp[i]</code>而01背包是<code>dp[i-1]</code>，即这里就是需要覆盖而01背包需要避免覆盖。所以伪代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 完全背包问题思路一伪代码(空间优化版)</span><br><span class="line">dp[0,...,W] = 0</span><br><span class="line">for i = 1,...,N</span><br><span class="line">    for j = w[i],...,W // 必须正向枚举!!!</span><br><span class="line">        dp[j] = max(dp[j], dp[j−w[i]]+v[i])</span><br></pre></td></tr></table></figure>
+<p>由上述伪代码看出，01背包和完全背包问题此解法的空间优化版解法唯一不同就是前者的 j 只能逆向枚举而后者的 j 只能正向枚举，这是由二者的状态转移方程决定的。此解法时间复杂度为O(NW), 空间复杂度为O(W)。</p>
+<h2 id="2-3-分析二"><a href="#2-3-分析二" class="headerlink" title="2.3 分析二"></a>2.3 分析二</h2><p>除了分析一的思路外，完全背包还有一种常见的思路，但是复杂度高一些。我们从装入第 i 种物品多少件出发，01背包只有两种情况即取0件和取1件，而这里是取0件、1件、2件…直到超过限重（k &gt; j/w[i]），所以状态转移方程为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># k为装入第i种物品的件数, k &lt;= j/w[i]</span><br><span class="line">dp[i][j] = max&#123;(dp[i-1][j − k*w[i]] + k*v[i]) for every k&#125;</span><br></pre></td></tr></table></figure></p>
+<p>同理也可以进行空间优化，需要注意的是，这里max里面是<code>dp[i-1]</code>，和01背包一样，所以 j 必须<strong>逆向枚举</strong>，优化后伪代码为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 完全背包问题思路二伪代码(空间优化版)</span><br><span class="line">dp[0,...,W] = 0</span><br><span class="line">for i = 1,...,N</span><br><span class="line">    for j = W,...,w[i] // 必须逆向枚举!!!</span><br><span class="line">        for k = [0, 1,..., j/w[i]]</span><br><span class="line">            dp[j] = max(dp[j], dp[j−k*w[i]]+k*v[i])</span><br></pre></td></tr></table></figure></p>
+<p>相比于分析一，此种方法不是在O(1)时间求得dp[i][j]，所以总的时间复杂度就比分析一大些了，为 $O(NW \frac W {\bar{w}})$级别。</p>
+<h2 id="2-4-分析三、转换成01背包"><a href="#2-4-分析三、转换成01背包" class="headerlink" title="2.4 分析三、转换成01背包"></a>2.4 分析三、转换成01背包</h2><p>01背包问题是最基本的背包问题，我们可以考虑把完全背包问题转化为01背包问题来解：将一种物品转换成若干件只能装入0件或者1件的01背包中的物品。</p>
+<p>最简单的想法是，考虑到第 i 种物品最多装入 W/w[i] 件，于是可以把第 i 种物品转化为 W/w[i] 件费用及价值均不变的物品，然后求解这个01背包问题。</p>
+<p>更高效的转化方法是采用二进制的思想：把第 i 种物品拆成重量为 $w_i 2^k$、价值为 $v_i 2^k$ 的若干件物品，其中 k 取遍满足 $w_i 2^k \le W$ 的非负整数。这是因为不管最优策略选几件第 i 种物品，总可以表示成若干个刚才这些物品的和（例：13 = 1 + 4 + 8）。这样就将转换后的物品数目降成了对数级别。</p>
+<h1 id="3-多重背包"><a href="#3-多重背包" class="headerlink" title="3. 多重背包"></a>3. 多重背包</h1><h2 id="3-1-题目"><a href="#3-1-题目" class="headerlink" title="3.1 题目"></a>3.1 题目</h2><p>多重背包（bounded knapsack problem）与前面不同就是每种物品是有限个：一共有N种物品，第i（i从1开始）种物品的数量为n[i]，重量为w[i]，价值为v[i]。在总重量不超过背包承载上限W的情况下，能够装入背包的最大价值是多少？</p>
+<h2 id="3-2-分析一"><a href="#3-2-分析一" class="headerlink" title="3.2 分析一"></a>3.2 分析一</h2><p>此时的分析和完全背包的分析二差不多，也是从装入第 i 种物品多少件出发：装入第i种物品0件、1件、…n[i]件（还要满足不超过限重）。所以状态方程为：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># k为装入第i种物品的件数, k &lt;= min(n[i], j/w[i])</span><br><span class="line">dp[i][j] = max&#123;(dp[i-1][j − k*w[i]] + k*v[i]) for every k&#125;</span><br></pre></td></tr></table></figure></p>
+<p>同理也可以进行空间优化，而且 j 也必须<strong>逆向枚举</strong>，优化后伪代码为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 完全背包问题思路二伪代码(空间优化版)</span><br><span class="line">dp[0,...,W] = 0</span><br><span class="line">for i = 1,...,N</span><br><span class="line">    for j = W,...,w[i] // 必须逆向枚举!!!</span><br><span class="line">        for k = [0, 1,..., min(n[i], j/w[i])]</span><br><span class="line">            dp[j] = max(dp[j], dp[j−k*w[i]]+k*v[i])</span><br></pre></td></tr></table></figure></p>
+<p>总的时间复杂度约为 $O(NW{\bar{n}}) = O(W \sum_i {n_i})$ 级别。</p>
+<h2 id="3-3-分析二、转换成01背包"><a href="#3-3-分析二、转换成01背包" class="headerlink" title="3.3 分析二、转换成01背包"></a>3.3 分析二、转换成01背包</h2><p>采用2.4节类似的思路可以将多重背包转换成01背包问题，采用二进制思路将第 i 种物品分成了 $O(logn_i)$ 件物品，将原问题转化为了复杂度为 $O(W \sum_i{logn_i})$ 的 01 背包问题，相对于分析一是很大的改进。</p>
+<h1 id="4-其他情形"><a href="#4-其他情形" class="headerlink" title="4. 其他情形"></a>4. 其他情形</h1><p>除了上述三种基本的背包问题外，还有一些其他的变种，如下图所示（<a href="https://blog.csdn.net/weixin_41162823/article/details/87878853" target="_blank" rel="noopener">图片来源</a>）。</p>
+<center><br>    <img src="/2019/11/24/knapsack-problem/4.1.png" width="500" class="full-image"><br></center>
+
+<p>本节列举几种比较常见的。</p>
+<h2 id="4-1-恰好装满"><a href="#4-1-恰好装满" class="headerlink" title="4.1 恰好装满"></a>4.1 恰好装满</h2><p>背包问题有时候还有一个限制就是必须恰好装满背包，此时基本思路没有区别，只是在初始化的时候有所不同。</p>
+<p>如果没有恰好装满背包的限制，我们将dp全部初始化成0就可以了。因为任何容量的背包都有一个合法解“什么都不装”，这个解的价值为0，所以初始时状态的值也就全部为0了。如果有恰好装满的限制，那只应该将dp[0,…,N][0]初始为0，其它dp值均初始化为<code>-inf</code>，因为此时只有容量为0的背包可以在什么也不装情况下被“恰好装满”，其它容量的背包初始均没有合法的解，应该被初始化为<code>-inf</code>。</p>
+<h2 id="4-2-求方案总数"><a href="#4-2-求方案总数" class="headerlink" title="4.2 求方案总数"></a>4.2 求方案总数</h2><p>除了在给定每个物品的价值后求可得到的最大价值外，还有一类问题是问装满背包或将背包装至某一指定容量的方案总数。对于这类问题，需要将状态转移方程中的 max 改成 sum ，大体思路是不变的。例如若每件物品均是完全背包中的物品，转移方程即为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dp[i][j] = sum(dp[i−1][j], dp[i][j−w[i]]) // j &gt;= w[i]</span><br></pre></td></tr></table></figure></p>
+<h2 id="4-3-求最优方案"><a href="#4-3-求最优方案" class="headerlink" title="4.3 求最优方案"></a>4.3 求最优方案</h2><p>一般而言，背包问题是要求一个最优值，如果要求输出这个最优值的方案，可以参照一般动态规划问题输出方案的方法：记录下每个状态的最优值是由哪一个策略推出来的，这样便可根据这条策略找到上一个状态，从上一个状态接着向前推即可。</p>
+<p>以01背包为例，我们可以再用一个数组G[i][j]来记录方案，设 <code>G[i][j] = 0</code>表示计算 dp[i][j] 的值时是采用了max中的前一项(也即dp[i−1][j])，<code>G[i][j] = 1</code> 表示采用了方程的后一项。即分别表示了两种策略: 未装入第 i 个物品及装了第 i 个物品。其实我们也可以直接从求好的dp[i][j]反推方案：若 <code>dp[i][j] = dp[i−1][j]</code> 说明未选第i个物品，反之说明选了。</p>
+<h1 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h1><p>本文讨论了几类背包问题，其中01背包问题和完全背包问题是最常考的，另外还需要注意一些其他变种例如恰好装满、求方案总数等等。除了本文讨论的这些背包问题之外，还存在一些其他的变种，但只要深刻领会本文所列的背包问题的思路和状态转移方程，遇到其它的变形问题，应该也不难想出算法。如果想更加详细地理解背包问题，推荐阅读经典的<a href="https://github.com/tianyicui/pack/blob/master/V2.pdf" target="_blank" rel="noopener">背包问题九讲</a>。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://zh.wikipedia.org/wiki/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98" target="_blank" rel="noopener">背包问题 - 维基百科</a></li>
+<li><a href="https://blog.csdn.net/weixin_41162823/article/details/87878853" target="_blank" rel="noopener">背包问题-笔记整理</a></li>
+<li><a href="https://blog.csdn.net/kk55guang2/article/details/86179068" target="_blank" rel="noopener">动态规划与贪婪法题16：背包问题总结 - CSDN</a></li>
+<li><a href="https://github.com/tianyicui/pack/blob/master/V2.pdf" target="_blank" rel="noopener">背包问题九讲2.0 - 崔添翼</a></li>
+</ul>
+<hr>
+<p>更多我的LeetCode中文题解，可前往GitHub查看：<a href="https://github.com/ShusenTang/LeetCode" target="_blank" rel="noopener">https://github.com/ShusenTang/LeetCode</a></p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/assets/wechatpay.jpg" alt="TangShusen 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/assets/alipay.jpg" alt="TangShusen 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/动态规划/" rel="tag"># 动态规划</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/17/range-sum-query-mutable/" rel="next" title="Range Sum Query - Mutable (区间查询)">
+                <i class="fa fa-chevron-left"></i> Range Sum Query - Mutable (区间查询)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/assets/header.jpg" alt="TangShusen">
+            
+              <p class="site-author-name" itemprop="name">TangShusen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">11</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">5</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">18</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/shusentang" title="GitHub &rarr; https://github.com/shusentang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.zhihu.com/people/tang-shu-sen-77/activities" title="知乎 &rarr; https://www.zhihu.com/people/tang-shu-sen-77/activities" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                Links
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://github.com/ShusenTang/LeetCode" title="https://github.com/ShusenTang/LeetCode" rel="noopener" target="_blank">LeetCode题解</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Dive-into-DL-PyTorch" title="https://shusentang.github.io/Dive-into-DL-PyTorch" rel="noopener" target="_blank">《动手学深度学习》(PyTorch版)</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-01背包"><span class="nav-text">1. 01背包</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-题目"><span class="nav-text">1.1 题目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-分析"><span class="nav-text">1.2 分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-完全背包"><span class="nav-text">2. 完全背包</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-题目"><span class="nav-text">2.1 题目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-分析一"><span class="nav-text">2.2 分析一</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-分析二"><span class="nav-text">2.3 分析二</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-分析三、转换成01背包"><span class="nav-text">2.4 分析三、转换成01背包</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-多重背包"><span class="nav-text">3. 多重背包</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-题目"><span class="nav-text">3.1 题目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-分析一"><span class="nav-text">3.2 分析一</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-分析二、转换成01背包"><span class="nav-text">3.3 分析二、转换成01背包</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-其他情形"><span class="nav-text">4. 其他情形</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-恰好装满"><span class="nav-text">4.1 恰好装满</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-求方案总数"><span class="nav-text">4.2 求方案总数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-求最优方案"><span class="nav-text">4.3 求最优方案</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-总结"><span class="nav-text">5. 总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 – <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TangShusen tip:本博客在电脑端食用更佳~</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">total view times: <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: true,
+        appId: 'Bi7QlJPklJ2hjFFoWMd1D2gB-gzGzoHsz',
+        appKey: 'yMWxfGo3ABn8yS13Ytq43Rdk',
+        placeholder: '在上面填上你的邮箱再评论可以收到我的回复哟~',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text('Counter not initialized! See more at console err msg.');
+              console.error('ATTENTION! LeanCloud counter has security bug, see here how to solve it: https://github.com/theme-next/hexo-leancloud-counter-security. \n But you also can use LeanCloud without security, by set \'security\' option to \'false\'.');
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz",
+                'X-LC-Key': "zK9lN00t9W1flFbM75hsjojR",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
