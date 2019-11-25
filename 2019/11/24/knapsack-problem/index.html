@@ -112,20 +112,20 @@
 
 
 
-  <meta name="description" content="背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文对背包问题的几种常见类型作一个总结。">
+  <meta name="description" content="背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文先对背包问题的几种常见类型作一个总结，然后再看看LeetCode上几个相关题目。">
 <meta name="keywords" content="动态规划">
 <meta property="og:type" content="article">
 <meta property="og:title" content="动态规划之背包问题系列">
 <meta property="og:url" content="https://tangshusen.me/2019/11/24/knapsack-problem/index.html">
 <meta property="og:site_name" content="TangShusen">
-<meta property="og:description" content="背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文对背包问题的几种常见类型作一个总结。">
+<meta property="og:description" content="背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文先对背包问题的几种常见类型作一个总结，然后再看看LeetCode上几个相关题目。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://tangshusen.me/2019/11/24/knapsack-problem/cover.png">
 <meta property="og:image" content="https://tangshusen.me/2019/11/24/knapsack-problem/4.1.png">
-<meta property="og:updated_time" content="2019-11-24T15:55:41.831Z">
+<meta property="og:updated_time" content="2019-11-25T15:27:19.845Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="动态规划之背包问题系列">
-<meta name="twitter:description" content="背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文对背包问题的几种常见类型作一个总结。">
+<meta name="twitter:description" content="背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文先对背包问题的几种常见类型作一个总结，然后再看看LeetCode上几个相关题目。">
 <meta name="twitter:image" content="https://tangshusen.me/2019/11/24/knapsack-problem/cover.png">
 
 
@@ -403,12 +403,24 @@
                 
               
 
-              <time title="创建时间：2019-11-24 11:05:44 / 修改时间：23:55:41" itemprop="dateCreated datePublished" datetime="2019-11-24T11:05:44+08:00">2019-11-24</time>
+              <time title="创建时间：2019-11-24 11:05:44" itemprop="dateCreated datePublished" datetime="2019-11-24T11:05:44+08:00">2019-11-24</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-11-25 23:27:19" itemprop="dateModified" datetime="2019-11-25T23:27:19+08:00">2019-11-25</time>
               
             
           </span>
@@ -482,7 +494,7 @@
       
         <center><br><img src="/2019/11/24/knapsack-problem/cover.png" width="200" class="full-image"><br></center>
 
-<p>背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文对背包问题的几种常见类型作一个总结。</p>
+<p>背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文先对背包问题的几种常见类型作一个总结，然后再看看LeetCode上几个相关题目。</p>
 <a id="more"></a>
 <p>根据<a href="https://zh.wikipedia.org/wiki/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98" target="_blank" rel="noopener">维基百科</a>，背包问题（Knapsack problem）是一种组合优化的NP完全（NP-Complete，NPC）问题。问题可以描述为：给定一组物品，每种物品都有自己的重量和价格，在限定的总重量内，我们如何选择，才能使得物品的总价格最高。NPC问题是没有多项式时间复杂度的解法的，但是利用动态规划，我们可以以伪多项式时间复杂度求解背包问题。一般来讲，背包问题有以下几种分类：</p>
 <ol>
@@ -534,7 +546,20 @@
 <h2 id="4-2-求方案总数"><a href="#4-2-求方案总数" class="headerlink" title="4.2 求方案总数"></a>4.2 求方案总数</h2><p>除了在给定每个物品的价值后求可得到的最大价值外，还有一类问题是问装满背包或将背包装至某一指定容量的方案总数。对于这类问题，需要将状态转移方程中的 max 改成 sum ，大体思路是不变的。例如若每件物品均是完全背包中的物品，转移方程即为<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dp[i][j] = sum(dp[i−1][j], dp[i][j−w[i]]) // j &gt;= w[i]</span><br></pre></td></tr></table></figure></p>
 <h2 id="4-3-求最优方案"><a href="#4-3-求最优方案" class="headerlink" title="4.3 求最优方案"></a>4.3 求最优方案</h2><p>一般而言，背包问题是要求一个最优值，如果要求输出这个最优值的方案，可以参照一般动态规划问题输出方案的方法：记录下每个状态的最优值是由哪一个策略推出来的，这样便可根据这条策略找到上一个状态，从上一个状态接着向前推即可。</p>
 <p>以01背包为例，我们可以再用一个数组G[i][j]来记录方案，设 <code>G[i][j] = 0</code>表示计算 dp[i][j] 的值时是采用了max中的前一项(也即dp[i−1][j])，<code>G[i][j] = 1</code> 表示采用了方程的后一项。即分别表示了两种策略: 未装入第 i 个物品及装了第 i 个物品。其实我们也可以直接从求好的dp[i][j]反推方案：若 <code>dp[i][j] = dp[i−1][j]</code> 说明未选第i个物品，反之说明选了。</p>
-<h1 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h1><p>本文讨论了几类背包问题，其中01背包问题和完全背包问题是最常考的，另外还需要注意一些其他变种例如恰好装满、求方案总数等等。除了本文讨论的这些背包问题之外，还存在一些其他的变种，但只要深刻领会本文所列的背包问题的思路和状态转移方程，遇到其它的变形问题，应该也不难想出算法。如果想更加详细地理解背包问题，推荐阅读经典的<a href="https://github.com/tianyicui/pack/blob/master/V2.pdf" target="_blank" rel="noopener">背包问题九讲</a>。</p>
+<h1 id="5-LeetCode相关题目"><a href="#5-LeetCode相关题目" class="headerlink" title="5. LeetCode相关题目"></a>5. LeetCode相关题目</h1><p>本节选取几个LeetCode上面的背包问题进行讨论。</p>
+<h2 id="5-1-Partition-Equal-Subset-Sum（分割等和子集）"><a href="#5-1-Partition-Equal-Subset-Sum（分割等和子集）" class="headerlink" title="5.1 Partition Equal Subset Sum（分割等和子集）"></a>5.1 Partition Equal Subset Sum（分割等和子集）</h2><p><a href="https://leetcode.com/problems/partition-equal-subset-sum/" target="_blank" rel="noopener">416. Partition Equal Subset Sum（分割等和子集）</a></p>
+<p>题目给定一个只包含正整数的非空数组。问是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。</p>
+<p>由于所有元素的和sum已知，所以两个子集的和都应该是sum/2（所以前提是sum不能是奇数），即题目转换成从这个数组里面选取一些元素使这些元素和为sum/2。如果我们将所有元素的值看做是物品的重量，每件物品价值都为1，所以这就是一个恰好装满的01背包问题。</p>
+<p>我们定义空间优化后的状态数组dp，由于是恰好装满，所以应该将dp[0]初始化为0而将其他全部初始化为<code>INT_MIN</code>，然后按照类似1.2节的伪代码更新dp：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> capacity = sum / <span class="number">2</span>;</span><br><span class="line"><span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;dp(capacity + <span class="number">1</span>, INT_MIN);</span><br><span class="line">dp[<span class="number">0</span>] = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= n; i++)</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j = capacity; j &gt;= nums[i<span class="number">-1</span>]; j--)</span><br><span class="line">        dp[j] = max(dp[j], <span class="number">1</span> + dp[j - nums[i<span class="number">-1</span>]]);</span><br></pre></td></tr></table></figure></p>
+<p>更新完毕后，如果dp[sum/2]大于0说明满足题意。</p>
+<p>由于此题最后求的是能不能进行划分，所以dp的每个元素定义成bool型就可以了，然后将dp[0]初始为true其他初始化为false，而转移方程就应该是用或操作而不是max操作。完整代码如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">bool</span> <span class="title">canPartition</span><span class="params">(<span class="built_in">vector</span>&lt;<span class="keyword">int</span>&gt;&amp; nums)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> sum = <span class="number">0</span>, n = nums.size();</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> &amp;num: nums) sum += num;</span><br><span class="line">    <span class="keyword">if</span>(sum % <span class="number">2</span>) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">int</span> capacity = sum / <span class="number">2</span>;</span><br><span class="line">    <span class="built_in">vector</span>&lt;<span class="keyword">bool</span>&gt;dp(capacity + <span class="number">1</span>, <span class="literal">false</span>);</span><br><span class="line">    dp[<span class="number">0</span>] = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">1</span>; i &lt;= n; i++)</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> j = capacity; j &gt;= nums[i<span class="number">-1</span>]; j--)</span><br><span class="line">            dp[j] = dp[j] || dp[j - nums[i<span class="number">-1</span>]];</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">return</span> dp[capacity];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>另外此题还有一个更巧妙更快的解法，基本思路是用一个bisets来记录所有可能子集的和，详见<a href="https://github.com/ShusenTang/LeetCode/blob/master/solutions/416.%20Partition%20Equal%20Subset%20Sum.md" target="_blank" rel="noopener">我的Github</a>。</p>
+</blockquote>
+<h2 id="5-2-Coin-Change（零钱兑换）"><a href="#5-2-Coin-Change（零钱兑换）" class="headerlink" title="5.2 Coin Change（零钱兑换）"></a>5.2 Coin Change（零钱兑换）</h2><p>TODO</p>
+<h2 id="5-3-Target-Sum（目标和）"><a href="#5-3-Target-Sum（目标和）" class="headerlink" title="5.3 Target Sum（目标和）"></a>5.3 Target Sum（目标和）</h2><p>TODO</p>
+<h2 id="5-4-Ones-and-Zeros（一和零）"><a href="#5-4-Ones-and-Zeros（一和零）" class="headerlink" title="5.4 Ones and Zeros（一和零）"></a>5.4 Ones and Zeros（一和零）</h2><p>TODO</p>
+<h1 id="6-总结"><a href="#6-总结" class="headerlink" title="6. 总结"></a>6. 总结</h1><p>本文讨论了几类背包问题及LeetCode相关题目，其中01背包问题和完全背包问题是最常考的，另外还需要注意一些其他变种例如恰好装满、求方案总数等等。除了本文讨论的这些背包问题之外，还存在一些其他的变种，但只要深刻领会本文所列的背包问题的思路和状态转移方程，遇到其它的变形问题，应该也不难想出算法。如果想更加详细地理解背包问题，推荐阅读经典的<a href="https://github.com/tianyicui/pack/blob/master/V2.pdf" target="_blank" rel="noopener">背包问题九讲</a>。</p>
 <h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
 <li><a href="https://zh.wikipedia.org/wiki/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98" target="_blank" rel="noopener">背包问题 - 维基百科</a></li>
 <li><a href="https://blog.csdn.net/weixin_41162823/article/details/87878853" target="_blank" rel="noopener">背包问题-笔记整理</a></li>
@@ -855,7 +880,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-01背包"><span class="nav-text">1. 01背包</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-题目"><span class="nav-text">1.1 题目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-分析"><span class="nav-text">1.2 分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-完全背包"><span class="nav-text">2. 完全背包</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-题目"><span class="nav-text">2.1 题目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-分析一"><span class="nav-text">2.2 分析一</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-分析二"><span class="nav-text">2.3 分析二</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-分析三、转换成01背包"><span class="nav-text">2.4 分析三、转换成01背包</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-多重背包"><span class="nav-text">3. 多重背包</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-题目"><span class="nav-text">3.1 题目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-分析一"><span class="nav-text">3.2 分析一</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-分析二、转换成01背包"><span class="nav-text">3.3 分析二、转换成01背包</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-其他情形"><span class="nav-text">4. 其他情形</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-恰好装满"><span class="nav-text">4.1 恰好装满</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-求方案总数"><span class="nav-text">4.2 求方案总数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-求最优方案"><span class="nav-text">4.3 求最优方案</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-总结"><span class="nav-text">5. 总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-01背包"><span class="nav-text">1. 01背包</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-题目"><span class="nav-text">1.1 题目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-分析"><span class="nav-text">1.2 分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-完全背包"><span class="nav-text">2. 完全背包</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-题目"><span class="nav-text">2.1 题目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-分析一"><span class="nav-text">2.2 分析一</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-分析二"><span class="nav-text">2.3 分析二</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-分析三、转换成01背包"><span class="nav-text">2.4 分析三、转换成01背包</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-多重背包"><span class="nav-text">3. 多重背包</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-题目"><span class="nav-text">3.1 题目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-分析一"><span class="nav-text">3.2 分析一</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-分析二、转换成01背包"><span class="nav-text">3.3 分析二、转换成01背包</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-其他情形"><span class="nav-text">4. 其他情形</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-恰好装满"><span class="nav-text">4.1 恰好装满</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-求方案总数"><span class="nav-text">4.2 求方案总数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-求最优方案"><span class="nav-text">4.3 求最优方案</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-LeetCode相关题目"><span class="nav-text">5. LeetCode相关题目</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-Partition-Equal-Subset-Sum（分割等和子集）"><span class="nav-text">5.1 Partition Equal Subset Sum（分割等和子集）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-Coin-Change（零钱兑换）"><span class="nav-text">5.2 Coin Change（零钱兑换）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3-Target-Sum（目标和）"><span class="nav-text">5.3 Target Sum（目标和）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-4-Ones-and-Zeros（一和零）"><span class="nav-text">5.4 Ones and Zeros（一和零）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6-总结"><span class="nav-text">6. 总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>

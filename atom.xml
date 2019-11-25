@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://tangshusen.me/"/>
-  <updated>2019-11-24T15:55:41.831Z</updated>
+  <updated>2019-11-25T15:27:19.845Z</updated>
   <id>https://tangshusen.me/</id>
   
   <author>
@@ -21,13 +21,13 @@
     <link href="https://tangshusen.me/2019/11/24/knapsack-problem/"/>
     <id>https://tangshusen.me/2019/11/24/knapsack-problem/</id>
     <published>2019-11-24T03:05:44.000Z</published>
-    <updated>2019-11-24T15:55:41.831Z</updated>
+    <updated>2019-11-25T15:27:19.845Z</updated>
     
     <summary type="html">
     
       &lt;center&gt;&lt;br&gt;&lt;img src=&quot;/2019/11/24/knapsack-problem/cover.png&quot; width=&quot;200&quot; class=&quot;full-image&quot;&gt;&lt;br&gt;&lt;/center&gt;
 
-&lt;p&gt;背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文对背包问题的几种常见类型作一个总结。&lt;/p&gt;
+&lt;p&gt;背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文先对背包问题的几种常见类型作一个总结，然后再看看LeetCode上几个相关题目。&lt;/p&gt;
     
     </summary>
     
