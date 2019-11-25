@@ -13,7 +13,7 @@ tags:
 <img src="./knapsack-problem/cover.png" width="200" class="full-image">
 </center>
 
-背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文对背包问题的几种常见类型作一个总结。
+背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文先对背包问题的几种常见类型作一个总结，然后再看看LeetCode上几个相关题目。
 
 <!-- more -->
 
@@ -166,9 +166,61 @@ dp[i][j] = sum(dp[i−1][j], dp[i][j−w[i]]) // j >= w[i]
 以01背包为例，我们可以再用一个数组G[i][j]来记录方案，设 `G[i][j] = 0 `表示计算 dp[i][j] 的值时是采用了max中的前一项(也即dp[i−1][j])，`G[i][j] = 1` 表示采用了方程的后一项。即分别表示了两种策略: 未装入第 i 个物品及装了第 i 个物品。其实我们也可以直接从求好的dp[i][j]反推方案：若 `dp[i][j] = dp[i−1][j]` 说明未选第i个物品，反之说明选了。
 
 
-# 5. 总结
+# 5. LeetCode相关题目
 
-本文讨论了几类背包问题，其中01背包问题和完全背包问题是最常考的，另外还需要注意一些其他变种例如恰好装满、求方案总数等等。除了本文讨论的这些背包问题之外，还存在一些其他的变种，但只要深刻领会本文所列的背包问题的思路和状态转移方程，遇到其它的变形问题，应该也不难想出算法。如果想更加详细地理解背包问题，推荐阅读经典的[背包问题九讲](https://github.com/tianyicui/pack/blob/master/V2.pdf)。
+本节选取几个LeetCode上面的背包问题进行讨论。
+
+## 5.1 Partition Equal Subset Sum（分割等和子集）
+[416. Partition Equal Subset Sum（分割等和子集）](https://leetcode.com/problems/partition-equal-subset-sum/)
+
+题目给定一个只包含正整数的非空数组。问是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。
+
+由于所有元素的和sum已知，所以两个子集的和都应该是sum/2（所以前提是sum不能是奇数），即题目转换成从这个数组里面选取一些元素使这些元素和为sum/2。如果我们将所有元素的值看做是物品的重量，每件物品价值都为1，所以这就是一个恰好装满的01背包问题。
+
+我们定义空间优化后的状态数组dp，由于是恰好装满，所以应该将dp[0]初始化为0而将其他全部初始化为`INT_MIN`，然后按照类似1.2节的伪代码更新dp：
+``` C++
+int capacity = sum / 2;
+vector<int>dp(capacity + 1, INT_MIN);
+dp[0] = 0;
+for(int i = 1; i <= n; i++)
+    for(int j = capacity; j >= nums[i-1]; j--)
+        dp[j] = max(dp[j], 1 + dp[j - nums[i-1]]);
+```
+
+更新完毕后，如果dp[sum/2]大于0说明满足题意。
+
+由于此题最后求的是能不能进行划分，所以dp的每个元素定义成bool型就可以了，然后将dp[0]初始为true其他初始化为false，而转移方程就应该是用或操作而不是max操作。完整代码如下：
+``` C++
+bool canPartition(vector<int>& nums) {
+    int sum = 0, n = nums.size();
+    for(int &num: nums) sum += num;
+    if(sum % 2) return false;
+    
+    int capacity = sum / 2;
+    vector<bool>dp(capacity + 1, false);
+    dp[0] = true;
+    for(int i = 1; i <= n; i++)
+        for(int j = capacity; j >= nums[i-1]; j--)
+            dp[j] = dp[j] || dp[j - nums[i-1]];
+        
+    return dp[capacity];
+}
+```
+
+> 另外此题还有一个更巧妙更快的解法，基本思路是用一个bisets来记录所有可能子集的和，详见[我的Github](https://github.com/ShusenTang/LeetCode/blob/master/solutions/416.%20Partition%20Equal%20Subset%20Sum.md)。
+
+## 5.2 Coin Change（零钱兑换）
+TODO
+
+## 5.3 Target Sum（目标和）
+TODO
+
+## 5.4 Ones and Zeros（一和零）
+TODO
+
+# 6. 总结
+
+本文讨论了几类背包问题及LeetCode相关题目，其中01背包问题和完全背包问题是最常考的，另外还需要注意一些其他变种例如恰好装满、求方案总数等等。除了本文讨论的这些背包问题之外，还存在一些其他的变种，但只要深刻领会本文所列的背包问题的思路和状态转移方程，遇到其它的变形问题，应该也不难想出算法。如果想更加详细地理解背包问题，推荐阅读经典的[背包问题九讲](https://github.com/tianyicui/pack/blob/master/V2.pdf)。
 
 # 参考
 * [背包问题 - 维基百科](https://zh.wikipedia.org/wiki/%E8%83%8C%E5%8C%85%E9%97%AE%E9%A2%98)
