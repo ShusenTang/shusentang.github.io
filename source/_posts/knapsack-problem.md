@@ -210,10 +210,55 @@ bool canPartition(vector<int>& nums) {
 > 另外此题还有一个更巧妙更快的解法，基本思路是用一个bisets来记录所有可能子集的和，详见[我的Github](https://github.com/ShusenTang/LeetCode/blob/master/solutions/416.%20Partition%20Equal%20Subset%20Sum.md)。
 
 ## 5.2 Coin Change（零钱兑换）
-TODO
+[322. Coin Change](https://leetcode.com/problems/coin-change/)
+
+题目给定一个价值amount和一些面值，假设每个面值的硬币数都是无限的，问我们最少能用几个硬币组成给定的价值。
+
+如果我们将面值看作是物品，面值金额看成是物品的重量，每件物品的价值均为1，这样此题就是是一个恰好装满的完全背包问题了。不过这里不是求最多装入多少物品而是求最少，我们只需要将2.2节的转态转移方程中的max改成min即可，又由于是恰好装满，所以除了dp[0]，其他都应初始化为`INT_MAX`。完整代码如下：
+``` C++
+int coinChange(vector<int>& coins, int amount) {
+    vector<int>dp(amount + 1, INT_MAX);
+    dp[0] = 0;
+    
+    for(int i = 1; i <= coins.size(); i++)
+        for(int j = coins[i-1]; j <= amount; j++){
+            // 下行代码会在 1+INT_MAX 时溢出
+            // dp[j] = min(dp[j], 1 + dp[j - coins[i-1]]); 
+            if(dp[j] - 1 > dp[j - coins[i-1]])
+                dp[j] = 1 + dp[j - coins[i-1]];   
+        }
+    return dp[amount] == INT_MAX ? -1 : dp[amount];   
+}
+```
+注意上面`1 + dp[j - coins[i-1]]`会存在溢出的风险，所以我们换了个写法。
+
+> 另外此题还可以进行搜索所有可能然后保持一个全局的结果res，但是直接搜索会超时，所以需要进行精心剪枝，剪枝后可击败99%。详见[我的Github](https://github.com/ShusenTang/LeetCode/blob/master/solutions/322.%20Coin%20Change.md)。
 
 ## 5.3 Target Sum（目标和）
-TODO
+[494. Target Sum](https://leetcode.com/problems/target-sum/)
+
+这道题给了我们一个数组（元素非负），和一个目标值，要求给数组中每个数字前添加正号或负号所组成的表达式结果与目标值S相等，求有多少种情况。
+
+假设所有元素和为sum，所有添加正号的元素的和为A，所有添加负号的元素和为B，则有`sum = A + B` 且 `S = A - B`，解方程得`A = (sum + S)/2`。即题目转换成：从数组中选取一些元素使和恰好为`(sum + S) / 2`。可见这是一个恰好装满的01背包问题，要求所有方案数，将1.2节状态转移方程中的max改成求和即可。需要注意的是，虽然这里是恰好装满，但是dp初始值不应该是`inf`，因为这里求的不是总价值而是方案数，应该全部初始为0（除了dp[0]初始化为1）。所以代码如下：
+``` C++
+int findTargetSumWays(vector<int>& nums, int S) {
+    int sum = 0;
+    // for(int &num: nums) sum += num;
+    sum = accumulate(nums.begin(), nums.end(), 0);
+    if(S > sum || sum < -S) return 0; // 肯定不行
+    if((S + sum) & 1) return 0; // 奇数
+    int target = (S + sum) >> 1;
+    
+    vector<int>dp(target + 1, 0);
+    
+    dp[0] = 1;
+    for(int i = 1; i <= nums.size(); i++)
+        for(int j = target; j >= nums[i-1]; j--)
+            dp[j] = dp[j] + dp[j - nums[i-1]];
+    
+    return dp[target];
+}
+```
 
 ## 5.4 Ones and Zeros（一和零）
 TODO
