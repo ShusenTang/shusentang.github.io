@@ -199,12 +199,13 @@ social_icons:
 
 # Blog rolls
 links_icon: link
-links_title: Links
+links_title: 我的项目
 links_layout: block
 #links_layout: inline
 links:
   LeetCode题解: https://github.com/ShusenTang/LeetCode
   《动手学深度学习》(PyTorch版): https://shusentang.github.io/Dive-into-DL-PyTorch
+  《Deep Learning with PyTorch》中文翻译: https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese
 
 # Sidebar Avatar # 侧栏头像设置
 avatar:
