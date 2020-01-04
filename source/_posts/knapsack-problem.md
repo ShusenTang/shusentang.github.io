@@ -13,7 +13,7 @@ tags:
 <img src="./knapsack-problem/cover.png" width="200" class="full-image">
 </center>
 
-背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文先对背包问题的几种常见类型作一个总结，然后再看看LeetCode上几个相关题目。
+背包问题是一类经典的动态规划问题，它非常灵活，需要仔细琢磨体会，本文先对背包问题的几种常见类型作一个总结，再给出代码模板，然后再看看LeetCode上几个相关题目。
 
 <!-- more -->
 
@@ -109,7 +109,7 @@ for i = 1,...,N
 
 最简单的想法是，考虑到第 i 种物品最多装入 W/w[i] 件，于是可以把第 i 种物品转化为 W/w[i] 件费用及价值均不变的物品，然后求解这个01背包问题。
 
-更高效的转化方法是采用二进制的思想：把第 i 种物品拆成重量为 $w_i 2^k$、价值为 $v_i 2^k$ 的若干件物品，其中 k 取遍满足 $w_i 2^k \le W$ 的非负整数。这是因为不管最优策略选几件第 i 种物品，总可以表示成若干个刚才这些物品的和（例：13 = 1 + 4 + 8）。这样就将转换后的物品数目降成了对数级别。
+更高效的转化方法是采用二进制的思想：把第 i 种物品拆成重量为 $w_i 2^k$、价值为 $v_i 2^k$ 的若干件物品，其中 k 取遍满足 $w_i 2^k \le W$ 的非负整数。这是因为不管最优策略选几件第 i 种物品，总可以表示成若干个刚才这些物品的和（例：13 = 1 + 4 + 8）。这样就将转换后的物品数目降成了对数级别。具体代码见3.4节模板。
 
 
 # 3. 多重背包
@@ -134,7 +134,60 @@ for i = 1,...,N
 总的时间复杂度约为 $O(NW{\bar{n}}) = O(W \sum_i {n_i})$ 级别。
 
 ## 3.3 分析二、转换成01背包
-采用2.4节类似的思路可以将多重背包转换成01背包问题，采用二进制思路将第 i 种物品分成了 $O(logn_i)$ 件物品，将原问题转化为了复杂度为 $O(W \sum_i{logn_i})$ 的 01 背包问题，相对于分析一是很大的改进。
+采用2.4节类似的思路可以将多重背包转换成01背包问题，采用二进制思路将第 i 种物品分成了 $O(logn_i)$ 件物品，将原问题转化为了复杂度为 $O(W \sum_i{logn_i})$ 的 01 背包问题，相对于分析一是很大的改进，具体代码见3.4节。
+
+## 3.4 代码模板
+
+此节根据上面的讲解给出这三种背包问题的解题模板，方便解题使用。尤其注意其中二进制优化是如何实现的。
+
+``` C++
+/*
+https://tangshusen.me/2019/11/24/knapsack-problem/
+01背包, 完全背包, 多重背包模板(二进制优化). 
+2020.01.04 by tangshusen.
+
+用法:
+    对每个物品调用对应的函数即可, 例如多重背包:
+    for(int i = 0; i < N; i++) 
+        multiple_pack_step(dp, w[i], v[i], num[i], W);
+
+参数:
+    dp   : 空间优化后的一维dp数组, 即dp[i]表示最大承重为i的书包的结果
+    w    : 这个物品的重量
+    v    : 这个物品的价值
+    n    : 这个物品的个数
+    max_w: 书包的最大承重
+*/
+void zero_one_pack_step(vector<int>&dp, int w, int v, int max_w){
+    for(int j = max_w; j >= w; j--) // 反向枚举!!!
+        dp[j] = max(dp[j], dp[j - w] + v);
+}
+
+void complete_pack_step(vector<int>&dp, int w, int v, int max_w){
+    for(int j = w; j <= max_w; j++) // 正向枚举!!!
+        dp[j] = max(dp[j], dp[j - w] + v);
+
+    // 法二: 转换成01背包, 二进制优化
+    // int n = max_w / w, k = 1;
+    // while(n > 0){
+    //     zero_one_pack_step(dp, w*k, v*k, max_w);
+    //     n -= k;
+    //     k = k*2 > n ? n : k*2;
+    // }
+}
+
+void multiple_pack_step(vector<int>&dp, int w, int v, int n, int max_w){
+   if(n >= max_w / w) complete_pack_step(dp, w, v, max_w);
+   else{ // 转换成01背包, 二进制优化
+       int k = 1;
+       while(n > 0){
+           zero_one_pack_step(dp, w*k, v*k, max_w);
+           n -= k;
+           k = k*2 > n ? n : k*2;
+       }
+   }
+}
+```
 
 # 4. 其他情形
 
