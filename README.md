@@ -1,8 +1,17 @@
 # 我的博客
 ## 仓库简介
 本仓库存放了我的个人网站 https://tangshusen.me/ 的相关文件，含有两个branch: master和hexo(default):
-* hexo存放相关hexo文件(即我本地的blog文件夹所有内容)如md文件等等;
+* 默认分支hexo存放相关hexo文件(即我本地的blog文件夹所有内容)如md文件等等;
 * master存放发布到网站的由md文件生成的静态文件，即md博客文件写好后通过命令`hexo g -d`发布网站时会将静态文件push到master分支。
+
+
+## 写文章步骤
+
+1. 确保本地仓库是切换到了hexo分支并pull一下；
+2. 执行`hexo n "blog_title"`新建文章，可以发现`source/_posts/`目录多了一个文件夹和一个.md文件，分别用来存放文章图片和文章内容；
+3. 编辑、撰写文章或做其他博客更新改动；
+4. `hexo g`生成静态网页，然后`hexo s`本地预览效果，确保没问题后执行`hexo d`（在此之前，有时可能需要执行hexo clean）部署，会自动将最新静态文件改动更新到master分支了；
+5. 然后将本地hexo分支的改动也更新到git。
 
 ## 参考文章
 [GitHub+Hexo 搭建个人网站详细教程](https://zhuanlan.zhihu.com/p/26625249)  
