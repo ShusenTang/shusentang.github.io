@@ -13,6 +13,19 @@
 4. `hexo g`生成静态网页，然后`hexo s`本地预览效果，确保没问题后执行`hexo d`（在此之前，有时可能需要执行hexo clean）部署，会自动将最新静态文件改动更新到master分支了；
 5. 然后将本地hexo分支的改动也更新到git。
 
+
+## hexo常用命令
+`npm install hexo -g` # 安装Hexo
+`npm update hexo -g` # 升级
+`hexo init` # 初始化博客
+
+
+`hexo n "blog_title"` == `hexo new "blog_title"` # 新建文章
+`hexo g` == `hexo generate` # 生成
+`hexo s` == `hexo server` # 预览
+`hexo d` == `hexo deploy` # 部署
+`hexo clean` # 清除缓存,若是网页正常情况下可以忽略这条命令
+
 ## 参考文章
 [GitHub+Hexo 搭建个人网站详细教程](https://zhuanlan.zhihu.com/p/26625249)  
 [超详细Hexo+Github博客搭建小白教程](https://godweiyang.com/2018/04/13/hexo-blog/)  
