@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://tangshusen.me/"/>
-  <updated>2020-01-04T08:04:36.566Z</updated>
+  <updated>2021-05-07T13:55:08.852Z</updated>
   <id>https://tangshusen.me/</id>
   
   <author>
@@ -15,6 +15,27 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Google三驾马车之MapReduce</title>
+    <link href="https://tangshusen.me/2021/05/05/mapreduce/"/>
+    <id>https://tangshusen.me/2021/05/05/mapreduce/</id>
+    <published>2021-05-05T12:54:12.000Z</published>
+    <updated>2021-05-07T13:55:08.852Z</updated>
+    
+    <summary type="html">
+    
+      &lt;!-- &lt;center&gt;
+&lt;img src=&quot;./SVM/cover.png&quot; width=&quot;300&quot; class=&quot;full-image&quot;&gt;
+&lt;/center&gt; --&gt;
+&lt;p&gt;Google三驾马车（Google File System (GFS)，MapReduce，BigTable）不仅在大数据领域广为人知，更直接或间接性的推动了大数据、云计算、乃至如今火爆的人工智能领域的发展。本文参考原论文对 MapReduce 进行学习总结。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="Big Data" scheme="https://tangshusen.me/categories/Big-Data/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>动态规划之背包问题系列</title>

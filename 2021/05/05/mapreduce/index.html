@@ -112,19 +112,20 @@
 
 
 
-  <meta name="keywords" content="tensorflow,RNN,attention,seq2seq">
+  <meta name="description" content="Google三驾马车（Google File System (GFS)，MapReduce，BigTable）不仅在大数据领域广为人知，更直接或间接性的推动了大数据、云计算、乃至如今火爆的人工智能领域的发展。本文参考原论文对 MapReduce 进行学习总结。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="TensorFlow实现多层RNN的一个大坑">
-<meta property="og:url" content="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/index.html">
+<meta property="og:title" content="Google三驾马车之MapReduce">
+<meta property="og:url" content="https://tangshusen.me/2021/05/05/mapreduce/index.html">
 <meta property="og:site_name" content="TangShusen">
+<meta property="og:description" content="Google三驾马车（Google File System (GFS)，MapReduce，BigTable）不仅在大数据领域广为人知，更直接或间接性的推动了大数据、云计算、乃至如今火爆的人工智能领域的发展。本文参考原论文对 MapReduce 进行学习总结。">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:image" content="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/cover.jpg">
-<meta property="og:image" content="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/enc_dec_with_attn.png">
-<meta property="og:image" content="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/enc_dec_with_attn_2.png">
-<meta property="og:updated_time" content="2018-12-30T09:15:56.162Z">
+<meta property="og:image" content="https://tangshusen.me/2021/05/05/mapreduce/exe_overview.png">
+<meta property="og:image" content="https://tangshusen.me/2021/05/05/mapreduce/backup_task.png">
+<meta property="og:updated_time" content="2021-05-07T13:55:08.852Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="TensorFlow实现多层RNN的一个大坑">
-<meta name="twitter:image" content="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/cover.jpg">
+<meta name="twitter:title" content="Google三驾马车之MapReduce">
+<meta name="twitter:description" content="Google三驾马车（Google File System (GFS)，MapReduce，BigTable）不仅在大数据领域广为人知，更直接或间接性的推动了大数据、云计算、乃至如今火爆的人工智能领域的发展。本文参考原论文对 MapReduce 进行学习总结。">
+<meta name="twitter:image" content="https://tangshusen.me/2021/05/05/mapreduce/exe_overview.png">
 
 
 
@@ -133,7 +134,7 @@
 
 
 
-  <link rel="canonical" href="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/">
+  <link rel="canonical" href="https://tangshusen.me/2021/05/05/mapreduce/">
 
 
 
@@ -143,7 +144,7 @@
   };
 </script>
 
-  <title>TensorFlow实现多层RNN的一个大坑 | TangShusen</title>
+  <title>Google三驾马车之MapReduce | TangShusen</title>
   
 
 
@@ -359,7 +360,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2018/11/13/tf-multi-rnn-bug/">
+    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2021/05/05/mapreduce/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="TangShusen">
@@ -376,7 +377,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">TensorFlow实现多层RNN的一个大坑
+          <h1 class="post-title" itemprop="name headline">Google三驾马车之MapReduce
               
             
           </h1>
@@ -401,7 +402,7 @@
                 
               
 
-              <time title="创建时间：2018-11-13 22:30:02" itemprop="dateCreated datePublished" datetime="2018-11-13T22:30:02+08:00">2018-11-13</time>
+              <time title="创建时间：2021-05-05 20:54:12" itemprop="dateCreated datePublished" datetime="2021-05-05T20:54:12+08:00">2021-05-05</time>
             
 
             
@@ -418,7 +419,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-12-30 17:15:56" itemprop="dateModified" datetime="2018-12-30T17:15:56+08:00">2018-12-30</time>
+                <time title="修改时间：2021-05-07 21:55:08" itemprop="dateModified" datetime="2021-05-07T21:55:08+08:00">2021-05-07</time>
               
             
           </span>
@@ -435,7 +436,7 @@
                 <span class="post-meta-item-text">分类于</span>
               
               
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Deep-Learning/" itemprop="url" rel="index"><span itemprop="name">Deep Learning</span></a></span>
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Big-Data/" itemprop="url" rel="index"><span itemprop="name">Big Data</span></a></span>
 
                 
                 
@@ -450,8 +451,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/11/13/tf-multi-rnn-bug/#comments" itemprop="discussionUrl">
-                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2018/11/13/tf-multi-rnn-bug/" itemprop="commentCount"></span>
+                <a href="/2021/05/05/mapreduce/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2021/05/05/mapreduce/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -459,7 +460,7 @@
 
           
           
-             <span id="/2018/11/13/tf-multi-rnn-bug/" class="leancloud_visitors" data-flag-title="TensorFlow实现多层RNN的一个大坑">
+             <span id="/2021/05/05/mapreduce/" class="leancloud_visitors" data-flag-title="Google三驾马车之MapReduce">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -490,45 +491,102 @@
       
 
       
-        <center><br><img src="/2018/11/13/tf-multi-rnn-bug/cover.jpg" width="400" class="full-image"><br></center>
-
+        <!-- <center>
+<img src="./SVM/cover.png" width="300" class="full-image">
+</center> -->
+<p>Google三驾马车（Google File System (GFS)，MapReduce，BigTable）不仅在大数据领域广为人知，更直接或间接性的推动了大数据、云计算、乃至如今火爆的人工智能领域的发展。本文参考原论文对 MapReduce 进行学习总结。</p>
 <a id="more"></a>
-<h2 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h2><p>事情的起因是这样的，我已经用tensorflow实现了一个带attention的encoder-decoder(都是单层的RNN)的结构，代码组织结构如下所示<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">encoder_cell = tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)</span><br><span class="line">decoder_cell = tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">Encoder</span><span class="params">(cell, inputs)</span>:</span></span><br><span class="line">    <span class="string">'''根据输入得到输出'''</span></span><br><span class="line">    ......</span><br><span class="line">    <span class="keyword">return</span> outputs</span><br><span class="line"></span><br><span class="line"><span class="comment"># shape: (batch_size, max_seq_len, rnn_size)</span></span><br><span class="line">encoder_outputs = Encoder(encoder_cell, inputs)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下面是attention</span></span><br><span class="line">attn_mech = tf.contrib.seq2seq.LuongAttention(...) </span><br><span class="line">decoder_cell = tf.contrib.seq2seq.AttentionWrapper(decoder_cell, attn_mech, attention_layer_size=attn_size,...)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下面的就不重要了</span></span><br><span class="line">......</span><br></pre></td></tr></table></figure></p>
-<p>上面这段代码在attn_size为任何值的时候都是可以正常执行的。这也很符合预期，因为上面这段代码所干的事情如下:</p>
-<ul>
-<li>用encoder将input编码成encoder_output(即attention的keys或者memory)；</li>
-<li>对于decode的每一个时刻t，将t-1时刻得到的attention context(shape[-1]为attn_size)和decoder的输入合并在一起输入到decoder；<br>……</li>
-</ul>
-<p>可以看到attn_size确实是任何值都可以, 也即decoder的输入维度(attn_size + input_x_size)为任何都可以。</p>
-<blockquote>
-<p>注意TensorFlow中的RNN cell不需要显式指定输入的维度(而是自己推断出来)，这和pytorch不一样:<br><code>pytorch_rnn = torch.nn.LSTM(input_size = attn_size + input_x_size, hidden_size=rnn_size)</code></p>
-</blockquote>
-<h2 id="经过"><a href="#经过" class="headerlink" title="经过"></a>经过</h2><p>后来我又想将decoder改成多层的RNN，decoder结构就像下面右边这样：</p>
-<center><br><img src="/2018/11/13/tf-multi-rnn-bug/enc_dec_with_attn.png" width="400" class="full-image"><br></center>
-
-<p>于是我将<code>decoder_cell</code>的定义做了如下修改:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line"></span><br><span class="line">one_cell = tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)</span><br><span class="line">decoder_cell = tf.nn.rnn_cell.MultiRNNCell([one_cell <span class="keyword">for</span> _ <span class="keyword">in</span> range(dec_num_layers)])</span><br><span class="line">......</span><br></pre></td></tr></table></figure></p>
-<p>除非把<code>attn_size</code>设置成<code>rnn_size - input_x_size</code>，否则会报类似下面的维度不对的错误(假设<code>rnn_size=256</code>, <code>attn_size + input_x_size = 356</code>)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ValueError: Dimensions must be equal, but are 256 and 356 for &apos;rnn/while/rnn/multi_rnn_cell/cell_0/cell_0/lstm_cell/MatMul_1&apos; (op: &apos;MatMul&apos;) with input shapes: [30,256], [356,1200].</span><br></pre></td></tr></table></figure></p>
-<p>这是为什么呢？明明按照前面的分析，明明attn_size设置成任何值都可以的啊。</p>
-<h2 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h2><p>一开始我一直以为是我的attention写得不对，于是google了好久都没发现attention问题在哪？<br>直到我看到了这个<a href="https://github.com/tensorflow/tensorflow/issues/16186" target="_blank" rel="noopener">issue</a>才发现是我的多层RNN没写对，还是自己太菜了😭</p>
-<p>正确的多层<code>decoder_cell</code>应该是如下定义:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">......</span><br><span class="line">cell_list = [tf.nn.rnn_cell.LSTMCell(num_units=rnn_size) <span class="keyword">for</span> _ <span class="keyword">in</span> range(dec_num_layers)]</span><br><span class="line">decoder_cell = tf.nn.rnn_cell.MultiRNNCell(cell_list)</span><br><span class="line">......</span><br></pre></td></tr></table></figure></p>
-<p>咋一看上面这段代码貌似和之前的错误代码没什么区别，但是如下代码你就应该意识到哪儿不对了<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>str = <span class="string">"bug"</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>strs = [str <span class="keyword">for</span> _ <span class="keyword">in</span> range(<span class="number">2</span>)]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>print(strs)</span><br><span class="line">[<span class="string">'bug'</span>, <span class="string">'bug'</span>]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">for</span> str <span class="keyword">in</span> strs:</span><br><span class="line">        print(id(str)) <span class="comment"># id()函数用于获取对象的内存地址</span></span><br><span class="line"><span class="number">4367049200</span></span><br><span class="line"><span class="number">4367049200</span></span><br></pre></td></tr></table></figure></p>
-<p>注意到上面输出的两个地址都是一样的。因此，我们就知道问题出在哪儿了:<br>对于前面错误的多层rnn实现, 每一层的LSTMCell其实都是同一个(指向它们的指针是相同的)，那么每一层的LSTMCell的weights维度就也是一样的，但其实第一层的输入维度(<code>attn_size + input_x_size</code>)和其它层的（<code>rnn_size</code>)一般都是不一样的，如下图所示，这样就会报维度错误了。</p>
-<center><br><img src="/2018/11/13/tf-multi-rnn-bug/enc_dec_with_attn_2.png" width="400" class="full-image"><br></center>
-
-<p>而正确代码中，每一个LSTMCell都是通过<code>tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)</code>定义的，因此可以有不同的结构，自然不会报错。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
-<li><p>TensorFlow中错误的多层RNN实现方式:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">one_cell = tf.nn.rnn_cell.LSTMCell(num_units=rnn_size)</span><br><span class="line">decoder_cell = tf.nn.rnn_cell.MultiRNNCell([one_cell <span class="keyword">for</span> _ <span class="keyword">in</span> range(dec_num_layers)])</span><br><span class="line"><span class="comment"># decoder_cell = tf.nn.rnn_cell.MultiRNNCell([one_cell]*dec_num_layers])也是错误的</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>TensorFlow中正确的多层RNN实现方式:</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cell_list = [tf.nn.rnn_cell.LSTMCell(num_units=rnn_size) <span class="keyword">for</span> _ <span class="keyword">in</span> range(dec_num_layers)]</span><br><span class="line">decoder_cell = tf.nn.rnn_cell.MultiRNNCell(cell_list)</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>参考</p>
+<p>[TOC]</p>
+<h1 id="1-引言"><a href="#1-引言" class="headerlink" title="1. 引言"></a>1. 引言</h1><p>首先回答几个基本问题。</p>
 <ol>
-<li><a href="https://stackoverflow.com/questions/47371608/cannot-stack-lstm-with-multirnncell-and-dynamic-rnn" target="_blank" rel="noopener">Cannot stack LSTM with MultiRNNCell and dynamic_rnn</a></li>
-<li><a href="https://stackoverflow.com/questions/48865554/using-dynamic-rnn-with-multirnn-gives-error/53277463#53277463" target="_blank" rel="noopener">using dynamic_rnn with multiRNN gives error</a></li>
+<li><p>MapReduce是什么？<br>MapReduce 是一个编程模型及实现，用于处理或生成超大数据集。</p>
+</li>
+<li><p>MapReduce解决什么问题？<br>针对超大量数据，MapReduce解决如何在很多台机器上并行计算、数据分配及故障处理等问题。</p>
+</li>
 </ol>
+<ol start="3">
+<li><p>MapReduce的基本原理？<br>Map函数处理一个键值对（key/value pair）的数据集合，输出中间结果（依然是键值对集合）；然后 Reduce 函数处理中间结果，合并具有相同 key 的 value 值得到最终输出。</p>
+</li>
+<li><p>MapReduce有哪些实际应用？</p>
+<ul>
+<li>大规模机器学习系统；</li>
+<li>数据挖掘，例如从新闻等网页中提取有用信息（如地理位置信息）；</li>
+<li>大规模图形计算；</li>
+<li>大规模搜索系统；</li>
+</ul>
+</li>
+</ol>
+<h1 id="2-编程模型"><a href="#2-编程模型" class="headerlink" title="2. 编程模型"></a>2. 编程模型</h1><p>总的来讲，MapReduce 所执行的分布式计算会以一组键值对作为输入，输出另一组键值对，用户则通过编写 Map 函数和 Reduce 函数来指定所要进行的计算。</p>
+<p>具体来讲， Map 函数和 Reduce 函数的输入和输出的数据类型为：<br>$$<br>\begin{array}{lll}<br>\textrm{map} &amp; (k_1,v_1) &amp; \rightarrow \textrm{list}(k_2,v_2) \\<br>\textrm{reduce} &amp; (k_2,\textrm{list}(v_2)) &amp; \rightarrow \textrm{list}(v_2) \\<br>\end{array}<br>$$</p>
+<p>以统计大量文档每个单词出现的次数（Word Count）为例，伪代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">map(String key, String value):</span><br><span class="line">  // key: document name</span><br><span class="line">  // value: document contents</span><br><span class="line">  for each word w in value:</span><br><span class="line">    EmitIntermediate(w, “1”);</span><br><span class="line"></span><br><span class="line">reduce(String key, Iterator values):</span><br><span class="line">  // key: a word</span><br><span class="line">  // values: a list of counts</span><br><span class="line">  int result = 0;</span><br><span class="line">  for each v in values:</span><br><span class="line">    result += ParseInt(v);</span><br><span class="line">  Emit(AsString(result));</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，一般使用 Iterator 来表示输入的集合，因为可以避免集合过大，无法被完整地放入到内存中。</p>
+<h1 id="3-实现"><a href="#3-实现" class="headerlink" title="3. 实现"></a>3. 实现</h1><h2 id="3-1-MapReduce执行过程"><a href="#3-1-MapReduce执行过程" class="headerlink" title="3.1 MapReduce执行过程"></a>3.1 MapReduce执行过程</h2><p>MapReduce 的大致执行过程如下图所示：</p>
+<center><br>    <img src="/2021/05/05/mapreduce/exe_overview.png" width="600" class="full-image"><br></center>
+
+<p>图中的6个步骤对应如下：</p>
+<ol>
+<li><p>先将输入文件分成 $M$ 个数据片段，每个数据片段的大小一般从 16MB 到 64MB。然后用户程序在集群中创建大量程序副本。</p>
+</li>
+<li><p>副本程序中除了一个 master，其他都是 worker 程序，并由 master 分配 $M$ 个 map 任务和 $R$ 个 reduce 任务。master 将一个 map 任务或 reduce 任务分配给一个空闲的 worker。</p>
+</li>
+<li><p>被分配了 map 任务的 worker 程序读取对应的输入数据片段，解析并处理键值对，生成并输出中间键值对结果，并缓存在内存缓冲区中。</p>
+</li>
+<li><p>周期性地，缓冲区中的中间结果会被用户指定的切分（partition）函数（例如<code>hash(key) mod R</code>）切分为 $R$ 个部分，并存入到本地磁盘中。任务完成时，缓存在本地磁盘上的存储位置将被回传给 master，由 master 负责把这些存储位置再传送给 reduce worker。</p>
+</li>
+<li><p>Reduce worker 程序接收到 master 程序发来的数据存储位置信息后，使用 RPC 从 map worker 所在主机的磁盘上读取这些缓存数据，然后通过对 key 进行<font color="red">排序</font>后使得具有相同 key 值的数据聚合在一起。如果中间数据太大无法在内存中完成排序，那么就要在外部进行排序。</p>
+</li>
+<li><p>Reduce worker 程序遍历排序后的中间数据，对于每一个唯一的中间 key 值，reduce worker 将这个 key 值和它相关的 value 值的集合传递给用户自定义的 reduce 函数进行处理，处理输出被追加到所属分区的输出文件。<font color="red">由于是按顺序对排序后的中间数据进行处理，所以每个输出文件分片内部是有序的。</font></p>
+</li>
+</ol>
+<p>成功完成所有任务之后，MapReduce 的输出存放在了 $R$ 个输出文件中（对应每个 reduce 任务产生一个输出文件，文件名由用户指定）。一般情况下，用户不需要将这 $R$ 个输出文件合并成一个文件，而会把这些文件作为另外一个 MapReduce程序的输入，或者在另外一个分布式应用中使用。</p>
+<p>关于分片数$M$和$R$：</p>
+<ul>
+<li>$M$：输入文件会被切分成的分片数，也是 map 任务的个数；</li>
+<li>$R$：输出文件的分片数，也是 reduce 任务的个数；</li>
+</ul>
+<font color="red">即 $M$ 个 map 任务与输入文件分片分别一一对应，$R$ 个 reduce 任务与输出文件分片分别一一对应。</font> $M$和$R$ 的值都应比集群中的 Worker 数量要大，以达成集群内负载均衡的效果。例如如果有 2000 台 worker 机器，可设置成 $M=200000, R=5000$。<br><br><br>## 3.2 Master的作用<br><br>Master会存储每一个 Map 和 Reduce 任务的状态（idle、in-progress, or completed，空闲、工作中或完成)，以及 Worker 机器的标识。Master 就像一个数据管道，中间文件存储区域的位置信息通过这个管道从 Map 传递到 Reduce，对于每个已经完成的 Map 任务，master 存储了 Map 任务产生的 $R$ 个中间文件存储区域的大小和位置的更新信息，这些信息被逐步递增的推送给那些正在工作的 Reduce 任务。<br><br>## 3.3 容错机制<br><br>由于MapReduce库旨在使用数百或数千台计算机处理大量数据，因此必须能容忍机器故障。<br><br>### 3.3.1 Worker故障<br><br>故障判定：master 周期性的 ping 每个 worker，在一个约定的时间范围内没有收到 worker 返回的信息，master 将把这个 worker 标记为失效。<br><br>故障处理：<br>- 正在运行：正在运行的 Map 或 Reduce 任务将被重新置为空闲状态，等待重新调度；<br>- <font color="red">已完成：已完成的 Map 任务也需要被重设为的空闲状态等待重新调度执行，因为该 Worker 不可用也意味着存储在该 Worker 本地磁盘上的中间结果也不可用了；已经完成的 Reduce 任务的输出存储在全局文件系统（Google File System）上，因此不需要重新执行。</font>
+
+<h3 id="3-3-2-Master故障"><a href="#3-3-2-Master故障" class="headerlink" title="3.3.2 Master故障"></a>3.3.2 Master故障</h3><p>最简单的解决办法是让 master 周期性的将checkpoint写入磁盘，如果这个 master 任务失败了，可以从最后一个checkpoint开始启动另一个 master 进程。</p>
+<p>整个 MapReduce 集群中只会有一个 master 结点，因此 master 故障的情况并不多见。所以现在的实现是如果 master 故障，就中止 MapReduce 运算。用户可以检查到这个状态，并且可以根据需要重新执行 MapReduce 操作。</p>
+<h2 id="3-4-数据的本地性"><a href="#3-4-数据的本地性" class="headerlink" title="3.4 数据的本地性"></a>3.4 数据的本地性</h2><p>机器间的网络带宽是比较稀缺的资源，需要尽量减少在机器间过多地进行不必要的数据传输。因此，</p>
+<ul>
+<li>尽量把输入数据存储在集群中机器的本地磁盘上来节省网络带宽；</li>
+<li>尽量将一个 map 任务调度在包含对应输入数据副本的机器上执行；</li>
+<li>如果无法将 map 任务分配至该机器，Master 也会利用 Google File System 提供的机架拓扑信息将任务分配到较近的机器上。</li>
+</ul>
+<h2 id="3-5-备用任务机制"><a href="#3-5-备用任务机制" class="headerlink" title="3.5 备用任务机制"></a>3.5 备用任务机制</h2><p>如果集群中有某个 Worker 花了特别长的时间来完成最后的几个 Map 或 Reduce 任务，整个 MapReduce 计算任务的耗时就会因此被拖长，这样的 Worker 也就成了落后者（Straggler）。</p>
+<p>因此，当一个 MapReduce 操作接近完成的时候，master 会调度备用（backup）任务进程来执行剩下的、处于处理中状态（in-progress）的任务。无论是最初的执行、还是备用（backup）任务进程完成了任务，我们都把这个任务标记成为已经完成。</p>
+<center><br>    <img src="/2021/05/05/mapreduce/backup_task.png" width="500" class="full-image"><br></center>
+
+<p>上图是一个真实MapReduce的执行过程中数据传输速率随时间的变化图，可见当没有采用备用任务机制时，完成（Done）时间被少量Straggler拖长了。</p>
+<h1 id="4-一些技巧"><a href="#4-一些技巧" class="headerlink" title="4. 一些技巧"></a>4. 一些技巧</h1><h2 id="4-1-分区函数"><a href="#4-1-分区函数" class="headerlink" title="4.1 分区函数"></a>4.1 分区函数</h2><p>MapReduce对中间结果的 key 使用分区函数来对数据进行分区，之后再输入到后续任务执行进程。默认分区函数是使用 hash（比如<code>hash(key) mod R</code>），有时候也可以使用其他函数，例如将<code>hash(Hostname(urlkey)) mod R</code>作为分区函数就可以把所有来自同一个主机的 URLs 保存在同一个输出文件中。</p>
+<h2 id="4-2-Combiner函数"><a href="#4-2-Combiner函数" class="headerlink" title="4.2 Combiner函数"></a>4.2 Combiner函数</h2><p>某些情况下，Map 函数产生的中间 key 值的重复数据会占很大的比重（例如WordCount时一些stop words如”the”），并且用户自定义的 Reduce 函数满足结合律和交换律。在这种情况下，MapReduce 系统允许用户声明在 Mapper 上执行的 Combiner 函数: Combiner 函数首先在本地将这些记录进行一次合并，然后将合并的结果再通过网络发送出去，以减少 Mapper 和 Reducer 间需要传输的数据量。</p>
+<p>一般情况下，Combiner 和 Reduce 函数是一样的，唯一的区别是 Reduce 函数的输出被保存在最终的输出文件里，Combiner 函数的输出被写到中间文件里，然后被发送给 Reduce 任务。</p>
+<h2 id="4-3-跳过损坏的数据"><a href="#4-3-跳过损坏的数据" class="headerlink" title="4.3 跳过损坏的数据"></a>4.3 跳过损坏的数据</h2><p>有时候少量特定的数据记录可能会导致Map或者Reduce函数出错，导致整个MapReduce程序出错。此时MapReduce提供一种模式来检测并跳过这些特定的数据：Master会记录在每个数据记录上的失败次数，如果发现之前在此条数据记录上失败过了，那就跳过此条数据。</p>
+<h2 id="4-4-其他"><a href="#4-4-其他" class="headerlink" title="4.4 其他"></a>4.4 其他</h2><ul>
+<li>本地执行：MapReduce支持本地执行方便debug；</li>
+<li>状态信息：master 使用 HTTP 服务器（如 Jetty）显示一些状态信息，用户可以监控各种执行状态。</li>
+<li>计数器：计数器机制对于 MapReduce 操作的完整性检查非常有用。</li>
+</ul>
+<h1 id="5-总结"><a href="#5-总结" class="headerlink" title="5. 总结"></a>5. 总结</h1><p>MapReduce编程模型已经在Google内部成功应用于多个领域，主要有以下几个原因：</p>
+<ol>
+<li>由于 MapReduce 封装了并行处理、容错处理、数据本地化优、负载均衡等等技术难点的细节，这使得 MapReduce 库易于使用（即使是对没有并行和分布式系统经验的程序员来说）；</li>
+<li>很多问题都可以用Map和Reduce的方式解决，例如搜索、排序、数据挖掘、机器学习以及其他许多系统。</li>
+<li>Google实现了一个在数千台计算机组成的大型集群上灵活部署运行的 MapReduce 系统，这个实现有效地利用了这些机器资源，因此适合用于Google遇到的许多大型计算问题。</li>
+</ol>
+<p>我们也从MapReduce开发过程中学到了不少东西：</p>
+<ol>
+<li>对编程模型的限制（约束编程模式）使得并行化和分布式计算变得非常容易，并具有容错性。</li>
+<li><p>网络带宽是一种稀缺资源。因此，MapReduce系统很多优化都是以减少网络数据传输量为目标的：</p>
+<ul>
+<li>本地优化使大量数据能够从本地磁盘上读取；</li>
+<li>将中间数据的唯一副本写入本地磁盘则可以节省网络带宽。</li>
+</ul>
+</li>
+<li><p>冗余执行可以减少慢速机器（Straggler）带来的负面影响，同时解决了机器失效导致的数据丢失问题。</p>
+</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://static.googleusercontent.com/media/research.google.com/zh-CN//archive/mapreduce-osdi04.pdf" target="_blank" rel="noopener">MapReduce: Simplified Data Processing on Large Clusters</a><br><a href="https://blog.csdn.net/HeyShHeyou/article/details/103538057" target="_blank" rel="noopener">CSDN：Google 早期三驾马车之 MapReduce 论文学习与研读</a><br><a href="https://zhuanlan.zhihu.com/p/34849261" target="_blank" rel="noopener">知乎：Google MapReduce 论文详解</a></p>
 
       
     </div>
@@ -583,18 +641,6 @@
 
     <footer class="post-footer">
       
-        <div class="post-tags">
-          
-            <a href="/tags/tensorflow/" rel="tag"># tensorflow</a>
-          
-            <a href="/tags/RNN/" rel="tag"># RNN</a>
-          
-            <a href="/tags/attention/" rel="tag"># attention</a>
-          
-            <a href="/tags/seq2seq/" rel="tag"># seq2seq</a>
-          
-        </div>
-      
 
       
       
@@ -604,8 +650,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/10/27/SVM/" rel="next" title="看了这篇文章你还不懂SVM你就来打我">
-                <i class="fa fa-chevron-left"></i> 看了这篇文章你还不懂SVM你就来打我
+              <a href="/2019/11/24/knapsack-problem/" rel="next" title="动态规划之背包问题系列">
+                <i class="fa fa-chevron-left"></i> 动态规划之背包问题系列
               </a>
             
           </div>
@@ -613,10 +659,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/11/18/adaboost/" rel="prev" title="AdaBoost算法详解与python实现">
-                AdaBoost算法详解与python实现 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -857,7 +899,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#起因"><span class="nav-text">起因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#经过"><span class="nav-text">经过</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决"><span class="nav-text">解决</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-引言"><span class="nav-text">1. 引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-编程模型"><span class="nav-text">2. 编程模型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-实现"><span class="nav-text">3. 实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-MapReduce执行过程"><span class="nav-text">3.1 MapReduce执行过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-2-Master故障"><span class="nav-text">3.3.2 Master故障</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-数据的本地性"><span class="nav-text">3.4 数据的本地性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-备用任务机制"><span class="nav-text">3.5 备用任务机制</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-一些技巧"><span class="nav-text">4. 一些技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-分区函数"><span class="nav-text">4.1 分区函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-Combiner函数"><span class="nav-text">4.2 Combiner函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-跳过损坏的数据"><span class="nav-text">4.3 跳过损坏的数据</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4-其他"><span class="nav-text">4.4 其他</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-总结"><span class="nav-text">5. 总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
