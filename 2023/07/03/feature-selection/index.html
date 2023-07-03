@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+  <meta name="google-site-verification" content="UM_oWjkmpNS4sC6N8fDEsgSTPTOong_3Muz7XL_l-bQ">
+
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="NntzqnjuUs">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/my_apple-touch-icon-next.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/my_favicon-32x32.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/my_favicon-16x16.jpg?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/my_logo.jpg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="在搜广推场景下，各业务团队会生产很多特征，但很多都是冗余甚至与预测任务不相干的，这不仅带来了额外的性能开销，还可能会导致模型陷入局部最优影响模型预估效果。因此，不管是性能优化，还是效果优化，特征选择都是必不可少的。本人近期阅读了一些特征选择相关的文章（包括特征重要度学习、embedding维度搜索等），总结成本文留作日后回顾，也供大家参考。">
+<meta name="keywords" content="特征筛选">
+<meta property="og:type" content="article">
+<meta property="og:title" content="搜广推之特征自动选择">
+<meta property="og:url" content="https://tangshusen.me/2023/07/03/feature-selection/index.html">
+<meta property="og:site_name" content="TangShusen">
+<meta property="og:description" content="在搜广推场景下，各业务团队会生产很多特征，但很多都是冗余甚至与预测任务不相干的，这不仅带来了额外的性能开销，还可能会导致模型陷入局部最优影响模型预估效果。因此，不管是性能优化，还是效果优化，特征选择都是必不可少的。本人近期阅读了一些特征选择相关的文章（包括特征重要度学习、embedding维度搜索等），总结成本文留作日后回顾，也供大家参考。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/fibinet.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/senet.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/autofis.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/fscd-prerank.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/fscd.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/fscd-eq.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/pep.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/pep-eq.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/amtl-overview.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/amtl.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/amtl-eq1.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/amtl-eq2.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/autodim.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/autodim-embed.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/autofield.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/adafs.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/autofas.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/optembed-table.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/optembed.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/feature-selection/pepnet.png">
+<meta property="og:updated_time" content="2023-07-03T12:47:46.782Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="搜广推之特征自动选择">
+<meta name="twitter:description" content="在搜广推场景下，各业务团队会生产很多特征，但很多都是冗余甚至与预测任务不相干的，这不仅带来了额外的性能开销，还可能会导致模型陷入局部最优影响模型预估效果。因此，不管是性能优化，还是效果优化，特征选择都是必不可少的。本人近期阅读了一些特征选择相关的文章（包括特征重要度学习、embedding维度搜索等），总结成本文留作日后回顾，也供大家参考。">
+<meta name="twitter:image" content="https://tangshusen.me/2023/07/03/feature-selection/fibinet.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="TangShusen" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://tangshusen.me/2023/07/03/feature-selection/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>搜广推之特征自动选择 | TangShusen</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TangShusen</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2023/07/03/feature-selection/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="TangShusen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/assets/header.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TangShusen">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">搜广推之特征自动选择
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2023-07-03 20:42:03 / 修改时间：20:47:46" itemprop="dateCreated datePublished" datetime="2023-07-03T20:42:03+08:00">2023-07-03</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/搜广推/" itemprop="url" rel="index"><span itemprop="name">搜广推</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/07/03/feature-selection/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2023/07/03/feature-selection/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/07/03/feature-selection/" class="leancloud_visitors" data-flag-title="搜广推之特征自动选择">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在搜广推场景下，各业务团队会生产很多特征，但很多都是冗余甚至与预测任务不相干的，这不仅带来了额外的性能开销，还可能会导致模型陷入局部最优影响模型预估效果。因此，不管是性能优化，还是效果优化，特征选择都是必不可少的。本人近期阅读了一些特征选择相关的文章（包括特征重要度学习、embedding维度搜索等），总结成本文留作日后回顾，也供大家参考。</p>
+<a id="more"></a>
+<h1 id="1-FiBiNET（RecSys-2019）"><a href="#1-FiBiNET（RecSys-2019）" class="headerlink" title="1. FiBiNET（RecSys 2019）"></a>1. FiBiNET（RecSys 2019）</h1><p>论文链接：<a href="https://arxiv.org/abs/1905.09433" target="_blank" rel="noopener">FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction</a></p>
+<p>这篇文章有些早了，不过里面采用SENet来学习不同特征权重的思想，还是很有效的。</p>
+<h2 id="1-1-主要思想"><a href="#1-1-主要思想" class="headerlink" title="1.1 主要思想"></a>1.1 主要思想</h2><p>推荐领域数据海量稀疏，存在大量长尾低频特征，而这些低频特征去学一个靠谱的Embedding是基本没希望的，但是又不能把低频的特征全抛掉，因为有一些又是有效的。所以需要弱化那些不靠谱低频特征Embedding的负面影响，强化靠谱低频特征以及重要中高频特征的作用。因此，本文通过使用Squeeze-Excitation network (SENet) 结构动态学习特征的重要性，此外还提出了用双线性交叉层进行更精细的特征交叉。</p>
+<center><br><img src="/2023/07/03/feature-selection/fibinet.png" width="700" class="full-image"><br></center>
+
+<h2 id="1-2-SENet学习特征重要性"><a href="#1-2-SENet学习特征重要性" class="headerlink" title="1.2 SENet学习特征重要性"></a>1.2 SENet学习特征重要性</h2><p>SENet首先被提出用于对CNN中的通道间的相关性进行建模，对重要通道进行强化来提升模型准确率。本文用SENet学习每个特征的重要度：将每个特征向量embedding进行pooling（原SENET论文用的max，本论文说用mean结果更好），然后经过mlp映射（一般两层，先降维再升维）得到每个特征的重要度权重，然后将原始embedding乘上重要度权重作为输出。</p>
+<center><br><img src="/2023/07/03/feature-selection/senet.png" width="700" class="full-image"><br></center>
+
+
+
+<h1 id="2-AutoFIS（KDD-2020）"><a href="#2-AutoFIS（KDD-2020）" class="headerlink" title="2. AutoFIS（KDD 2020）"></a>2. AutoFIS（KDD 2020）</h1><p>论文链接：<a href="https://dl.acm.org/doi/pdf/10.1145/3394486.3403314" target="_blank" rel="noopener">AutoFIS: Automatic Feature Interaction Selection in Factorization Models for Click-Through Rate Prediction</a></p>
+<p>自动进行学习特征交叉的筛选。</p>
+<h2 id="2-1-主要思想"><a href="#2-1-主要思想" class="headerlink" title="2.1 主要思想"></a>2.1 主要思想</h2><p>分为两个阶段：</p>
+<ol>
+<li>搜索阶段：学习每个特征交叉的重要度门控参数（受NAS算法DARTS的启发）；</li>
+<li>重新训练阶段：去掉不重要的特征交叉，重新训练模型。</li>
+</ol>
+<center><br><img src="/2023/07/03/feature-selection/autofis.png" width="500" class="full-image"><br></center>
+
+
+<h2 id="2-2-特征交叉重要性搜索"><a href="#2-2-特征交叉重要性搜索" class="headerlink" title="2.2 特征交叉重要性搜索"></a>2.2 特征交叉重要性搜索</h2><p>对每一对特征交叉，引入一个可学习的门控参数 $\alpha$ 和其他参数一起联合训练，为了避免特征尺度对 $\alpha$ 学习的影响，引入BatchNorm；为了学习得到稀疏的 $\alpha$，使用GRDA（Generalized regularized dual averaging）优化器来学习 $\alpha$（其他参数还是用Adam进行学习）；</p>
+<h1 id="3-FSCD-PreRank（SIGIR-2021）"><a href="#3-FSCD-PreRank（SIGIR-2021）" class="headerlink" title="3. FSCD-PreRank（SIGIR 2021）"></a>3. FSCD-PreRank（SIGIR 2021）</h1><p>论文链接：<a href="https://arxiv.org/abs/2105.07706" target="_blank" rel="noopener">Towards a Better Tradeoff between Effectiveness and Efficiency in Pre-Ranking: A Learnable Feature Selection based Approach</a></p>
+<p>参考：<a href="https://zhuanlan.zhihu.com/p/375943741" target="_blank" rel="noopener">SIGIR 2021 | FSCD-PreRank：面向效率和效果更加均衡的交互式粗排模型 - 知乎</a></p>
+<p>阿里用于粗排的工作。</p>
+<h2 id="3-1-主要思想"><a href="#3-1-主要思想" class="headerlink" title="3.1 主要思想"></a>3.1 主要思想</h2><p>主要思想如下图所示</p>
+<center><br><img src="/2023/07/03/feature-selection/fscd-prerank.png" width="500" class="full-image"><br></center>
+
+<ol>
+<li>基于特征复杂度和variational dropout的可学习特征选择方法(FSCD)进行特征选择，选择精排特征的子集提供给粗排模型进行训练；</li>
+<li>通过继承精排模型结构，粗排阶段成功采用了IF结构的模型，解决传统向量点击模型效果不足的问题；</li>
+</ol>
+<h2 id="3-2-FSCD"><a href="#3-2-FSCD" class="headerlink" title="3.2 FSCD"></a>3.2 FSCD</h2><p>FSCD：Feature Selection based on feature Complexity and variational Dropout</p>
+<center><br><img src="/2023/07/03/feature-selection/fscd.png" width="600" class="full-image"><br></center>
+
+<p>借鉴Dropout FR（Dropout Feature Ranking for Deep Learning Models）的思想，针对每个特征学习一个丢弃率（dropout rate）z，该值越小表示该特征越重要。</p>
+<center><br><img src="/2023/07/03/feature-selection/fscd-eq.png" width="600" class="full-image"><br></center>
+
+<p>损失函数为上式。其中 $ \alpha $ 为 z 的正则惩罚项，是特征复杂度（包括计算和存储复杂度，例如在线计算复杂度、embedding维度、取值个数等等）的增函数。即较大复杂度的特征在训练中会受到较大的惩罚，因此有更大的可能被舍弃掉。</p>
+<h1 id="4-PEP（ICLR-2021）"><a href="#4-PEP（ICLR-2021）" class="headerlink" title="4. PEP（ICLR 2021）"></a>4. PEP（ICLR 2021）</h1><p>PEP是Plug-in Embedding Pruning的缩写，用于特征embedding维度搜索。</p>
+<p>论文链接：<a href="https://arxiv.org/abs/2101.07577" target="_blank" rel="noopener">[2101.07577] Learnable Embedding Sizes for Recommender Systems</a></p>
+<p>参考：<a href="https://zhuanlan.zhihu.com/p/389037631" target="_blank" rel="noopener">ICLR2021 | 推荐系统中可学习的嵌入维度 - 知乎</a></p>
+<h2 id="4-1-解决的问题"><a href="#4-1-解决的问题" class="headerlink" title="4.1 解决的问题"></a>4.1 解决的问题</h2><p>在搜广推场景下，由于数据海量且稀疏，传统Embedding方式会面临下面两个问题：</p>
+<ol>
+<li><p>模型参数量embedding占主导，过大的embedding size会带来极大地计算/存储开销。</p>
+</li>
+<li><p>相同的维度可能很难处理不同特征之间的异质性，很可能会导致那些不需要太大表示容量的特征出现过拟合，导致推荐模型陷入局部最优。</p>
+</li>
+</ol>
+<p>因此，对于不同特征，需要赋予不同的embedding维度。</p>
+<h2 id="4-2-主要思想"><a href="#4-2-主要思想" class="headerlink" title="4.2 主要思想"></a>4.2 主要思想</h2><center><br><img src="/2023/07/03/feature-selection/pep.png" width="600" class="full-image"><br></center>
+
+<p>如上图所示，通过设置阈值，将embedding进行剪枝。例如v1的第一个值被置为0丢弃，可以看作其embedding维度减1；另外对于一些不重要的特征，例如v3的所有值都置为了0，相当于进行了特征筛选。<br>为了自动实现上述过程，受Soft Threshold Reparameterization的启发，作者将soft剪枝后的embedding矩阵可表示为：</p>
+<center><br><img src="/2023/07/03/feature-selection/pep-eq.png" width="500" class="full-image"><br></center>
+
+<p>其中 g 为剪枝阈值计算函数（例如sigmoid），s 为可学习参数（需合理初始化以确保阈值开始时接近0），与其他参数联合训练优化。上述 s 为实数，即全局一个阈值，当然也可以向量甚至矩阵，实现更细粒度的剪枝。<br>剪枝完成后，对embedding进行mask，然后对模型重新训练。</p>
+<h1 id="5-AMTL（2021-CIKM）"><a href="#5-AMTL（2021-CIKM）" class="headerlink" title="5. AMTL（2021 CIKM）"></a>5. AMTL（2021 CIKM）</h1><p>论文链接：<a href="https://arxiv.org/pdf/2108.11513.pdf" target="_blank" rel="noopener">Learning Effective and Efficient Embedding via an Adaptively-Masked Twins-based Layer</a><br>参考：<a href="https://zhuanlan.zhihu.com/p/434470873" target="_blank" rel="noopener">CIKM 2021 | AMTL：设计孪生掩码层高效学习维度自适应的Embedding - 知乎</a></p>
+<p>也是一篇特征embedding维度学习的文章。</p>
+<h2 id="5-1-主要思想"><a href="#5-1-主要思想" class="headerlink" title="5.1 主要思想"></a>5.1 主要思想</h2><p>如下图所示，AMTL（Adaptively-Masked Twins-based Layer）可对不同特征学习到不同的embedding维度。由于AMTL的输入是特征频次信息，所以能够对高频特征赋予长embedding，对低频特征赋予短embedding。</p>
+<center><br><img src="/2023/07/03/feature-selection/amtl-overview.png" width="600" class="full-image"><br></center>
+
+<h2 id="5-2-AMTL模型结构"><a href="#5-2-AMTL模型结构" class="headerlink" title="5.2 AMTL模型结构"></a>5.2 AMTL模型结构</h2><p>如下图所示，AMTL的的输入输出分别是：<br>1）输入：特征 i 的频率信息 $s_i$，如特征历史出现次数、出现次数排名等等；<br>2）输出：特征 i 对应embedding的mask，该mask前 $k_i$ 个元素都是1，后面全是0；</p>
+<center><br><img src="/2023/07/03/feature-selection/amtl.png" width="600" class="full-image"><br></center>
+
+<p>由于网络参数很容易被高频的特征所主导， 因此作者提出了用两个分支网络来计算mask，h-AML 和 l-AML 分别被用来刻画高频和低频特征。在实践中，很难去卡一个阈值来事先定义哪些是高频特征哪些是低频特征，因此采用了soft的方法，即将 h-AML 和 l-AML 的输出通过加权得到，而这个权重是由特征的出现次数 $q_i$ 进行归一化得到的。即如果一个特征是高频特征，那 h-AML 的输出就会占主导，反向传播主要更新h-AML，反之亦然。</p>
+<h2 id="5-3-Relaxation-策略"><a href="#5-3-Relaxation-策略" class="headerlink" title="5.3 Relaxation 策略"></a>5.3 Relaxation 策略</h2><p>由于我们期望的输出需要 argmax 操作，是不可微的。因此，训练时，作者实际采用的是temperated softmax：</p>
+<center><br><img src="/2023/07/03/feature-selection/amtl-eq1.png" width="600" class="full-image"><br></center>
+
+<p>其中 T&gt;0 是温度超参，当T趋于0时，上式趋近于 argmax。然而，这样的操作会使得训练和推断之间存在gap，为了消除这个gap，受 Straight-Through Estimator (STE) 启发，作者重构t_i为</p>
+<center><br><img src="/2023/07/03/feature-selection/amtl-eq2.png" width="300" class="full-image"><br></center>
+
+<p>由于前向不受 stop_gradient 影响，故训练和推理保持了一致。 而在反向传播时，通过 stop_gradient 来避免不可微过程的梯度更新。</p>
+<h1 id="6-AutoDim（WWW-2021）"><a href="#6-AutoDim（WWW-2021）" class="headerlink" title="6. AutoDim（WWW 2021）"></a>6. AutoDim（WWW 2021）</h1><p>论文链接：<a href="https://arxiv.org/pdf/2006.14827.pdf" target="_blank" rel="noopener">AutoDim: Memory-efficient Embedding for Recommendations</a></p>
+<p>参考：<a href="https://zhuanlan.zhihu.com/p/378166274" target="_blank" rel="noopener">AutoDim:自动Embedding维度寻优，如何节省70%的存储空间同时还能大幅提效？</a></p>
+<p>也是一篇特征embedding维度学习的文章。</p>
+<h2 id="6-1-解决的问题"><a href="#6-1-解决的问题" class="headerlink" title="6.1 解决的问题"></a>6.1 解决的问题</h2><p>在搜广推场景下，由于数据海量且稀疏，会面临下面两个问题：</p>
+<ol>
+<li><p>模型参数量embedding占主导，过大的embedding size会带来极大地计算/存储开销。</p>
+</li>
+<li><p>不同特征的基数（即取值个数）大小不一，将所有特征编码成同一维度显然是不合理的。例如性别只有两种取值，而和商品ID有成千上万个取值，如果都编码成同一维度的embedding，那前者存在计算浪费，后者可能存在表达能力不足。</p>
+</li>
+</ol>
+<h2 id="6-2-主要思想"><a href="#6-2-主要思想" class="headerlink" title="6.2 主要思想"></a>6.2 主要思想</h2><center><br><img src="/2023/07/03/feature-selection/autodim.png" width="700" class="full-image"><br></center>
+
+
+<p>如上图，分为两个阶段，<br>（a）维度搜索：对每个特征的每个候选维度，学习一个权重（学习时复用embedding减小开销）。<br>（b）参数再训练：对每个特征选择权重最大的维度作为最终维度，重新训练。</p>
+<p>为了避免过拟合，作者在训练集上训练模型权重，在验证集上训练不同维度的权重（实验证明，同在训练集上处理，模型容易过拟合，基本会选择embedding size大的）。</p>
+<h2 id="6-2-阶段一、维度搜索"><a href="#6-2-阶段一、维度搜索" class="headerlink" title="6.2 阶段一、维度搜索"></a>6.2 阶段一、维度搜索</h2><p>在实践中，在维度权重学习之前，我们首先为所有候选embeddings分配相等的权重，固定这些权重进行预训练embedding。</p>
+<ol>
+<li>权重共享embedding<br>对每个特征学习多个维度的embedding，训练代价太大了。因此，如下图所示，考虑只学习一个维度为d（d为所有候选维度的最大值）的embedding，小于此维度的embedding复用前面的digits即可。这样做的好处是，1）大大减小了训练代价；2）embedding中靠前的digits被多次训练，更有可能学习到特征的重要信息。</li>
+</ol>
+<center><br><img src="/2023/07/03/feature-selection/autodim-embed.png" width="400" class="full-image"><br></center>
+
+
+<ol start="2">
+<li>embedding维度统一<br>由于MLP的输入需要固定维度，所以需要统一不同长度的特征，有两种方法：1）线性映射，这会引入额外的参数；2）补0，注意需要做BN。</li>
+</ol>
+<ol start="3">
+<li>维度选择<br>学习不同维度embedding的权重时，引入Gumbel-softmax模拟从一个类别分布中进行不可微的采样。</li>
+</ol>
+<h2 id="6-3-阶段二、参数再训练"><a href="#6-3-阶段二、参数再训练" class="headerlink" title="6.3 阶段二、参数再训练"></a>6.3 阶段二、参数再训练</h2><p>由于维度搜索阶段的次优Embedding也会影响模型的训练，因此需要一个只训练最优维数模型的再训练阶段来消除这些影响。具体的，对每个特征，选取权重最大的维度，重新训练embedding，也需要不同特征维度统一，类似阶段一可以采用线性映射或者0填充两种方法。</p>
+<h1 id="7-AutoField（WWW-2022）"><a href="#7-AutoField（WWW-2022）" class="headerlink" title="7. AutoField（WWW 2022）"></a>7. AutoField（WWW 2022）</h1><p>论文链接：<a href="https://dl.acm.org/doi/pdf/10.1145/3485447.3512071" target="_blank" rel="noopener">AutoField: Automating Feature Selection in Deep Recommender Systems | Proceedings of the ACM Web Conference 2022</a></p>
+<h2 id="7-1-主要思想"><a href="#7-1-主要思想" class="headerlink" title="7.1 主要思想"></a>7.1 主要思想</h2><p>和AutoDim基本是一模一样的，只是AutoDim是学习不同embedding维度，AutoField是学习是否丢弃某个特征。也分为两个阶段：</p>
+<ol>
+<li>搜索阶段：对每个特征赋予可学习的保留和丢弃参数 $\alpha^1$ 和  $\alpha^0$（二者和为1），采用类似DARTS的优化方法，在验证集上对这两个参数进行学习（同样采用了Gumbel-Softmax）；</li>
+<li>重训练：选取部分特征，重新训练。</li>
+</ol>
+<center><br><img src="/2023/07/03/feature-selection/autofield.png" width="700" class="full-image"><br></center>
+
+<h1 id="8-AdaFS（KDD-2022）"><a href="#8-AdaFS（KDD-2022）" class="headerlink" title="8. AdaFS（KDD 2022）"></a>8. AdaFS（KDD 2022）</h1><p>论文链接：<a href="https://dl.acm.org/doi/pdf/10.1145/3534678.3539204" target="_blank" rel="noopener">AdaFS: Adaptive Feature Selection in Deep Recommender System | Proceedings of the 28th ACM SIGKDD Conference on Knowledge Discovery and Data Mining</a></p>
+<p>注：思路和AutoField基本一样，也是同一个团队做的，只是AutoField是先筛选出固定的特征子集，而AdaFS是对所有特征学一个重要度分数。感觉前者是为了性能提升，后者是为了效果提升。</p>
+<h2 id="8-1-解决的问题"><a href="#8-1-解决的问题" class="headerlink" title="8.1 解决的问题"></a>8.1 解决的问题</h2><p>现有特征选择方法大多是筛选出固定的特征子集，如上面的AutoField。但对于不同的用户物品对（user-item interactions），某个特征的重要性可能是不同的，因此需要动态的特征选择，即对不同特征学习一个重要度分数。</p>
+<h2 id="8-2-主要思想"><a href="#8-2-主要思想" class="headerlink" title="8.2 主要思想"></a>8.2 主要思想</h2><p>用一个Controller网络（就是个MLP）计算每个特征embedding的重要性。</p>
+<center><br><img src="/2023/07/03/feature-selection/adafs.png" width="500" class="full-image"><br></center>
+
+<p>具体的，如上图所示，为了消除不同embedding大小的影响，会首先做一个BatchNorm；然后经过一个MLP，输出维度为N（N为特征field数），再经过softmax得到每个特征field的重要性分数。在得到了重要性分数后，有两种处理方式：</p>
+<ol>
+<li>soft selection：用重要性分数对特征embedding加权求和作为输出；</li>
+<li>hard selection：将不重要的特征mask掉，即将不重要的特征embedding置为0。</li>
+</ol>
+<p>优化时，和其他特征选择方法一样，采用DARTS，即在验证集上优化Controller参数，在训练集上优化其他参数。另外在实践中，还首先不考虑Controller而只对其他参数进行预训练。</p>
+<h1 id="9-AutoFAS（KDD-2022）"><a href="#9-AutoFAS（KDD-2022）" class="headerlink" title="9. AutoFAS（KDD 2022）"></a>9. AutoFAS（KDD 2022）</h1><p>论文链接：<a href="https://arxiv.org/pdf/2205.09394.pdf" target="_blank" rel="noopener">AutoFAS: Automatic Feature and Architecture Selection for Pre-Ranking System</a></p>
+<p>参考：<a href="https://www.6aiq.com/article/1660225427073" target="_blank" rel="noopener">美团搜索粗排优化的探索与实践</a></p>
+<p>在粗排场景下，利用NAS进行特征选择和结构选择。</p>
+<p>下图左边部分是常规排序模型，用于特征选择；右部分对模型结构（候选结构仅包括MLP和直接连接）进行搜索。</p>
+<center><br><img src="/2023/07/03/feature-selection/autofas.png" width="700" class="full-image"><br></center>
+
+
+<h1 id="10-OptEmbed（CIKM-2022）"><a href="#10-OptEmbed（CIKM-2022）" class="headerlink" title="10. OptEmbed（CIKM 2022）"></a>10. OptEmbed（CIKM 2022）</h1><p>论文链接：<a href="https://arxiv.org/abs/2208.04482" target="_blank" rel="noopener">[2208.04482] OptEmbed: Learning Optimal Embedding Table for Click-through Rate Prediction</a></p>
+<h2 id="10-1-解决的问题"><a href="#10-1-解决的问题" class="headerlink" title="10.1 解决的问题"></a>10.1 解决的问题</h2><p>文中提出，最佳Embedding需要满足三个条件：</p>
+<ol>
+<li>NRE（No Redundant Embeddings，没有冗余）：只有有用的特征值（feature value，如性别=男）才有embedding；</li>
+<li>EDF（Embedding Dimension Flexible，维度可变）：不同特征赋予不同维度的embedding（field-wise）；</li>
+<li>HF（Hardware Friendly，硬件友好的）：适合常见的并行处理硬件如GPU</li>
+</ol>
+<p>如下图，现有的一些工作都没同时满足上述三个条件，例如AutoField不满足2），AutoDim不满足1）。</p>
+<center><br><img src="/2023/07/03/feature-selection/optembed-table.png" width="500" class="full-image"><br></center>
+
+<h2 id="10-2-主要思想"><a href="#10-2-主要思想" class="headerlink" title="10.2 主要思想"></a>10.2 主要思想</h2><center><br><img src="/2023/07/03/feature-selection/optembed.png" width="500" class="full-image"><br></center>
+
+<p>如上图所示，为了满足前面提到的三个条件，本文提出了：1）训练一个特征值粒度的mask来只保留有用的特征值；2）训练一个特征粒度（field-wise）的维度mask来对不同特征赋予不同维度embedding；3）最后重新训练得到最优embedding。</p>
+<h1 id="11-PEPNet（2023）"><a href="#11-PEPNet（2023）" class="headerlink" title="11. PEPNet（2023）"></a>11. PEPNet（2023）</h1><p>论文链接：<a href="https://arxiv.org/pdf/2302.01115.pdf" target="_blank" rel="noopener">PEPNet: Parameter and Embedding Personalized Network for Infusing with Personalized Prior Information</a></p>
+<p>参考：<a href="https://zhuanlan.zhihu.com/p/611400673" target="_blank" rel="noopener">「2023 | 快手」PEPNet：融合个性化先验信息的多场景多任务网络 - 知乎</a></p>
+<p>快手的PEPNet用一个子网络，学习特征的重要度分数。</p>
+<h2 id="11-1-解决的问题"><a href="#11-1-解决的问题" class="headerlink" title="11.1 解决的问题"></a>11.1 解决的问题</h2><p>PEPNet主要是为了解决多场景多任务的问题。</p>
+<ol>
+<li>EPNet（Embedding Personalized）：在不同场景下，某个特征的重要度可能是不同的，因此可以考虑用一个子网络，将场景特征（如场景ID）作为输入，得到每个特征的重要度分数。这个思路和AdaFS是类似的，只是AdaFS的子网络输入是所有特征。</li>
+<li>PPNet（Parameter Personalized）：除了用子网络学习不同特征重要度，还可以将子网络的输出与主网络DNN层结果element-wise相乘后，作为下一层DNN的输入。</li>
+</ol>
+<h2 id="11-2-网络结构"><a href="#11-2-网络结构" class="headerlink" title="11.2 网络结构"></a>11.2 网络结构</h2><p>PEPNet结构如下图所示，</p>
+<center><br><img src="/2023/07/03/feature-selection/pepnet.png" width="900" class="full-image"><br></center>
+
+<p>主要包含Gate Nu、EPNet和PPNet三部分：</p>
+<ol>
+<li>Gate NU：即一个子网络门控结构，输入为一些先验信息，是EPNet和PPNet的基本单元；</li>
+<li>EPNet：场景信息作为输入，输出不同特征的重要度分数，增强模型对用户跨域行为的感知能力；</li>
+<li>PPNet：用户和item信息作为门控输入，适配不同任务每层参数，平衡顶层任务间相互依赖关系；</li>
+</ol>
+<p>总的来说，就是挑选一些重要特征（如场景特征、item特征等），经过一个子网络，然后作用到主网络。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总结一下，这些工作都需要对特征赋予一个重要度分数（或Embedding维度大小），这个重要度分数可以直接作为可学习参数进行学习（如AutoFIS、PEP、FSCD、AutoDim、AutoField、AutoFAS、OptEmbed）；也可以作为一个子网络的输出（如FiBiNet、AMTL、AdaFS、PEPNet），子网络的输入可以是所有特征（如FiBiNet、AdaFS），也可以是一些先验信息（如AMTL是特征频次，PEPNet是一些场景特征）。将重要度作为可学习参数直接学习的，往往还会去掉不重要的特征对模型进行重新训练。可见前者主要是为了性能优化（去掉不重要的特征），后者主要是为了效果优化（如强化一些先验信息）。</p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/assets/wechatpay.jpg" alt="TangShusen 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/assets/alipay.jpg" alt="TangShusen 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/特征筛选/" rel="tag"># 特征筛选</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2021/05/05/mapreduce/" rel="next" title="Google三驾马车之MapReduce">
+                <i class="fa fa-chevron-left"></i> Google三驾马车之MapReduce
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/assets/header.jpg" alt="TangShusen">
+            
+              <p class="site-author-name" itemprop="name">TangShusen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">13</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">19</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/shusentang" title="GitHub &rarr; https://github.com/shusentang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.zhihu.com/people/tang-shu-sen-77/activities" title="知乎 &rarr; https://www.zhihu.com/people/tang-shu-sen-77/activities" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                我的项目
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://github.com/ShusenTang/LeetCode" title="https://github.com/ShusenTang/LeetCode" rel="noopener" target="_blank">LeetCode题解</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Dive-into-DL-PyTorch" title="https://shusentang.github.io/Dive-into-DL-PyTorch" rel="noopener" target="_blank">《动手学深度学习》(PyTorch版)</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" title="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" rel="noopener" target="_blank">《Deep Learning with PyTorch》中文翻译</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-FiBiNET（RecSys-2019）"><span class="nav-text">1. FiBiNET（RecSys 2019）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-主要思想"><span class="nav-text">1.1 主要思想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-SENet学习特征重要性"><span class="nav-text">1.2 SENet学习特征重要性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-AutoFIS（KDD-2020）"><span class="nav-text">2. AutoFIS（KDD 2020）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-主要思想"><span class="nav-text">2.1 主要思想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-特征交叉重要性搜索"><span class="nav-text">2.2 特征交叉重要性搜索</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-FSCD-PreRank（SIGIR-2021）"><span class="nav-text">3. FSCD-PreRank（SIGIR 2021）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-主要思想"><span class="nav-text">3.1 主要思想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-FSCD"><span class="nav-text">3.2 FSCD</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-PEP（ICLR-2021）"><span class="nav-text">4. PEP（ICLR 2021）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-解决的问题"><span class="nav-text">4.1 解决的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-主要思想"><span class="nav-text">4.2 主要思想</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-AMTL（2021-CIKM）"><span class="nav-text">5. AMTL（2021 CIKM）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-主要思想"><span class="nav-text">5.1 主要思想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-AMTL模型结构"><span class="nav-text">5.2 AMTL模型结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-3-Relaxation-策略"><span class="nav-text">5.3 Relaxation 策略</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6-AutoDim（WWW-2021）"><span class="nav-text">6. AutoDim（WWW 2021）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#6-1-解决的问题"><span class="nav-text">6.1 解决的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-2-主要思想"><span class="nav-text">6.2 主要思想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-2-阶段一、维度搜索"><span class="nav-text">6.2 阶段一、维度搜索</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-3-阶段二、参数再训练"><span class="nav-text">6.3 阶段二、参数再训练</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7-AutoField（WWW-2022）"><span class="nav-text">7. AutoField（WWW 2022）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#7-1-主要思想"><span class="nav-text">7.1 主要思想</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-AdaFS（KDD-2022）"><span class="nav-text">8. AdaFS（KDD 2022）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#8-1-解决的问题"><span class="nav-text">8.1 解决的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8-2-主要思想"><span class="nav-text">8.2 主要思想</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#9-AutoFAS（KDD-2022）"><span class="nav-text">9. AutoFAS（KDD 2022）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-OptEmbed（CIKM-2022）"><span class="nav-text">10. OptEmbed（CIKM 2022）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#10-1-解决的问题"><span class="nav-text">10.1 解决的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#10-2-主要思想"><span class="nav-text">10.2 主要思想</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-PEPNet（2023）"><span class="nav-text">11. PEPNet（2023）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#11-1-解决的问题"><span class="nav-text">11.1 解决的问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#11-2-网络结构"><span class="nav-text">11.2 网络结构</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 – <span itemprop="copyrightYear">2023</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TangShusen tip:本博客在电脑端食用更佳~</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">total view times: <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: true,
+        appId: 'Bi7QlJPklJ2hjFFoWMd1D2gB-gzGzoHsz',
+        appKey: 'yMWxfGo3ABn8yS13Ytq43Rdk',
+        placeholder: '在上面填上你的邮箱再评论可以收到我的回复哟~',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text('Counter not initialized! See more at console err msg.');
+              console.error('ATTENTION! LeanCloud counter has security bug, see here how to solve it: https://github.com/theme-next/hexo-leancloud-counter-security. \n But you also can use LeanCloud without security, by set \'security\' option to \'false\'.');
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz",
+                'X-LC-Key': "zK9lN00t9W1flFbM75hsjojR",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

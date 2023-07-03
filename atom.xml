@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://tangshusen.me/"/>
-  <updated>2021-05-07T13:56:16.844Z</updated>
+  <updated>2023-07-03T12:47:46.782Z</updated>
   <id>https://tangshusen.me/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>搜广推之特征自动选择</title>
+    <link href="https://tangshusen.me/2023/07/03/feature-selection/"/>
+    <id>https://tangshusen.me/2023/07/03/feature-selection/</id>
+    <published>2023-07-03T12:42:03.000Z</published>
+    <updated>2023-07-03T12:47:46.782Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;在搜广推场景下，各业务团队会生产很多特征，但很多都是冗余甚至与预测任务不相干的，这不仅带来了额外的性能开销，还可能会导致模型陷入局部最优影响模型预估效果。因此，不管是性能优化，还是效果优化，特征选择都是必不可少的。本人近期阅读了一些特征选择相关的文章（包括特征重要度学习、embedding维度搜索等），总结成本文留作日后回顾，也供大家参考。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="搜广推" scheme="https://tangshusen.me/categories/%E6%90%9C%E5%B9%BF%E6%8E%A8/"/>
+    
+    
+      <category term="特征筛选" scheme="https://tangshusen.me/tags/%E7%89%B9%E5%BE%81%E7%AD%9B%E9%80%89/"/>
+    
+  </entry>
   
   <entry>
     <title>Google三驾马车之MapReduce</title>
