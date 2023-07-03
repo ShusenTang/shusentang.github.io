@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://tangshusen.me/"/>
-  <updated>2023-07-03T12:47:46.782Z</updated>
+  <updated>2023-07-03T13:02:06.232Z</updated>
   <id>https://tangshusen.me/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>搜广推之多场景学习</title>
+    <link href="https://tangshusen.me/2023/07/03/multi-domain/"/>
+    <id>https://tangshusen.me/2023/07/03/multi-domain/</id>
+    <published>2023-07-03T12:56:58.000Z</published>
+    <updated>2023-07-03T13:02:06.232Z</updated>
+    
+    <summary type="html">
+    
+      &lt;center&gt;&lt;br&gt;&lt;img src=&quot;/2023/07/03/multi-domain/intro.png&quot; width=&quot;600&quot; class=&quot;full-image&quot;&gt;&lt;br&gt;&lt;/center&gt;
+    
+    </summary>
+    
+      <category term="搜广推" scheme="https://tangshusen.me/categories/%E6%90%9C%E5%B9%BF%E6%8E%A8/"/>
+    
+    
+      <category term="多场景学习" scheme="https://tangshusen.me/tags/%E5%A4%9A%E5%9C%BA%E6%99%AF%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
   
   <entry>
     <title>搜广推之特征自动选择</title>

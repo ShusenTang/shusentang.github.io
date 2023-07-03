@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+  <meta name="google-site-verification" content="UM_oWjkmpNS4sC6N8fDEsgSTPTOong_3Muz7XL_l-bQ">
+
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="NntzqnjuUs">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/my_apple-touch-icon-next.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/my_favicon-32x32.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/my_favicon-16x16.jpg?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/my_logo.jpg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="keywords" content="多场景学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="搜广推之多场景学习">
+<meta property="og:url" content="https://tangshusen.me/2023/07/03/multi-domain/index.html">
+<meta property="og:site_name" content="TangShusen">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/intro.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/domain-feature.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/subnet.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/ppnet.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/pepnet.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/star.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/star-fcn.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/m2m-overview.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/m2m.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/apg-overview.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/apg.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/adasparse.png">
+<meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/hc2.png">
+<meta property="og:updated_time" content="2023-07-03T13:02:06.232Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="搜广推之多场景学习">
+<meta name="twitter:image" content="https://tangshusen.me/2023/07/03/multi-domain/intro.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="TangShusen" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://tangshusen.me/2023/07/03/multi-domain/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>搜广推之多场景学习 | TangShusen</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TangShusen</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2023/07/03/multi-domain/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="TangShusen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/assets/header.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TangShusen">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">搜广推之多场景学习
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2023-07-03 20:56:58 / 修改时间：21:02:06" itemprop="dateCreated datePublished" datetime="2023-07-03T20:56:58+08:00">2023-07-03</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/搜广推/" itemprop="url" rel="index"><span itemprop="name">搜广推</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2023/07/03/multi-domain/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2023/07/03/multi-domain/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2023/07/03/multi-domain/" class="leancloud_visitors" data-flag-title="搜广推之多场景学习">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <center><br><img src="/2023/07/03/multi-domain/intro.png" width="600" class="full-image"><br></center>
+
+<a id="more"></a>
+<h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h1><p>不同用户群体（如新老用户）、APP不同频道模块、不同客户端等，可以看作不同场景。不同场景具有用户差异，即使是同一用户，在不同场景下的行为偏好也可能不同，页面呈现的形式和内容、进入页面前的用户状态也存在很大的差异，这些差异直接反映到数据分布上，使得不同场景数据分布上存在明显差异。注意多场景学习和多任务学习的区别，多任务是解决相同场景/分布下的不同任务，如CTR和CVR等目标同时预估；而多场景建模是解决不同场景/分布下的相同任务，如对不同场景样本预估相同的 CTR 目标。</p>
+<!-- <center>
+<img src="./multi-domain/intro.png" width="700" class="full-image">
+</center> -->
+<p>为什么需要多场景学习？</p>
+<p>1）如果采用各场景独立的方式，会忽视场景共性，加剧数据稀疏性，导致长尾小场景难以学好；<br>2）每个场景维护一个模型，会极大地增加系统资源开销和人力成本；<br>3）如果直接将样本混合，训练共享模型，会忽视场景差异性；<br>4）如果各场景数据量不均衡，容易被数据量大的大场景主导，数据量小的小场景学习不好。</p>
+<p>因此，多场景学习建模的是不同场景的共性和以及异性（或者说各场景的特性）。</p>
+<h1 id="2-常见范式"><a href="#2-常见范式" class="headerlink" title="2. 常见范式"></a>2. 常见范式</h1><h2 id="2-1-场景信息直接作为特征"><a href="#2-1-场景信息直接作为特征" class="headerlink" title="2.1 场景信息直接作为特征"></a>2.1 场景信息直接作为特征</h2><p>为了让模型感知到样本来自不同场景，我们可以将场景信息作为特征（如场景ID）输入到模型中。</p>
+<center><br><img src="/2023/07/03/multi-domain/domain-feature.png" width="300" class="full-image"><br></center><br>这是最简单的方法，但场景特征相比特征总数一般较少，随着网络深度的增加，对最终预测结果影响有限。<br><br>## 2.2 场景子网络<br><br>为了强化场景特征对模型输出的影响，可以考虑构建一个子网络，输入场景特征，然后将输出作用到主网络的某处：<br><br>1）SubNet-logit：作用到最终输出，与主网络logit相加，如STAR中的辅助网络；<br>2）SubNet-NN：作用到主网络中间某些层（例如MMoE的gate，作用方法一般可用attention、动态权重等），如M2M、PPNet等；<br>3）SubNet-embed：作用到主网络输入层，例如对输入的特征学习重要度分数，如PEPNet中的EPNet；<br><br><center><br><img src="/2023/07/03/multi-domain/subnet.png" width="900" class="full-image"><br></center>
+
+<p>业界很多方法都可以认为是场景子网络，总结如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">分类</th>
+<th style="text-align:left">业界工作名称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">SubNet-logit</td>
+<td style="text-align:left">STAR辅助网络</td>
+</tr>
+<tr>
+<td style="text-align:center">SubNet-NN</td>
+<td style="text-align:left">M2M、APG、PPNet、AdaSparse</td>
+</tr>
+<tr>
+<td style="text-align:center">SubNet-embed</td>
+<td style="text-align:left">EPNet</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-3-多网络结构"><a href="#2-3-多网络结构" class="headerlink" title="2.3 多网络结构"></a>2.3 多网络结构</h2><p>例如使用MMoE或者PLE结构，结合范式2场景子网络，对场景间共性信息和特定场景信息融合。或者STAR这种多网络结构，每个场景对应独有的网络参数。</p>
+<h1 id="3-业界方法"><a href="#3-业界方法" class="headerlink" title="3. 业界方法"></a>3. 业界方法</h1><h2 id="3-1-快手PEPNet（2019）"><a href="#3-1-快手PEPNet（2019）" class="headerlink" title="3.1 快手PEPNet（2019）"></a>3.1 快手PEPNet（2019）</h2><p>一开始叫PPNet（Parameter Personalized Net），后面扩展整理成了论文PEPNet：<a href="https://arxiv.org/abs/2302.01115" target="_blank" rel="noopener">PEPNet: Parameter and Embedding Personalized Network for Infusing with Personalized Prior Information</a></p>
+<h3 id="3-1-1-PPNet"><a href="#3-1-1-PPNet" class="headerlink" title="3.1.1 PPNet"></a>3.1.1 PPNet</h3><p>借鉴的是LHUC，核心思想是用一个子网络GateNN为不同场景/用户学习个性化偏差，乘到主网络输入上。</p>
+<center><br><img src="/2023/07/03/multi-domain/ppnet.png" width="700" class="full-image"><br></center>
+
+<p>如图所示，PPNet具体做法是：<br>1）利用一个小的子网络GateNN，输入一些ID类特征（换成场景特征就可以实现多场景建模）及主干网络特征（GateNN梯度不回传主干网络特征）；<br>2）GateNN的每层输出（激活函数是2 * sigmoid）和主网络DNN每层输入维度相同，这样就可以和主网络各层输入做element-wise乘法，从而引入个性化偏置；</p>
+<h3 id="3-1-2-EPNet"><a href="#3-1-2-EPNet" class="headerlink" title="3.1.2 EPNet"></a>3.1.2 EPNet</h3><p>PEPNet论文包含了上述PPNet以及EPNet，如下图所示。</p>
+<center><br><img src="/2023/07/03/multi-domain/pepnet.png" width="900" class="full-image"><br></center>
+
+<p>EPNet将场景信息作为输入，输出不同特征的重要度分数，增强模型对用户跨场景行为的感知能力。</p>
+<h2 id="3-2-阿里STAR（CIKM-2021）"><a href="#3-2-阿里STAR（CIKM-2021）" class="headerlink" title="3.2 阿里STAR（CIKM 2021）"></a>3.2 阿里STAR（CIKM 2021）</h2><p>论文链接：<a href="https://arxiv.org/abs/2101.11427" target="_blank" rel="noopener">One Model to Serve All: Star Topology Adaptive Recommender for Multi-Domain CTR Prediction</a></p>
+<p>核心思想是每个场景都有自己独有的MLP参数，最终的参数通过独有参数乘以共享参数得到。<br>整体模型结构如下图所示，相比于单场景（左）模型，STAR有三个改动：星型拓扑结构FCN、Partitioned Normalization以及辅助网络。</p>
+<center><br><img src="/2023/07/03/multi-domain/star.png" width="900" class="full-image"><br></center>
+
+<h3 id="3-2-1-星型拓扑结构FCN"><a href="#3-2-1-星型拓扑结构FCN" class="headerlink" title="3.2.1 星型拓扑结构FCN"></a>3.2.1 星型拓扑结构FCN</h3><p>对于每一个FC层，都有中心的共享参数和场景私有参数，每个场景最终的参数通过二者进行element-wise product得到。STAR的共享参数被所有场景样本的梯度更新学习场景共性，而场景私有参数只被场景内样本更新建模场景差异性。</p>
+<center><br><img src="/2023/07/03/multi-domain/star-fcn.png" width="500" class="full-image"><br></center>
+
+<p>作者认为，这种方式与业界常用方案MMoE的优势在于：</p>
+<ul>
+<li>STAR包含共享参数：MMoE对不同任务采用独立的 FC 层，而STAR包含共享参数可以学习场景共性行为（可引入共享塔解决）；</li>
+<li>STAR显式建模多场景：MMoE 通过学习 gate 隐式建模场景间的关系，会丢失显示的 domain-specific 知识，而 STAR 引入场景先验，通过场景私有/共享参数显示建模场景间的关系；</li>
+<li>STAR计算量更小：MMoE需要计算每个场景的 expert，相对共享模型 FC 层会有 M 倍的计算开销 (M 为场景数)，而 STAR 稀疏激活的特性不引入额外计算，和原来计算开销持平；</li>
+<li>STAR更方便接入新场景：由于 gate 的学习存在冷启动，MMoE 对于新场景不友好，而 STAR 更易于接入新场景，只需将新场景私有参数全初始化为1即可开始 fine-tune 接入；</li>
+</ul>
+<h3 id="3-2-2-Partitioned-Normalization"><a href="#3-2-2-Partitioned-Normalization" class="headerlink" title="3.2.2 Partitioned Normalization"></a>3.2.2 Partitioned Normalization</h3><p>为了加快模型收敛，一般模型中都会加入BN（Batch Normalization），但BN其实有个前提假设是所有样本独立同分布，但在多场景中，样本往往只在场景内独立同分布，不满足BN的前提假设。所以作者提出了PN实现domain-specific标准化，具体的，PN训练时累计场景各自的的滑动均值以及方差，并且学习场景各自的shift参数。</p>
+<h3 id="3-2-3-辅助网络"><a href="#3-2-3-辅助网络" class="headerlink" title="3.2.3 辅助网络"></a>3.2.3 辅助网络</h3><p>引入一个额外的小辅助网络，将场景相关特征送进去，并将其输出与主干网络相加然后经过sigmoid得到最终预估值，即 $\text{pctr} = \text{sigmoid}( \text{logit}_\text{main} + \text{logit}_\text{auxiliary})$。这样能够让场景相关特征直接影响最终预测值，捕捉场景差异性。</p>
+<h2 id="3-3-阿里M2M（WSDM-2022）"><a href="#3-3-阿里M2M（WSDM-2022）" class="headerlink" title="3.3 阿里M2M（WSDM 2022）"></a>3.3 阿里M2M（WSDM 2022）</h2><p>论文链接：<a href="https://arxiv.org/abs/2201.06814" target="_blank" rel="noopener">Leaving No One Behind: A Multi-Scenario Multi-Task Meta Learning Approach for Advertiser Modeling</a></p>
+<p>核心思想就是用一个子网络（Meta Unit）学习场景相关先验知识，通过动态权重机制作用于主网络。</p>
+<center><br><img src="/2023/07/03/multi-domain/m2m-overview.png" width="600" class="full-image"><br></center>
+
+<p>如下图（a）所示，Meta Unit有两种作用于主网络的方式，一是attention，二是tower（就是个残差结构）。核心在于如下图（b）所示的Meta Unit结构，场景信息特征作为输入，通过全连接层和reshape方式产出动态网络的weight和bias（注：这个思路其实和Co-Action Net是类似的）。</p>
+<center><br><img src="/2023/07/03/multi-domain/m2m.png" width="1000" class="full-image"><br></center>
+
+<h2 id="3-4-阿里APG（NeurIPS-2022）"><a href="#3-4-阿里APG（NeurIPS-2022）" class="headerlink" title="3.4 阿里APG（NeurIPS 2022）"></a>3.4 阿里APG（NeurIPS 2022）</h2><p>论文链接：<a href="https://arxiv.org/abs/2203.16218" target="_blank" rel="noopener">APG: Adaptive Parameter Generation Network for Click-Through Rate Prediction</a></p>
+<p>APG（Adaptive Parameter Generation）的核心思路和M2M中的动态权重是一样的，只是通过矩阵拆分进行了复杂度优化，APG整体架构如下图所示。</p>
+<center><br><img src="/2023/07/03/multi-domain/apg-overview.png" width="600" class="full-image"><br></center>
+
+<p>在通过子网络产出动态网络的参数weight和bias时，复杂度是很高的（亲测确实太高了），如果网络每层维度均为D，那生成动态权重的时间和空间复杂度将为 $O(D^3)$。所以作者用矩阵分解的思路进行复杂度优化，如下图所示。其中绿色表示子网络产出的动态权重，可见优化后比优化前小很多。</p>
+<center><br><img src="/2023/07/03/multi-domain/apg.png" width="900" class="full-image"><br></center>
+
+
+<h2 id="3-5-阿里AdaSparse（CIKM-2022）"><a href="#3-5-阿里AdaSparse（CIKM-2022）" class="headerlink" title="3.5 阿里AdaSparse（CIKM 2022）"></a>3.5 阿里AdaSparse（CIKM 2022）</h2><p>论文链接：<a href="https://arxiv.org/abs/2206.13108" target="_blank" rel="noopener">AdaSparse: Learning Adaptively Sparse Structures for Multi-Domain Click-Through Rate Prediction</a></p>
+<p>作者认为不管是新增domain-specific可学习参数（如STAR），还是通过动态权重的方法生成参数（如M2M、APG），复杂度都较高，且泛化能力有限。因此论文从提升多场景模型泛化性和计算效率出发，提出AdaSparse模型：<br>1）引入神经元级场景感知权重因子，用来衡量不同场景下神经元的重要性；<br>2）通过裁剪(Pruner)冗余神经元实现不同场景不同的稀疏结构；</p>
+<center><br><img src="/2023/07/03/multi-domain/adasparse.png" width="700" class="full-image"><br></center>
+
+<h3 id="3-5-1-Domain-adaptive-Pruner"><a href="#3-5-1-Domain-adaptive-Pruner" class="headerlink" title="3.5.1 Domain-adaptive Pruner"></a>3.5.1 Domain-adaptive Pruner</h3><p>如上图右边部分所示，Pruner是一个轻量化的模型，对于第 $l$ 层，Pruner的输入是主网络第 $l$ 层的神经元 $h^l$ 和场景特征 $e_d$，输出是维度和 $h^l$ 一致的场景感知因子 $\pi^l$，二者element-wise相乘得到输出。场景感知因子 $\pi^l$ 有三种计算方法：<br>1）Binarization：场景感知因子非0即1，即设定一个阈值进行二值化，相当于hard方式；<br>2）Scaling：相当于soft方式（这就有点像PPNet了）；<br>3）Fusion：结合上面两种方式；</p>
+<h3 id="3-5-2-稀疏可控正则"><a href="#3-5-2-稀疏可控正则" class="headerlink" title="3.5.2 稀疏可控正则"></a>3.5.2 稀疏可控正则</h3><p>为了控制稀疏率，引入稀疏正则约束，直接引入L1正则项没法达到预期的稀疏率。因此作者提出稀疏可控正则化，在训练初期不侧重稀疏性，随着训练的进行，稀疏率越来越接近预先设置的稀疏率。</p>
+<h2 id="3-6-阿里HC-2"><a href="#3-6-阿里HC-2" class="headerlink" title="3.6 阿里HC^2"></a>3.6 阿里HC^2</h2><p>论文链接：<a href="https://arxiv.org/abs/2302.02636" target="_blank" rel="noopener">Hybrid Contrastive Constraints for Multi-Scenario Ad Ranking
+</a></p>
+<p>阿里的HC2提供了一个新的思路，利用对比学习建模场景间的共性和异性。</p>
+<center><br><img src="/2023/07/03/multi-domain/hc2.png" width="1000" class="full-image"><br></center>
+
+<p>模型结构如上图所示，特征经过Embedding层后，会先经过Shared bottom学习不同场景的共性，然后再进入各自Scenario-specific塔学习各场景的特性。</p>
+<h3 id="3-6-1-Generalized-Contrastive-Loss-建模共性"><a href="#3-6-1-Generalized-Contrastive-Loss-建模共性" class="headerlink" title="3.6.1. Generalized Contrastive Loss 建模共性"></a>3.6.1. Generalized Contrastive Loss 建模共性</h3><p>如上图左边图(b)所示，作者将Shared bottom输出的表示向量进行对比学习以学习不同场景的共性。具体的，将不同场景下同label的样本作为正例对，将不同场景下不同label的样本作为负例对。值得一提的是，直观来讲与当前样本比较类似（例如相同用户）的其他场景的样本更能反映出场景共性，因此在选取其他场景下的样本的时候，采用的是K近邻算法，尽可能选类似的。</p>
+<p>此外，由于对比学习容易出现各向异性问题（anisotropy problem），在构建负样对时，从其他场景选取的样本无法覆盖整个表示空间，因此作者还通过向样本中添加diffusion noise的方式来产生更泛化的更多样的负样本对。</p>
+<h3 id="3-6-2-Individual-Contrastive-Loss-建模特性"><a href="#3-6-2-Individual-Contrastive-Loss-建模特性" class="headerlink" title="3.6.2. Individual Contrastive Loss 建模特性"></a>3.6.2. Individual Contrastive Loss 建模特性</h3><p>如上图右边图(c)所示，作者将各自Scenario-specific塔输出的向量进行对比学习来学习不同场景各自的特性。通过给同一条样本添加dropout noise的方式构建正例对。不同场景下的样本，各自对应的Scenario-specific塔的输出向量作为负例对（即图(c)的 ${h_i^1,h_{i^-}^{K}}$  ）；此外作者还从相同场景下采样样本，输入到其他场景对应的Scenario-specific塔，输出向量作为困难负样本（即图(c)的 $ h_{i^-}^{(K)}$）。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>多场景学习，就是为了让模型学习到各场景的共性和特性，求同存异。共性一般比较好学习，多场景建模的关键在于各场景的特性学习。为此，业界从特征（让模型感知场景信息）、网络结构（用场景子网络强化场景特征的影响力）、优化方式（如对比学习）等方面入手，让模型感知并学习到场景信息。</p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/assets/wechatpay.jpg" alt="TangShusen 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/assets/alipay.jpg" alt="TangShusen 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/多场景学习/" rel="tag"># 多场景学习</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2023/07/03/feature-selection/" rel="next" title="搜广推之特征自动选择">
+                <i class="fa fa-chevron-left"></i> 搜广推之特征自动选择
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/assets/header.jpg" alt="TangShusen">
+            
+              <p class="site-author-name" itemprop="name">TangShusen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">7</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">20</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/shusentang" title="GitHub &rarr; https://github.com/shusentang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.zhihu.com/people/tang-shu-sen-77/activities" title="知乎 &rarr; https://www.zhihu.com/people/tang-shu-sen-77/activities" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                我的项目
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://github.com/ShusenTang/LeetCode" title="https://github.com/ShusenTang/LeetCode" rel="noopener" target="_blank">LeetCode题解</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Dive-into-DL-PyTorch" title="https://shusentang.github.io/Dive-into-DL-PyTorch" rel="noopener" target="_blank">《动手学深度学习》(PyTorch版)</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" title="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" rel="noopener" target="_blank">《Deep Learning with PyTorch》中文翻译</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-背景"><span class="nav-text">1. 背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-常见范式"><span class="nav-text">2. 常见范式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-场景信息直接作为特征"><span class="nav-text">2.1 场景信息直接作为特征</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-多网络结构"><span class="nav-text">2.3 多网络结构</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-业界方法"><span class="nav-text">3. 业界方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-快手PEPNet（2019）"><span class="nav-text">3.1 快手PEPNet（2019）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-1-PPNet"><span class="nav-text">3.1.1 PPNet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-2-EPNet"><span class="nav-text">3.1.2 EPNet</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-阿里STAR（CIKM-2021）"><span class="nav-text">3.2 阿里STAR（CIKM 2021）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-1-星型拓扑结构FCN"><span class="nav-text">3.2.1 星型拓扑结构FCN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-2-Partitioned-Normalization"><span class="nav-text">3.2.2 Partitioned Normalization</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-3-辅助网络"><span class="nav-text">3.2.3 辅助网络</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-阿里M2M（WSDM-2022）"><span class="nav-text">3.3 阿里M2M（WSDM 2022）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-阿里APG（NeurIPS-2022）"><span class="nav-text">3.4 阿里APG（NeurIPS 2022）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-阿里AdaSparse（CIKM-2022）"><span class="nav-text">3.5 阿里AdaSparse（CIKM 2022）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-5-1-Domain-adaptive-Pruner"><span class="nav-text">3.5.1 Domain-adaptive Pruner</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-5-2-稀疏可控正则"><span class="nav-text">3.5.2 稀疏可控正则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-6-阿里HC-2"><span class="nav-text">3.6 阿里HC^2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-6-1-Generalized-Contrastive-Loss-建模共性"><span class="nav-text">3.6.1. Generalized Contrastive Loss 建模共性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-6-2-Individual-Contrastive-Loss-建模特性"><span class="nav-text">3.6.2. Individual Contrastive Loss 建模特性</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 – <span itemprop="copyrightYear">2023</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TangShusen tip:本博客在电脑端食用更佳~</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">total view times: <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: true,
+        appId: 'Bi7QlJPklJ2hjFFoWMd1D2gB-gzGzoHsz',
+        appKey: 'yMWxfGo3ABn8yS13Ytq43Rdk',
+        placeholder: '在上面填上你的邮箱再评论可以收到我的回复哟~',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text('Counter not initialized! See more at console err msg.');
+              console.error('ATTENTION! LeanCloud counter has security bug, see here how to solve it: https://github.com/theme-next/hexo-leancloud-counter-security. \n But you also can use LeanCloud without security, by set \'security\' option to \'false\'.');
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz",
+                'X-LC-Key': "zK9lN00t9W1flFbM75hsjojR",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
