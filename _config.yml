@@ -80,7 +80,7 @@ theme: next
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   - type: git
-    repo: https://github.com/ShusenTang/shusentang.github.io.git
+    repo: git@github.com:ShusenTang/shusentang.github.io.git
     branch: master
   - type: leancloud_counter_security_sync
 
@@ -94,6 +94,7 @@ leancloud_counter_security:
   enable_sync: true
   app_id: TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz
   app_key: zK9lN00t9W1flFbM75hsjojR
+  server_url: https://leancloud.cn
   username: SMON
   password:
 
