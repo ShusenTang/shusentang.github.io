@@ -201,6 +201,53 @@ APG（Adaptive Parameter Generation）的核心思路和M2M中的动态权重是
 如上图右边图(c)所示，作者将各自Scenario-specific塔输出的向量进行对比学习来学习不同场景各自的特性。通过给同一条样本添加dropout noise的方式构建正例对。不同场景下的样本，各自对应的Scenario-specific塔的输出向量作为负例对（即图(c)的 $\{h_i^1,h_{i^-}^{K}\}$  ）；此外作者还从相同场景下采样样本，输入到其他场景对应的Scenario-specific塔，输出向量作为困难负样本（即图(c)的 $ h_{i^-}^{(K)}$）。
 
 
+## 3.7 阿里MARIA（SIGIR 2023）
+论文链接：[Multi-Scenario Ranking with Adaptive Feature Learning](https://arxiv.org/pdf/2306.16732.pdf)
+
+将场景信息注入到模型底层（即特征表示层），如对特征进行scaling（这个就和EPNet很类似了），做得比较精细。
+
+<center>
+<img src="./multi-domain/maria.png" width="900" class="full-image">
+</center>
+
+### 3.7.1 Feature Scaling 特征缩放
+
+考虑到特征在不同场景中具有不同的重要度。FS（Feature Scaling）模块根据场景信息来缩小或放大每个特征。和EPNet一样，此模块的梯度不回传至特征Embedding以避免潜在的过拟合和梯度冲突问题，另外缩放的比例限定在[0, 2]之间。
+
+### 3.7.2 Feature Refinement 特征精调
+
+首先特征被人工分成了多个field，如上图所示有Behavior、User、Target等等五个field，每个field会经过若干（不同field对应的Refiner个数可以不一样，后文实验中指出一般为2或1）Refiner，最后进行selection。具体的，每个Refiner其实就是一个FC，输入是当前field信息；而Selector的输入是场景信息和当前field信息，输出是每个Refiner的分数，最后将所有Refiner加权拼接输出。例如对于Behavior这组特征，作用方式如下：
+
+<center>
+<img src="./multi-domain/maria-eq1.png" width="400" class="full-image">
+</center>
+
+其中GS指GumBel Softmax（模拟离散的selection操作），$\hat{h}_b$ 表示Behavior特征信息，$e_s$ 表示场景特征信息，一共有 $N_b$个Refiner，$\beta$ 是每个Refiner的分数。
+
+这个模块有点类似于MMoE的多专家思想，Refiner相当于Expert，Gate的输入包含场景信息。另外，由于Refiner本身可以起到一个降维的作用，可以减小下游NN层的参数量。
+
+### 3.7.3 Feature Correlation Modeling 特征相关性
+
+为了显式建模Field之间的交互信息，FCM模块将不同Field先映射为相同长度的向量，然后两两之间计算相关性（就是向量内积），将所有的相关性拼接起来作为输出。即
+
+<center>
+<img src="./multi-domain/maria-eq2.png" width="300" class="full-image">
+</center>
+
+最后，FCM模块的输出和FR模块的输出拼接起来，作为下游MoE的输入。
+
+
+### 3.7.4 NN层
+
+如模型结构图（b）和（c）所示，NN层是一个MoE后接多塔的结构。每个场景塔单独服务于对应场景的样本，此外还有一个额外的共享塔来建模场景间的共享信息，即 $ \text{out} = h_\text{specific} + \alpha \cdot h_\text{extra} $。其中 $\alpha$ 是共享塔的权重，根据 Coupling Gate 计算得来，计算方式是用当前输入的样本场景特征和其他场景特征计算相似度并取平均（出发点是如果和其他场景相关性很低，那共享塔对应的权重就应该小）：
+
+<center>
+<img src="./multi-domain/maria-eq3.png" width="300" class="full-image">
+</center>
+
+通过增加场景间的信息共享，可以利用其他场景的信息为当前场景的预测提供帮助，进而提升所有场景的预测表现。
+
+
 # 总结
 
 多场景学习，就是为了让模型学习到各场景的共性和特性，求同存异。共性一般比较好学习，多场景建模的关键在于各场景的特性学习。为此，业界从特征（让模型感知场景信息）、网络结构（用场景子网络强化场景特征的影响力）、优化方式（如对比学习）等方面入手，让模型感知并学习到场景信息。
