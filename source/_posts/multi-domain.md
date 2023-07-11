@@ -180,7 +180,7 @@ APG（Adaptive Parameter Generation）的核心思路和M2M中的动态权重是
 为了控制稀疏率，引入稀疏正则约束，直接引入L1正则项没法达到预期的稀疏率。因此作者提出稀疏可控正则化，在训练初期不侧重稀疏性，随着训练的进行，稀疏率越来越接近预先设置的稀疏率。
 
 
-## 3.6 阿里HC^2
+## 3.6 阿里HC^2（2023）
 论文链接：[Hybrid Contrastive Constraints for Multi-Scenario Ad Ranking
 ](https://arxiv.org/abs/2302.02636)
 
