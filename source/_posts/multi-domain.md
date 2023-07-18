@@ -39,15 +39,15 @@ tags:
 ## 2.1 场景信息直接作为特征
 
 为了让模型感知到样本来自不同场景，我们可以将场景信息作为特征（如场景ID）输入到模型中。
+
 <center>
 <img src="./multi-domain/domain-feature.png" width="300" class="full-image">
 </center>
+
 这是最简单的方法，但场景特征相比特征总数一般较少，随着网络深度的增加，对最终预测结果影响有限。
 
-## 2.2 场景子网络
-
+## 2.3 场景子网络
 为了强化场景特征对模型输出的影响，可以考虑构建一个子网络，输入场景特征，然后将输出作用到主网络的某处：
-
 1）SubNet-logit：作用到最终输出，与主网络logit相加，如STAR中的辅助网络；
 2）SubNet-NN：作用到主网络中间某些层（例如MMoE的gate，作用方法一般可用attention、动态权重等），如M2M、PPNet等；
 3）SubNet-embed：作用到主网络输入层，例如对输入的特征学习重要度分数，如PEPNet中的EPNet；
