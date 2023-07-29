@@ -135,7 +135,7 @@
 <meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/maria-eq1.png">
 <meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/maria-eq2.png">
 <meta property="og:image" content="https://tangshusen.me/2023/07/03/multi-domain/maria-eq3.png">
-<meta property="og:updated_time" content="2023-07-11T17:07:07.549Z">
+<meta property="og:updated_time" content="2023-07-14T09:42:06.990Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="搜广推之多场景学习">
 <meta name="twitter:image" content="https://tangshusen.me/2023/07/03/multi-domain/intro.png">
@@ -324,6 +324,23 @@
     <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
 
   </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-findjob">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/findJob/" rel="section"><i class="menu-item-icon fa fa-fw fa-info"></i> <br>内推</a>
+
+  </li>
 
       
       
@@ -432,7 +449,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2023-07-12 01:07:07" itemprop="dateModified" datetime="2023-07-12T01:07:07+08:00">2023-07-12</time>
+                <time title="修改时间：2023-07-14 17:42:06" itemprop="dateModified" datetime="2023-07-14T17:42:06+08:00">2023-07-14</time>
               
             
           </span>
@@ -515,7 +532,11 @@
 <p>1）如果采用各场景独立的方式，会忽视场景共性，加剧数据稀疏性，导致长尾小场景难以学好；<br>2）每个场景维护一个模型，会极大地增加系统资源开销和人力成本；<br>3）如果直接将样本混合，训练共享模型，会忽视场景差异性；<br>4）如果各场景数据量不均衡，容易被数据量大的大场景主导，数据量小的小场景学习不好。</p>
 <p>因此，多场景学习建模的是不同场景的共性和以及异性（或者说各场景的特性）。</p>
 <h1 id="2-常见范式"><a href="#2-常见范式" class="headerlink" title="2. 常见范式"></a>2. 常见范式</h1><h2 id="2-1-场景信息直接作为特征"><a href="#2-1-场景信息直接作为特征" class="headerlink" title="2.1 场景信息直接作为特征"></a>2.1 场景信息直接作为特征</h2><p>为了让模型感知到样本来自不同场景，我们可以将场景信息作为特征（如场景ID）输入到模型中。</p>
-<center><br><img src="/2023/07/03/multi-domain/domain-feature.png" width="300" class="full-image"><br></center><br>这是最简单的方法，但场景特征相比特征总数一般较少，随着网络深度的增加，对最终预测结果影响有限。<br><br>## 2.2 场景子网络<br><br>为了强化场景特征对模型输出的影响，可以考虑构建一个子网络，输入场景特征，然后将输出作用到主网络的某处：<br><br>1）SubNet-logit：作用到最终输出，与主网络logit相加，如STAR中的辅助网络；<br>2）SubNet-NN：作用到主网络中间某些层（例如MMoE的gate，作用方法一般可用attention、动态权重等），如M2M、PPNet等；<br>3）SubNet-embed：作用到主网络输入层，例如对输入的特征学习重要度分数，如PEPNet中的EPNet；<br><br><center><br><img src="/2023/07/03/multi-domain/subnet.png" width="900" class="full-image"><br></center>
+<center><br><img src="/2023/07/03/multi-domain/domain-feature.png" width="300" class="full-image"><br></center>
+
+<p>这是最简单的方法，但场景特征相比特征总数一般较少，随着网络深度的增加，对最终预测结果影响有限。</p>
+<h2 id="2-3-场景子网络"><a href="#2-3-场景子网络" class="headerlink" title="2.3 场景子网络"></a>2.3 场景子网络</h2><p>为了强化场景特征对模型输出的影响，可以考虑构建一个子网络，输入场景特征，然后将输出作用到主网络的某处：<br>1）SubNet-logit：作用到最终输出，与主网络logit相加，如STAR中的辅助网络；<br>2）SubNet-NN：作用到主网络中间某些层（例如MMoE的gate，作用方法一般可用attention、动态权重等），如M2M、PPNet等；<br>3）SubNet-embed：作用到主网络输入层，例如对输入的特征学习重要度分数，如PEPNet中的EPNet；</p>
+<center><br><img src="/2023/07/03/multi-domain/subnet.png" width="900" class="full-image"><br></center>
 
 <p>业界很多方法都可以认为是场景子网络，总结如下：</p>
 <table>
@@ -939,7 +960,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-背景"><span class="nav-text">1. 背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-常见范式"><span class="nav-text">2. 常见范式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-场景信息直接作为特征"><span class="nav-text">2.1 场景信息直接作为特征</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-多网络结构"><span class="nav-text">2.3 多网络结构</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-业界方法"><span class="nav-text">3. 业界方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-快手PEPNet（2019）"><span class="nav-text">3.1 快手PEPNet（2019）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-1-PPNet"><span class="nav-text">3.1.1 PPNet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-2-EPNet"><span class="nav-text">3.1.2 EPNet</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-阿里STAR（CIKM-2021）"><span class="nav-text">3.2 阿里STAR（CIKM 2021）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-1-星型拓扑结构FCN"><span class="nav-text">3.2.1 星型拓扑结构FCN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-2-Partitioned-Normalization"><span class="nav-text">3.2.2 Partitioned Normalization</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-3-辅助网络"><span class="nav-text">3.2.3 辅助网络</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-阿里M2M（WSDM-2022）"><span class="nav-text">3.3 阿里M2M（WSDM 2022）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-阿里APG（NeurIPS-2022）"><span class="nav-text">3.4 阿里APG（NeurIPS 2022）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-阿里AdaSparse（CIKM-2022）"><span class="nav-text">3.5 阿里AdaSparse（CIKM 2022）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-5-1-Domain-adaptive-Pruner"><span class="nav-text">3.5.1 Domain-adaptive Pruner</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-5-2-稀疏可控正则"><span class="nav-text">3.5.2 稀疏可控正则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-6-阿里HC-2（2023）"><span class="nav-text">3.6 阿里HC^2（2023）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-6-1-Generalized-Contrastive-Loss-建模共性"><span class="nav-text">3.6.1. Generalized Contrastive Loss 建模共性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-6-2-Individual-Contrastive-Loss-建模特性"><span class="nav-text">3.6.2. Individual Contrastive Loss 建模特性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-7-阿里MARIA（SIGIR-2023）"><span class="nav-text">3.7 阿里MARIA（SIGIR 2023）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-1-Feature-Scaling-特征缩放"><span class="nav-text">3.7.1 Feature Scaling 特征缩放</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-2-Feature-Refinement-特征精调"><span class="nav-text">3.7.2 Feature Refinement 特征精调</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-3-Feature-Correlation-Modeling-特征相关性"><span class="nav-text">3.7.3 Feature Correlation Modeling 特征相关性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-4-NN层"><span class="nav-text">3.7.4 NN层</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-背景"><span class="nav-text">1. 背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-常见范式"><span class="nav-text">2. 常见范式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-场景信息直接作为特征"><span class="nav-text">2.1 场景信息直接作为特征</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-场景子网络"><span class="nav-text">2.3 场景子网络</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-多网络结构"><span class="nav-text">2.3 多网络结构</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-业界方法"><span class="nav-text">3. 业界方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-快手PEPNet（2019）"><span class="nav-text">3.1 快手PEPNet（2019）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-1-PPNet"><span class="nav-text">3.1.1 PPNet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-2-EPNet"><span class="nav-text">3.1.2 EPNet</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-阿里STAR（CIKM-2021）"><span class="nav-text">3.2 阿里STAR（CIKM 2021）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-1-星型拓扑结构FCN"><span class="nav-text">3.2.1 星型拓扑结构FCN</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-2-Partitioned-Normalization"><span class="nav-text">3.2.2 Partitioned Normalization</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-3-辅助网络"><span class="nav-text">3.2.3 辅助网络</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-阿里M2M（WSDM-2022）"><span class="nav-text">3.3 阿里M2M（WSDM 2022）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-阿里APG（NeurIPS-2022）"><span class="nav-text">3.4 阿里APG（NeurIPS 2022）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-阿里AdaSparse（CIKM-2022）"><span class="nav-text">3.5 阿里AdaSparse（CIKM 2022）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-5-1-Domain-adaptive-Pruner"><span class="nav-text">3.5.1 Domain-adaptive Pruner</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-5-2-稀疏可控正则"><span class="nav-text">3.5.2 稀疏可控正则</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-6-阿里HC-2（2023）"><span class="nav-text">3.6 阿里HC^2（2023）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-6-1-Generalized-Contrastive-Loss-建模共性"><span class="nav-text">3.6.1. Generalized Contrastive Loss 建模共性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-6-2-Individual-Contrastive-Loss-建模特性"><span class="nav-text">3.6.2. Individual Contrastive Loss 建模特性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-7-阿里MARIA（SIGIR-2023）"><span class="nav-text">3.7 阿里MARIA（SIGIR 2023）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-1-Feature-Scaling-特征缩放"><span class="nav-text">3.7.1 Feature Scaling 特征缩放</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-2-Feature-Refinement-特征精调"><span class="nav-text">3.7.2 Feature Refinement 特征精调</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-3-Feature-Correlation-Modeling-特征相关性"><span class="nav-text">3.7.3 Feature Correlation Modeling 特征相关性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-7-4-NN层"><span class="nav-text">3.7.4 NN层</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li></ol></div>
             
 
           </div>
