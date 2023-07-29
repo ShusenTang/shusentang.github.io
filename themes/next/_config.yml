@@ -141,6 +141,7 @@ menu:
   categories: /categories/ || th
   archives: /archives/ || archive
   about: /about/ || user
+  findJob: /findJob/ || info
   #schedule: /schedule/ || calendar
   #sitemap: /sitemap.xml || sitemap
   #commonweal: /404/ || heartbeat
