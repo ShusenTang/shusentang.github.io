@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+  <meta name="google-site-verification" content="UM_oWjkmpNS4sC6N8fDEsgSTPTOong_3Muz7XL_l-bQ">
+
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="NntzqnjuUs">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/my_apple-touch-icon-next.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/my_favicon-32x32.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/my_favicon-16x16.jpg?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/my_logo.jpg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="本文从初代 GPT 开始，总结 GPT 系列（GPT、GPT2、GPT3、InstructGPT/ChatGPT）的发展演变，主要包括模型结构、训练数据、核心创新等。">
+<meta name="keywords" content="GPT">
+<meta property="og:type" content="article">
+<meta property="og:title" content="GPT 系列（GPT、GPT2、GPT3、InstructGPT）">
+<meta property="og:url" content="https://tangshusen.me/2026/06/07/gpt/index.html">
+<meta property="og:site_name" content="TangShusen">
+<meta property="og:description" content="本文从初代 GPT 开始，总结 GPT 系列（GPT、GPT2、GPT3、InstructGPT/ChatGPT）的发展演变，主要包括模型结构、训练数据、核心创新等。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://tangshusen.me/2026/06/07/gpt/cover.jpg">
+<meta property="og:image" content="https://tangshusen.me/2026/06/07/gpt/gpt1.png">
+<meta property="og:image" content="https://tangshusen.me/2026/06/07/gpt/ln.png">
+<meta property="og:image" content="https://tangshusen.me/2026/06/07/gpt/sparse_attention.png">
+<meta property="og:image" content="https://tangshusen.me/2026/06/07/gpt/gpt3_eval.jpg">
+<meta property="og:image" content="https://tangshusen.me/2026/06/07/gpt/rlhf.png">
+<meta property="og:image" content="https://tangshusen.me/2026/06/07/gpt/rlhf_loss.png">
+<meta property="og:updated_time" content="2026-06-07T13:46:08.491Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="GPT 系列（GPT、GPT2、GPT3、InstructGPT）">
+<meta name="twitter:description" content="本文从初代 GPT 开始，总结 GPT 系列（GPT、GPT2、GPT3、InstructGPT/ChatGPT）的发展演变，主要包括模型结构、训练数据、核心创新等。">
+<meta name="twitter:image" content="https://tangshusen.me/2026/06/07/gpt/cover.jpg">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="TangShusen" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://tangshusen.me/2026/06/07/gpt/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>GPT 系列（GPT、GPT2、GPT3、InstructGPT） | TangShusen</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TangShusen</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-findjob">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/findJob/" rel="section"><i class="menu-item-icon fa fa-fw fa-info"></i> <br>内推</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2026/06/07/gpt/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="TangShusen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/assets/header.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TangShusen">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">GPT 系列（GPT、GPT2、GPT3、InstructGPT）
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2026-06-07 19:56:58 / 修改时间：21:46:08" itemprop="dateCreated datePublished" datetime="2026-06-07T19:56:58+08:00">2026-06-07</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/LLM/" itemprop="url" rel="index"><span itemprop="name">LLM</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2026/06/07/gpt/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2026/06/07/gpt/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2026/06/07/gpt/" class="leancloud_visitors" data-flag-title="GPT 系列（GPT、GPT2、GPT3、InstructGPT）">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <center><br><img src="/2026/06/07/gpt/cover.jpg" width="600" class="full-image"><br></center>
+
+<p>本文从初代 GPT 开始，总结 GPT 系列（GPT、GPT2、GPT3、InstructGPT/ChatGPT）的发展演变，主要包括模型结构、训练数据、核心创新等。</p>
+<a id="more"></a>
+<h1 id="总览对比"><a href="#总览对比" class="headerlink" title="总览对比"></a>总览对比</h1><table>
+<thead>
+<tr>
+<th>模型</th>
+<th>参数量</th>
+<th>预训练数据量</th>
+<th>上下文长度</th>
+<th>分词器</th>
+<th>核心创新</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GPT-1</td>
+<td>1.17 亿</td>
+<td>5 GB (BooksCorpus)</td>
+<td>512</td>
+<td>BPE (约40k)</td>
+<td>Pre-train + Fine-tuning</td>
+</tr>
+<tr>
+<td>GPT-2</td>
+<td>15 亿</td>
+<td>40 GB (WebText)</td>
+<td>1024</td>
+<td>Byte-level BPE (50k)</td>
+<td>Zero-shot, Pre-LN</td>
+</tr>
+<tr>
+<td>GPT-3</td>
+<td>1750 亿</td>
+<td>570 GB (混合)</td>
+<td>2048</td>
+<td>Byte-level BPE (50k)</td>
+<td>Few-shot / In-context learning, Sparse attention (大模型)</td>
+</tr>
+<tr>
+<td>InstructGPT</td>
+<td>1750 亿</td>
+<td>同上 + 人工反馈</td>
+<td>2048</td>
+<td>Byte-level BPE</td>
+<td>指令微调 + RLHF (人类对齐)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h1 id="GPT"><a href="#GPT" class="headerlink" title="GPT"></a>GPT</h1><p>_Improving Language Understanding by_ <strong>_G_</strong>_enerative_ <strong>_P_</strong>_re-_<strong>_T_</strong>_raining_，即使用通用的预训练模型来提升语言理解能力。</p>
+<h2 id="模型结构"><a href="#模型结构" class="headerlink" title="模型结构"></a>模型结构</h2><p>GPT模型结构其实就是多层Transformer的decoder堆叠而来，如下所示。</p>
+<center><br><img src="/2026/06/07/gpt/gpt1.png" width="200" class="full-image"><br></center>
+
+
+<p>预训练时采用标准的语言模型目标函数，即训练目标是根据前k个词，来预测下一个词。这里的 k 表示上文的窗口大小，理论上来讲 k 取的越大，模型所能获取的上文信息越充足，模型的能力越强。</p>
+<p>在微调阶段，在有特定下游任务label的情况下，可以再进行有监督的学习。</p>
+<p>模型结构的一些关键参数为：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>取值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>transformer 层数</td>
+<td>12</td>
+</tr>
+<tr>
+<td>特征维度</td>
+<td>768</td>
+</tr>
+<tr>
+<td>transformer head 数</td>
+<td>12</td>
+</tr>
+<tr>
+<td>总参数量</td>
+<td>1.17 亿</td>
+</tr>
+</tbody>
+</table>
+<h2 id="GPT和BERT的区别"><a href="#GPT和BERT的区别" class="headerlink" title="GPT和BERT的区别"></a>GPT和BERT的区别</h2><p>GPT 模型选择了 Transformer 的 decoder 部分，这是因为 GPT 的预训练目标函数选取的是标准的语言模型目标函数，使得模型在预测某一个词的时候只考虑上文信息而不参考下文。</p>
+<p>BERT 在预训练的时候选择的不是标准的语言模型作为目标函数，而是一种 mask 语言模型，也就是在预测句子中某一个词的时候可以同时看到它前后的所有上下文信息（类似完形填空），所以 BERT 选择的是 Transformer 的 encoder。</p>
+<p>GPT 和 BERT 的预训练目标函数的不同决定了其选择decoder还是encoder，GPT 选择的是一个更难的训练目标，它是根据前面的信息去预测下文，预测未来肯定是比完形填空难度要更大的。这也能从某种程度上解释了为什么相同规模的 GPT 和 BERT 模型，GPT 的效果要比 BERT 差。但是从另一个角度去想，如果能够把预测未来这个事情做好的话，它最终所能达到的效果的天花板一定是更高的，这可能也是 OpenAI 从一开始到现在一直坚持使用标准语言模型目标函数来做预训练模型的其中一个原因吧，当然这只是一种猜想。事实证明，从 GPT-3 开始，到最近的 ChatGPT，OpenAI 所取得的令人惊艳的效果也一定程度上证明了他们的选择的正确性。</p>
+<h2 id="模型训练"><a href="#模型训练" class="headerlink" title="模型训练"></a>模型训练</h2><p>训练数据方面，初代 GPT 使用了 BooksCorpus 数据集，文本大小约 <strong>5 GB</strong>，包含 7400w+ 的句子。该数据集是由约 7000 本独立的、不同风格类型的书籍组成。选择该数据集主要的好处是书籍文本包含大量高质量长句，保证模型学习长距离信息依赖。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>初代 GPT 到底做了什么？有哪些贡献？</p>
+<ol>
+<li>它是最早一批提出在 NLP 任务上使用 pre-train + fine-tuning 范式的工作。其实 pre-train + fine-tuning 在计算机视觉里面早在好多年前已经成为主流的范式，但是在 NLP 中一直没有流行起来，主要还是因为在 NLP 里面没有像 ImageNet 那样大规模标好的数据集，这也导致相当一段时间内，深度学习在 NLP 的进展相对比较缓慢，直到 GPT 和 BERT 的出现才渐渐打开局面。</li>
+<li>GPT 的实验证明了模型的精度和泛化能力会随着解码器层数增加而不断提升。</li>
+<li>预训练模型具有 <strong>zero-shot</strong> 的潜力（虽效果有限，但验证了可迁移性），并且这种能力能随着预训练的进行不断增强（GPT-2 将其作为主推方向）。</li>
+</ol>
+<hr>
+<h1 id="GPT-2"><a href="#GPT-2" class="headerlink" title="GPT-2"></a>GPT-2</h1><p>_Language Models are Unsupervised Multitask Learners_，语言模型是一种无监督多任务学习器。</p>
+<p>GPT-2的主要思想是，当模型的容量非常大且数据量足够丰富时，迁移到其他任务上的时候不需要额外的标注数据，也不需要额外的模型训练（不用微调），即 <strong>zero-shot</strong>。<br>在 zero-shot 的设定下，由于没有进行微调，因此不同任务需要以自然语言的形式去作为输入，例如下面两个任务的输入序列是这样改造的：</p>
+<ul>
+<li>机器翻译任务：<strong>translate</strong> to french, { english text }, { french text }</li>
+<li>阅读理解任务：<strong>answer</strong> the question, { document }, { question }, { answer }</li>
+</ul>
+<p>上述 zero-shot 奏效是因为在预训练的语料中，存在一些不同任务相关的自然语言描述示例，比如“xxx在法语中即xxx”这种。</p>
+<h2 id="模型结构-1"><a href="#模型结构-1" class="headerlink" title="模型结构"></a>模型结构</h2><p>在模型结构方面， GPT-2 与 GPT-1 基本相同，只是有几个训练trick调整：</p>
+<ol>
+<li><strong>后置 Layer-Norm （残差之后做 LN）改为前置（Pre-LN）</strong>，见论文《Learning Deep Transformer Models for Machine Translation》，这是因为当模型层数不断增加，梯度消失和梯度爆炸的风险越来越大，Pre-LN 相比 Post-LN 能使梯度更加稳定，缓解深层网络的训练问题。</li>
+</ol>
+<center><br><img src="/2026/06/07/gpt/ln.png" width="400" class="full-image"><br></center>
+
+<ol start="2">
+<li>在模型最后一个自注意力层之后，额外增加一个 Layer-Norm。</li>
+<li>调整参数的初始化方式，按残差层个数进行缩放，缩放比例为 1:sqrt(N)。</li>
+<li>输入序列的最大长度从 512 扩充到 <strong>1024</strong>。</li>
+<li><strong>分词器升级</strong>：采用 <strong>Byte-level BPE</strong>，词表大小 50k，可以处理任意 Unicode 字符，解决了原 BPE 对非英文文本的支持问题。</li>
+</ol>
+<h2 id="模型训练-1"><a href="#模型训练-1" class="headerlink" title="模型训练"></a>模型训练</h2><p>在训练数据方面，为了保证 zero-shot 的效果，必须要足够大且覆盖面广。所以 GPT-2 专门爬取了大量的<strong>网络文本</strong>数据，最后得到的数据集叫 WebText。它选取了 Reddit 上的高质量帖子，最终得到 4500w 网页链接，800w 有效的文本文档，语料大小为 <strong>40G</strong>。</p>
+<h2 id="GPT-2与GPT-1的区别"><a href="#GPT-2与GPT-1的区别" class="headerlink" title="GPT-2与GPT-1的区别"></a>GPT-2与GPT-1的区别</h2><ol>
+<li><strong>主推 zero-shot</strong>，而 GPT-1 为 pre-train + fine-tuning。</li>
+<li><strong>训练数据规模更大</strong>，GPT-2 为 800w 文档 40G，GPT-1 为 5GB。</li>
+<li><strong>模型大小</strong>，GPT-2 最大 15 亿参数，GPT-1为 1 亿参数。</li>
+<li><strong>模型结构调整</strong>：Pre-LN、额外 LN、参数初始化方式。</li>
+<li><strong>训练参数</strong>：batch_size 从 64 增加到 512，上文窗口大小从 512 增加到 1024。</li>
+<li><strong>分词器</strong>：Byte-level BPE，支持任意 Unicode。</li>
+</ol>
+<hr>
+<h1 id="GPT-3"><a href="#GPT-3" class="headerlink" title="GPT-3"></a>GPT-3</h1><p>虽然 GPT-2 主推的 zero-shot 在创新度上有比较高的水平，但是由于其在效果上表现平平，所以在业界并没有取得比较大的影响力，而 GPT-3 正是为了解决效果上的问题而提出的。GPT-3 不再去追求那种极致的不需要任何样本就可以表现很好的模型，而是考虑像人类的学习方式那样，仅仅使用<strong>极少数样本</strong>就可以掌握某一个任务，因此就引出了 GPT-3 标题 _Language Models are_ <strong>_Few-Shot_</strong> _Learners_。</p>
+<p>这里的 few-shot 不是像之前那样，使用少量样本在下游任务上去做微调，因为在 GPT-3 那样的参数规模下，即使是参数微调的成本也是高到无法估计。</p>
+<h2 id="模型结构-2"><a href="#模型结构-2" class="headerlink" title="模型结构"></a>模型结构</h2><p>整体沿用 GPT 模型结构，但引入了 <strong>Sparse Transformer</strong> 中的 sparse attention（稀疏注意力）模块。<br><strong>需要注意的是</strong>：GPT-3 并非所有尺寸的模型都使用了 sparse attention。小模型（如 125M、350M）仍使用传统的 dense attention，只有大模型（13B、175B）为了降低计算量才在部分层使用了 <strong>交替的 dense + locally banded sparse attention</strong>。</p>
+<p>sparse attention 与传统 self-attention（称为 dense attention） 的区别在于：</p>
+<blockquote>
+<p>dense attention：每个 token 之间两两计算 attention，复杂度 O(n²)<br>sparse attention：每个 token 只与其他 token 的一个子集计算 attention，复杂度 O(n log n)<br>具体来说，sparse attention 除了相对距离不超过 k（局部紧密相关）以及相对距离为 k，2k，3k…（远程稀疏相关）的 token，其他所有 token 的注意力都设为 0，如下图所示：</p>
+</blockquote>
+<center><br><img src="/2026/06/07/gpt/sparse_attention.png" width="400" class="full-image"><br></center>
+
+<blockquote>
+<p>图片来源：<a href="https://spaces.ac.cn/archives/6853" target="_blank" rel="noopener">为节约而生：从标准Attention到稀疏Attention —— 科学空间</a></p>
+</blockquote>
+<p>使用 sparse attention 的好处主要有以下两点：</p>
+<ol>
+<li><strong>减少注意力层的计算复杂度</strong>，节约显存和耗时，从而能够处理更长的输入序列（GPT-3 上下文长度扩展至 <strong>2048</strong>）。</li>
+<li><strong>具有“局部紧密相关和远程稀疏相关”的特性</strong>，对于距离较近的上下文关注更多，对于距离较远的上下文关注较少。</li>
+</ol>
+<h2 id="下游评估"><a href="#下游评估" class="headerlink" title="下游评估"></a>下游评估</h2><p>如下图所示，GPT-3 在下游任务的评估与预测时，提供了三种不同的方法：</p>
+<blockquote>
+<p><strong>Zero-shot</strong>：仅使用当前任务的自然语言描述，不进行任何梯度更新。<br><strong>One-shot</strong>：当前任务的自然语言描述，加上一个简单的输入输出样例，<strong>不进行任何梯度更新</strong>。<br><strong>Few-shot</strong>：当前任务的自然语言描述，加上几个简单的输入输出样例，<strong>不进行任何梯度更新</strong>。</p>
+</blockquote>
+<p>其中 Few-shot 也被称为上下文学习（in-context learning），虽然它与 fine-tuning 一样都需要一些有监督标注数据，但是两者的本质区别是前者使用标注数据时<strong>不做任何的梯度回传，模型参数不更新</strong>。</p>
+<center><br><img src="/2026/06/07/gpt/gpt3_eval.jpg" width="600" class="full-image"><br></center>
+
+<h2 id="模型训练-2"><a href="#模型训练-2" class="headerlink" title="模型训练"></a>模型训练</h2><p>由于 GPT-3 在模型规模上的扩大，在训练数据方面也必须进行扩充来适配更大的模型使其发挥出相应的能力。</p>
+<p>GPT-3 使用了多个数据集，其中最大的是 CommonCrawl，原始未处理的数据达到了 45TB，其实在 GPT-2 的时候他们就有考虑使用这个数据集，但是后来还是觉得这个数据集太脏了所以没用，但是现在 GPT-3 的模型规模太大了，使得训练对数据量的需求也增加了很多，他们不得不重新考虑这个数据集。因此，他们必须在这个数据集上做一些额外的数据清洗工作来尽量保证数据的质量。</p>
+<p>数据处理主要包括以下几个部分：</p>
+<blockquote>
+<ol>
+<li>使用高质量数据作为正例，训练 LR 分类算法，对 CommonCrawl 的所有文档做初步过滤。</li>
+<li>利用公开的算法做文档去重，减少冗余数据。</li>
+<li>加入之前 BERT、GPT、GPT-2 使用过的已知的高质量数据集。</li>
+</ol>
+</blockquote>
+<p>最终处理完成后使用的数据规模约 <strong>570G</strong>。</p>
+<h2 id="与GPT-2区别"><a href="#与GPT-2区别" class="headerlink" title="与GPT-2区别"></a>与GPT-2区别</h2><p>整体来看，GPT-3 相比于 GPT-2 有如下几点区别：</p>
+<ol>
+<li><strong>效果上</strong>，超出 GPT-2 非常多，能生成人类难以区分的新闻文章。</li>
+<li><strong>主推 few-shot</strong>，相比于 GPT-2 的 zero-shot，具有很强的创新性。</li>
+<li><strong>模型结构</strong>略微变化，大模型采用 sparse attention 模块。</li>
+<li><strong>海量训练语料</strong> 45TB（清洗后 570GB），相比于 GPT-2 的 40GB。</li>
+<li><strong>海量模型参数</strong>，最大模型为 1750 亿，GPT-2 最大为 15 亿参数。</li>
+<li><strong>上下文长度</strong>从 1024 扩展至 2048。</li>
+</ol>
+<h2 id="模型“偏见”"><a href="#模型“偏见”" class="headerlink" title="模型“偏见”"></a>模型“偏见”</h2><p>模型最终呈现的效果取决于训练数据，这会导致模型会出现各种各样的“<strong>偏见</strong>”，比如“种族偏见”和“性别偏见”。<br>GPT-3由于其影响力本就较大，容易造成一定的社会影响，比如生成新闻稿，散布一些不实的消息等。</p>
+<hr>
+<h1 id="InstructGPT-ChatGPT"><a href="#InstructGPT-ChatGPT" class="headerlink" title="InstructGPT/ChatGPT"></a>InstructGPT/ChatGPT</h1><p>GPT-3 虽然在各大NLP任务的效果上令人惊艳，但前面提到的“偏见”问题容易造成严重的负面社会影响（比如模型将黑人预测为黑猩猩，引发了巨大争议，负面舆论对大公司来说影响是巨大的），而且很多时候，他并不按人类喜欢的表达方式去说话。之所以有这个问题，作者认为是模型没有跟人类意图进行对齐（Align）。因此，需要 Align，就有了 InstructGPT 这个工作。</p>
+<center><br><img src="/2026/06/07/gpt/rlhf.png" width="600" class="full-image"><br></center>
+
+<p>为了进行对齐，原文分为了三个步骤：</p>
+<ol>
+<li><strong>有监督微调（Supervised FineTune，SFT）</strong>：收集标注的数据集，有监督微调训练 GPT-3。</li>
+<li><strong>奖励模型训练（Reward Model，RM）</strong>：训练一个奖励模型（可以看做一个分类模型），该模型输入是 prompt 和 response，输出是奖励值。</li>
+<li><strong>强化学习训练</strong>：使用初始化的策略模型根据 prompt 输入生成 response，然后使用奖励模型对该 response 打分，再使用打分值借助 <strong>PPO 算法</strong>重新优化策略模型。</li>
+</ol>
+<p>可以把上述步骤拆分成两大步：一个是有监督微调（SFT），一个是基于人类反馈的强化学习（RLHF）。</p>
+<h2 id="监督微调（SFT）"><a href="#监督微调（SFT）" class="headerlink" title="监督微调（SFT）"></a>监督微调（SFT）</h2><p>SFT 可以理解为人工标注了一批数据，然后去微调 GPT-3。注意这里的微调和 GPT-3 之前用来做下游任务使用的 few-shot learning 有非常本质的区别：</p>
+<p>GPT-3 中的 few-shot 对于同一个下游任务，通常采用固定的任务描述方式，而且需要人去探索哪一种任务表述方式更好。显然这种模式与真实场景下用户的使用方式存在较大的 gap，用户在向 GPT-3 提问时才不会采用某种固定的任务表述，而是随心所欲地以自己的说话习惯去表达某个需求。InstructGPT 在 SFT 中标注的数据，正是为了消除这种模型预测与用户表达习惯之间的 gap。在标注过程中，他们从 GPT-3 的用户真实请求中采样大量下游任务的描述，然后让标注人员对任务描述进行续写，从而得到该问题的高质量回答。这里用户真实请求又被称为某个任务的<strong>指令</strong>，即 InstructGPT 的核心思想“基于人类反馈的指令微调”。</p>
+<h2 id="基于人类反馈的强化学习（RLHF）"><a href="#基于人类反馈的强化学习（RLHF）" class="headerlink" title="基于人类反馈的强化学习（RLHF）"></a>基于人类反馈的强化学习（RLHF）</h2><p>基于 SFT 得到的模型被用于后续的 RLHF 做进一步的模型优化。</p>
+<h3 id="奖励模型（RM）"><a href="#奖励模型（RM）" class="headerlink" title="奖励模型（RM）"></a>奖励模型（RM）</h3><p>训练 Reward 模型去选择人类更倾向的选项（Instruction Learning，指示学习）。<br>首先通过人工标注的方式来提供奖励（Reward），标注者可以给那些涉及偏见的生成内容更低的分，从而鼓励模型不去生成这些人类不喜欢的内容。奖励模型 RM 的结构是将 SFT 训练后的模型的最后的嵌入层去掉后的模型。它的输入是 prompt 和 response，输出是奖励值。具体的讲，对每个 prompt，InstructGPT 会随机生成 K 个输出，然后向每个人工标注者成对的展示输出结果，标注者从中选择效果更好的输出。奖励模型的损失函数为：</p>
+<center><br><img src="/2026/06/07/gpt/rlhf_loss.png" width="500" class="full-image"><br></center>
+
+<p>其中 ( r_\theta ) 是奖励值，( y_w ) 是标注者更喜欢的响应结果，( y_l ) 是标注者不喜欢的响应结果。损失函数本质上是一个 <strong>pair-wise ranking loss</strong>，它最大化偏好响应与不偏好响应之间的奖励差值（实际是最小化负对数似然）。</p>
+<h3 id="强化学习模型（PPO）"><a href="#强化学习模型（PPO）" class="headerlink" title="强化学习模型（PPO）"></a>强化学习模型（PPO）</h3><p>PPO 算法（Proximal Policy Optimization）的核心思想是通过<strong>剪切概率比</strong>来限制策略更新的幅度，避免更新过大导致破坏奖励模型。在 InstructGPT 中，每个 episode 仅包含一对 prompt-response 和其 reward，为防止 RL 过度优化，还使用了 per-token KL 惩罚。PPO算法的详细流程这里不过多赘述。</p>
+<h2 id="InstructGPT-总结"><a href="#InstructGPT-总结" class="headerlink" title="InstructGPT 总结"></a>InstructGPT 总结</h2><p>总的来说，InstructGPT 相对于之前的 GPT 系列，有以下几点值得注意：</p>
+<ol>
+<li>解决 GPT-3 的输出与人类意图之间的 Align 问题。</li>
+<li>让具备丰富世界知识的大模型，学习“人类偏好”。</li>
+<li>标注人员明显感觉 InstructGPT 的输出比 GPT-3 的输出更好，更可靠。</li>
+<li>InstructGPT 在真实性、丰富度上表现更好。</li>
+<li>InstructGPT 对有害结果的生成控制得更好，但是对于“偏见”没有明显改善。</li>
+<li>基于指令微调后，在公开任务测试集上的表现仍然良好。</li>
+<li>InstructGPT 有令人意外的泛化性，在缺乏人类指令数据的任务上也表现很好。</li>
+</ol>
+<p>InstructGPT 是 OpenAI 在 2022 年初发布的模型，后续的 <strong>ChatGPT</strong> 是在 InstructGPT 的基础上进一步优化对话体验的版本（同样使用了 RLHF，但数据收集方式和对话数据规模不同）。可以认为 ChatGPT 是 InstructGPT 的对话专用衍生品。</p>
+<hr>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://zhuanlan.zhihu.com/p/609716668" target="_blank" rel="noopener">GPT / GPT-2 / GPT-3 / InstructGPT 进化之路 —— 知乎</a>（主要参考）</li>
+<li><a href="https://zhuanlan.zhihu.com/p/504609631" target="_blank" rel="noopener">Sparse Transformer —— 知乎</a></li>
+<li><a href="https://spaces.ac.cn/archives/6853" target="_blank" rel="noopener">为节约而生：从标准Attention到稀疏Attention —— 科学空间</a></li>
+<li><a href="https://www.zhihu.com/tardis/zm/art/614597581?source_id=1003" target="_blank" rel="noopener">OpenAI ChatGPT（四）：十分钟读懂 GPT-3 —— 知乎</a></li>
+</ul>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/assets/wechatpay.jpg" alt="TangShusen 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/assets/alipay.jpg" alt="TangShusen 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/GPT/" rel="tag"># GPT</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2024/03/24/delay-feedback/" rel="next" title="搜广推之延迟反馈建模">
+                <i class="fa fa-chevron-left"></i> 搜广推之延迟反馈建模
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/assets/header.jpg" alt="TangShusen">
+            
+              <p class="site-author-name" itemprop="name">TangShusen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">16</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">8</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">23</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/shusentang" title="GitHub &rarr; https://github.com/shusentang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.zhihu.com/people/tang-shu-sen-77/activities" title="知乎 &rarr; https://www.zhihu.com/people/tang-shu-sen-77/activities" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                我的项目
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://github.com/ShusenTang/LeetCode" title="https://github.com/ShusenTang/LeetCode" rel="noopener" target="_blank">LeetCode题解</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Dive-into-DL-PyTorch" title="https://shusentang.github.io/Dive-into-DL-PyTorch" rel="noopener" target="_blank">《动手学深度学习》(PyTorch版)</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" title="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" rel="noopener" target="_blank">《Deep Learning with PyTorch》中文翻译</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#总览对比"><span class="nav-text">总览对比</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GPT"><span class="nav-text">GPT</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#模型结构"><span class="nav-text">模型结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GPT和BERT的区别"><span class="nav-text">GPT和BERT的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模型训练"><span class="nav-text">模型训练</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GPT-2"><span class="nav-text">GPT-2</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#模型结构-1"><span class="nav-text">模型结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模型训练-1"><span class="nav-text">模型训练</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GPT-2与GPT-1的区别"><span class="nav-text">GPT-2与GPT-1的区别</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GPT-3"><span class="nav-text">GPT-3</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#模型结构-2"><span class="nav-text">模型结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#下游评估"><span class="nav-text">下游评估</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模型训练-2"><span class="nav-text">模型训练</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#与GPT-2区别"><span class="nav-text">与GPT-2区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模型“偏见”"><span class="nav-text">模型“偏见”</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#InstructGPT-ChatGPT"><span class="nav-text">InstructGPT/ChatGPT</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#监督微调（SFT）"><span class="nav-text">监督微调（SFT）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基于人类反馈的强化学习（RLHF）"><span class="nav-text">基于人类反馈的强化学习（RLHF）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#奖励模型（RM）"><span class="nav-text">奖励模型（RM）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#强化学习模型（PPO）"><span class="nav-text">强化学习模型（PPO）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#InstructGPT-总结"><span class="nav-text">InstructGPT 总结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 – <span itemprop="copyrightYear">2026</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TangShusen tip:本博客在电脑端食用更佳~</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">total view times: <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: true,
+        appId: 'Bi7QlJPklJ2hjFFoWMd1D2gB-gzGzoHsz',
+        appKey: 'yMWxfGo3ABn8yS13Ytq43Rdk',
+        placeholder: '在上面填上你的邮箱再评论可以收到我的回复哟~',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text('Counter not initialized! See more at console err msg.');
+              console.error('ATTENTION! LeanCloud counter has security bug, see here how to solve it: https://github.com/theme-next/hexo-leancloud-counter-security. \n But you also can use LeanCloud without security, by set \'security\' option to \'false\'.');
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz",
+                'X-LC-Key': "zK9lN00t9W1flFbM75hsjojR",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
