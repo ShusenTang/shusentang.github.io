@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://tangshusen.me/"/>
-  <updated>2026-06-07T13:46:08.491Z</updated>
+  <updated>2026-06-07T13:55:03.935Z</updated>
   <id>https://tangshusen.me/</id>
   
   <author>
@@ -17,15 +17,15 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>GPT 系列（GPT、GPT2、GPT3、InstructGPT）</title>
+    <title>LLM 之 GPT 系列（GPT、GPT2、GPT3、InstructGPT）</title>
     <link href="https://tangshusen.me/2026/06/07/gpt/"/>
     <id>https://tangshusen.me/2026/06/07/gpt/</id>
     <published>2026-06-07T11:56:58.000Z</published>
-    <updated>2026-06-07T13:46:08.491Z</updated>
+    <updated>2026-06-07T13:55:03.935Z</updated>
     
     <summary type="html">
     
-      &lt;center&gt;&lt;br&gt;&lt;img src=&quot;/2026/06/07/gpt/cover.jpg&quot; width=&quot;600&quot; class=&quot;full-image&quot;&gt;&lt;br&gt;&lt;/center&gt;
+      &lt;center&gt;&lt;br&gt;&lt;img src=&quot;/2026/06/07/gpt/cover.jpg&quot; width=&quot;800&quot; class=&quot;full-image&quot;&gt;&lt;br&gt;&lt;/center&gt;
 
 &lt;p&gt;本文从初代 GPT 开始，总结 GPT 系列（GPT、GPT2、GPT3、InstructGPT/ChatGPT）的发展演变，主要包括模型结构、训练数据、核心创新等。&lt;/p&gt;
     

@@ -115,7 +115,7 @@
   <meta name="description" content="本文从初代 GPT 开始，总结 GPT 系列（GPT、GPT2、GPT3、InstructGPT/ChatGPT）的发展演变，主要包括模型结构、训练数据、核心创新等。">
 <meta name="keywords" content="GPT">
 <meta property="og:type" content="article">
-<meta property="og:title" content="GPT 系列（GPT、GPT2、GPT3、InstructGPT）">
+<meta property="og:title" content="LLM 之 GPT 系列（GPT、GPT2、GPT3、InstructGPT）">
 <meta property="og:url" content="https://tangshusen.me/2026/06/07/gpt/index.html">
 <meta property="og:site_name" content="TangShusen">
 <meta property="og:description" content="本文从初代 GPT 开始，总结 GPT 系列（GPT、GPT2、GPT3、InstructGPT/ChatGPT）的发展演变，主要包括模型结构、训练数据、核心创新等。">
@@ -127,9 +127,9 @@
 <meta property="og:image" content="https://tangshusen.me/2026/06/07/gpt/gpt3_eval.jpg">
 <meta property="og:image" content="https://tangshusen.me/2026/06/07/gpt/rlhf.png">
 <meta property="og:image" content="https://tangshusen.me/2026/06/07/gpt/rlhf_loss.png">
-<meta property="og:updated_time" content="2026-06-07T13:46:08.491Z">
+<meta property="og:updated_time" content="2026-06-07T13:55:03.935Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="GPT 系列（GPT、GPT2、GPT3、InstructGPT）">
+<meta name="twitter:title" content="LLM 之 GPT 系列（GPT、GPT2、GPT3、InstructGPT）">
 <meta name="twitter:description" content="本文从初代 GPT 开始，总结 GPT 系列（GPT、GPT2、GPT3、InstructGPT/ChatGPT）的发展演变，主要包括模型结构、训练数据、核心创新等。">
 <meta name="twitter:image" content="https://tangshusen.me/2026/06/07/gpt/cover.jpg">
 
@@ -150,7 +150,7 @@
   };
 </script>
 
-  <title>GPT 系列（GPT、GPT2、GPT3、InstructGPT） | TangShusen</title>
+  <title>LLM 之 GPT 系列（GPT、GPT2、GPT3、InstructGPT） | TangShusen</title>
   
 
 
@@ -400,7 +400,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">GPT 系列（GPT、GPT2、GPT3、InstructGPT）
+          <h1 class="post-title" itemprop="name headline">LLM 之 GPT 系列（GPT、GPT2、GPT3、InstructGPT）
               
             
           </h1>
@@ -425,7 +425,7 @@
                 
               
 
-              <time title="创建时间：2026-06-07 19:56:58 / 修改时间：21:46:08" itemprop="dateCreated datePublished" datetime="2026-06-07T19:56:58+08:00">2026-06-07</time>
+              <time title="创建时间：2026-06-07 19:56:58 / 修改时间：21:55:03" itemprop="dateCreated datePublished" datetime="2026-06-07T19:56:58+08:00">2026-06-07</time>
             
 
             
@@ -471,7 +471,7 @@
 
           
           
-             <span id="/2026/06/07/gpt/" class="leancloud_visitors" data-flag-title="GPT 系列（GPT、GPT2、GPT3、InstructGPT）">
+             <span id="/2026/06/07/gpt/" class="leancloud_visitors" data-flag-title="LLM 之 GPT 系列（GPT、GPT2、GPT3、InstructGPT）">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -502,7 +502,7 @@
       
 
       
-        <center><br><img src="/2026/06/07/gpt/cover.jpg" width="600" class="full-image"><br></center>
+        <center><br><img src="/2026/06/07/gpt/cover.jpg" width="800" class="full-image"><br></center>
 
 <p>本文从初代 GPT 开始，总结 GPT 系列（GPT、GPT2、GPT3、InstructGPT/ChatGPT）的发展演变，主要包括模型结构、训练数据、核心创新等。</p>
 <a id="more"></a>
@@ -649,7 +649,7 @@
 <p><strong>Zero-shot</strong>：仅使用当前任务的自然语言描述，不进行任何梯度更新。<br><strong>One-shot</strong>：当前任务的自然语言描述，加上一个简单的输入输出样例，<strong>不进行任何梯度更新</strong>。<br><strong>Few-shot</strong>：当前任务的自然语言描述，加上几个简单的输入输出样例，<strong>不进行任何梯度更新</strong>。</p>
 </blockquote>
 <p>其中 Few-shot 也被称为上下文学习（in-context learning），虽然它与 fine-tuning 一样都需要一些有监督标注数据，但是两者的本质区别是前者使用标注数据时<strong>不做任何的梯度回传，模型参数不更新</strong>。</p>
-<center><br><img src="/2026/06/07/gpt/gpt3_eval.jpg" width="600" class="full-image"><br></center>
+<center><br><img src="/2026/06/07/gpt/gpt3_eval.jpg" width="800" class="full-image"><br></center>
 
 <h2 id="模型训练-2"><a href="#模型训练-2" class="headerlink" title="模型训练"></a>模型训练</h2><p>由于 GPT-3 在模型规模上的扩大，在训练数据方面也必须进行扩充来适配更大的模型使其发挥出相应的能力。</p>
 <p>GPT-3 使用了多个数据集，其中最大的是 CommonCrawl，原始未处理的数据达到了 45TB，其实在 GPT-2 的时候他们就有考虑使用这个数据集，但是后来还是觉得这个数据集太脏了所以没用，但是现在 GPT-3 的模型规模太大了，使得训练对数据量的需求也增加了很多，他们不得不重新考虑这个数据集。因此，他们必须在这个数据集上做一些额外的数据清洗工作来尽量保证数据的质量。</p>
@@ -674,7 +674,7 @@
 <h2 id="模型“偏见”"><a href="#模型“偏见”" class="headerlink" title="模型“偏见”"></a>模型“偏见”</h2><p>模型最终呈现的效果取决于训练数据，这会导致模型会出现各种各样的“<strong>偏见</strong>”，比如“种族偏见”和“性别偏见”。<br>GPT-3由于其影响力本就较大，容易造成一定的社会影响，比如生成新闻稿，散布一些不实的消息等。</p>
 <hr>
 <h1 id="InstructGPT-ChatGPT"><a href="#InstructGPT-ChatGPT" class="headerlink" title="InstructGPT/ChatGPT"></a>InstructGPT/ChatGPT</h1><p>GPT-3 虽然在各大NLP任务的效果上令人惊艳，但前面提到的“偏见”问题容易造成严重的负面社会影响（比如模型将黑人预测为黑猩猩，引发了巨大争议，负面舆论对大公司来说影响是巨大的），而且很多时候，他并不按人类喜欢的表达方式去说话。之所以有这个问题，作者认为是模型没有跟人类意图进行对齐（Align）。因此，需要 Align，就有了 InstructGPT 这个工作。</p>
-<center><br><img src="/2026/06/07/gpt/rlhf.png" width="600" class="full-image"><br></center>
+<center><br><img src="/2026/06/07/gpt/rlhf.png" width="800" class="full-image"><br></center>
 
 <p>为了进行对齐，原文分为了三个步骤：</p>
 <ol>
@@ -704,7 +704,11 @@
 <p>InstructGPT 是 OpenAI 在 2022 年初发布的模型，后续的 <strong>ChatGPT</strong> 是在 InstructGPT 的基础上进一步优化对话体验的版本（同样使用了 RLHF，但数据收集方式和对话数据规模不同）。可以认为 ChatGPT 是 InstructGPT 的对话专用衍生品。</p>
 <hr>
 <h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
-<li><a href="https://zhuanlan.zhihu.com/p/609716668" target="_blank" rel="noopener">GPT / GPT-2 / GPT-3 / InstructGPT 进化之路 —— 知乎</a>（主要参考）</li>
+<li>GPT1: <a href="https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf" target="_blank" rel="noopener">Improving Language Understanding by Generative Pre-Training</a></li>
+<li>GPT2: <a href="https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf" target="_blank" rel="noopener">Language Models are Unsupervised Multitask Learners</a></li>
+<li>GPT3: <a href="https://arxiv.org/pdf/2005.14165" target="_blank" rel="noopener">Language Models are Few-Shot Learners</a></li>
+<li>instructGPT: <a href="https://arxiv.org/pdf/2203.02155" target="_blank" rel="noopener">Training language models to follow instructions with human feedback</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/609716668" target="_blank" rel="noopener">GPT / GPT-2 / GPT-3 / InstructGPT 进化之路 —— 知乎</a></li>
 <li><a href="https://zhuanlan.zhihu.com/p/504609631" target="_blank" rel="noopener">Sparse Transformer —— 知乎</a></li>
 <li><a href="https://spaces.ac.cn/archives/6853" target="_blank" rel="noopener">为节约而生：从标准Attention到稀疏Attention —— 科学空间</a></li>
 <li><a href="https://www.zhihu.com/tardis/zm/art/614597581?source_id=1003" target="_blank" rel="noopener">OpenAI ChatGPT（四）：十分钟读懂 GPT-3 —— 知乎</a></li>
