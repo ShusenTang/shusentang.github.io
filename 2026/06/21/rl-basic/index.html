@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+  <meta name="google-site-verification" content="UM_oWjkmpNS4sC6N8fDEsgSTPTOong_3Muz7XL_l-bQ">
+
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="NntzqnjuUs">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/my_apple-touch-icon-next.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/my_favicon-32x32.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/my_favicon-16x16.jpg?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/my_logo.jpg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="强化学习入门，包括基本思想、经典算法（如Q-Learning，DQN，Policy Gradient、Actor-Critic等）。">
+<meta name="keywords" content="强化学习,Q-Learning,DQN,Policy Gradient,Actor Critic">
+<meta property="og:type" content="article">
+<meta property="og:title" content="强化学习基础与经典算法">
+<meta property="og:url" content="https://tangshusen.me/2026/06/21/rl-basic/index.html">
+<meta property="og:site_name" content="TangShusen">
+<meta property="og:description" content="强化学习入门，包括基本思想、经典算法（如Q-Learning，DQN，Policy Gradient、Actor-Critic等）。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://tangshusen.me/2026/06/21/rl-basic/mc.png">
+<meta property="og:image" content="https://tangshusen.me/2026/06/21/rl-basic/q-learning-formula.png">
+<meta property="og:image" content="https://tangshusen.me/2026/06/21/rl-basic/q-learning-game.png">
+<meta property="og:image" content="https://tangshusen.me/2026/06/21/rl-basic/q-function.png">
+<meta property="og:image" content="https://tangshusen.me/2026/06/21/rl-basic/q-table.png">
+<meta property="og:image" content="https://tangshusen.me/2026/06/21/rl-basic/dqn-loss.png">
+<meta property="og:image" content="https://tangshusen.me/2026/06/21/rl-basic/dqn.png">
+<meta property="og:image" content="https://tangshusen.me/2026/06/21/rl-basic/reinforce.png">
+<meta property="og:image" content="https://tangshusen.me/2026/06/21/rl-basic/actor-critic.png">
+<meta property="og:updated_time" content="2026-06-21T10:25:25.287Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="强化学习基础与经典算法">
+<meta name="twitter:description" content="强化学习入门，包括基本思想、经典算法（如Q-Learning，DQN，Policy Gradient、Actor-Critic等）。">
+<meta name="twitter:image" content="https://tangshusen.me/2026/06/21/rl-basic/mc.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="TangShusen" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://tangshusen.me/2026/06/21/rl-basic/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>强化学习基础与经典算法 | TangShusen</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TangShusen</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-findjob">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/findJob/" rel="section"><i class="menu-item-icon fa fa-fw fa-info"></i> <br>内推</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2026/06/21/rl-basic/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="TangShusen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/assets/header.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TangShusen">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">强化学习基础与经典算法
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2026-06-21 17:06:58 / 修改时间：18:25:25" itemprop="dateCreated datePublished" datetime="2026-06-21T17:06:58+08:00">2026-06-21</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/RL/" itemprop="url" rel="index"><span itemprop="name">RL</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2026/06/21/rl-basic/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2026/06/21/rl-basic/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2026/06/21/rl-basic/" class="leancloud_visitors" data-flag-title="强化学习基础与经典算法">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>强化学习入门，包括基本思想、经典算法（如Q-Learning，DQN，Policy Gradient、Actor-Critic等）。</p>
+<a id="more"></a>
+<h1 id="一、基本思想"><a href="#一、基本思想" class="headerlink" title="一、基本思想"></a>一、基本思想</h1><h2 id="1-1-术语"><a href="#1-1-术语" class="headerlink" title="1.1 术语"></a>1.1 术语</h2><ul>
+<li>环境(Environment)：是一个外部系统，智能体处于这个系统中，能够感知到这个系统并且能够基于感知到的状态做出一定的行动。</li>
+<li>智能体(Agent)：是一个嵌入到环境中的系统，能够通过采取行动来改变环境的状态。</li>
+<li>状态(State)/观察值(Observation)：状态是对世界的完整描述，不会隐藏世界的信息。观测是对状态的部分描述，可能会遗漏一些信息。</li>
+<li>策略(Policy)：策略是智能体用于决定下一步执行什么行动的规则，可以是确定性的，也可以是随机的；</li>
+<li>动作(Action)：不同的环境允许不同种类的动作，在给定的环境中，有效动作的集合经常被称为动作空间(action space)；</li>
+<li>奖励(Reward)：是由环境给的一个标量的反馈信号(scalar feedback signal)，这个信号显示了智能体在某一步采 取了某个策略的表现如何；</li>
+<li>回报(Return)：cumulated future reward，即未来奖励累计，未来的奖励不如现在等值的奖励那么好，需要折算（类似金融经济学里面的折现）；</li>
+<li>状态价值函数 $V_\pi(s)$ ：智能体在状态 s，遵循策略 $\pi$ 直至游戏结束所能获得的<strong>期望累积回报</strong>。不必等待未来的收益实际发生就可以获知当前状态的好坏。比如在下棋游戏中，不管中途如何，只有最终赢得游戏才得1分，否则0分，那中途就可以通过状态价值函数判断智能体下得如何；</li>
+<li>动作价值函数 $Q_\pi(s, a)$：智能体在状态 s 采取特定动作 a ，随后遵循策略 $\pi$ 直到游戏结束能获得的<strong>期望累积回报</strong>。</li>
+</ul>
+<p>在强化学习过程中，智能体跟环境一直在交互。智能体在环境里面获取到状态，智能体会利用这个状态输出一个动作，一个决策。然后这个决策会放到环境之中去，环境会根据智能体采取的决策，输出下一个状态以及当前的这个决策得到的奖励。智能体的目的就是为了尽可能多地从环境中获取奖励。</p>
+<h2 id="1-2-和监督学习-非监督学习区别"><a href="#1-2-和监督学习-非监督学习区别" class="headerlink" title="1.2 和监督学习/非监督学习区别"></a>1.2 和监督学习/非监督学习区别</h2><ul>
+<li><font color="#245bdb">监督学习</font>：是从外部监督者提供的带标注训练集（iid独立同分布的）中进行学习。 (<font color="#245bdb">任务驱动型</font>)</li>
+<li><font color="#de7802">非监督学习</font>：是一个典型的寻找未标注数据中隐含结构的过程。 (<font color="#de7802">数据驱动型</font>)</li>
+<li><font color="#ff0000">强化学习</font>：更偏重于智能体与环境的交互（是一个序列）， 这带来了一个独有的挑战 ——“探索（exploration）”与“利用（exploitation）”之间的折中权衡，智能体必须利用已有的经验来获取收益，同时也要进行试探，使得未来可以获得更好的动作选择空间。 (<font color="#ff0000">从错误中学习</font>)</li>
+</ul>
+<h2 id="1-3-算法分类"><a href="#1-3-算法分类" class="headerlink" title="1.3 算法分类"></a>1.3 算法分类</h2><p>按照环境是否已知划分：<strong>免模型学习（Model-Free） vs 有模型学习（Model-Based）</strong></p>
+<blockquote>
+<p>Model-free就是不去学习和理解环境，环境给出什么信息就是什么信息，常见的方法有policy optimization和Q-learning。<br>Model-Based是去学习和理解环境，学会用一个模型来模拟环境，通过模拟的环境来得到反馈。Model-Based相当于比Model-Free多了模拟环境这个环节，通过模拟环境预判接下来会发生的所有情况，然后选择最佳的情况。<br>一般情况下，环境都是不可知的，所以这里主要研究Model-Free。</p>
+</blockquote>
+<p>按照学习方式划分：<strong>在线策略（On-Policy） vs 离线策略（Off-Policy）</strong></p>
+<blockquote>
+<p>On-Policy：用于学习的策略和用于和环境交互采样数据的策略是<strong>同一个</strong>策略，目标策略产出当前训练数据，训完更新策略后，旧数据就不能用了。即边做边学，典型的算法为Sarsa、PPO等。<br>Off-Policy：用于学习的策略和用于和环境交互采样数据的策略是<strong>不同</strong>的策略。即从别人（其他策略，或者旧策略）的经验中学习。典型的方法是Q-learning，以及Deep-Q-Network。值得一提的是和<strong>Offline RL</strong>（离线强化学习）的区别， Offline RL 指学习过程中完全不与环境交互，只从一个固定的、事先收集好的数据集中学习（如DPO）， Offline RL可以是 Off-Policy 的一种特殊形式，但日常讨论中，Off-Policy 更多指“能利用不同策略历史数据”的能力，不强调完全不交互。</p>
+</blockquote>
+<p>按照学习目标划分：<strong>基于价值（Value-Based）和基于策略（Policy-Based）</strong></p>
+<blockquote>
+<p><strong>Value-Based</strong>：学一个价值函数，输出的是动作的价值，选择价值最高的动作。适用于非连续的动作。常见的方法有Q-learning、Deep Q Network和Sarsa。<br><strong>Policy-Based</strong>：学一个策略函数，输出下一步动作的概率，根据概率来选取动作。但不一定概率最高就会选择该动作，还是会从整体进行考虑。适用于非连续和连续的动作。常见的方法有Policy gradients。<br><strong>还有二者的结合：Actor-Critic</strong>，Actor根据概率做出动作，Critic根据动作给出价值，从而加速学习过程，常见的有A2C，A3C，DDPG等。</p>
+</blockquote>
+<h2 id="1-4-求解方法"><a href="#1-4-求解方法" class="headerlink" title="1.4 求解方法"></a>1.4 求解方法</h2><p>强化学习的求解方法有：动态规划（DP）、蒙特卡洛（MC）、时序差分（TD）。</p>
+<p><strong>动态规划</strong>：需要事先知道环境的状态转移函数和奖励函数（即知道整个马尔可夫决策过程），且状态空间和动作空间是离散的，实际场景很难满足。</p>
+<p><strong>蒙特卡洛</strong>：如下图，一个简单的蒙特卡洛方法例子是计算圆的面积。而在强化学习中，可以用蒙特卡洛方法来求状态的价值，前面提到一个状态的价值函数是通过未来的奖励与对应的衰减乘积求和得到，蒙特卡罗法的基本思想就是：采样很多条序列，计算从这个状态出发（完整的状态序列）的回报再求均值。</p>
+<center><br><img src="/2026/06/21/rl-basic/mc.png" width="400" class="full-image"><br></center>
+
+
+<p><strong>时序差分</strong>：如果没有完整的状态序列，那么就无法使用蒙特卡罗法求解。而时序差分通过贝尔曼方程（简单来讲就是一个状态的价值由该状态的奖励以及后续状态价值按一定的衰减比例联合组成，<a href="https://www.cnblogs.com/pinard/p/9426283.html" target="_blank" rel="noopener">参考</a>）：$<br>v_\pi(s)=E_\pi\left[R_{t+1}+\gamma v_\pi\left(s_{t+1}\right) \mid s_t=s\right]$，利用后续状态的价值估计来更新当前状态的价值估计。具体的，时序差分算法用当前获得的奖励加上下一个状态的价值估计来作为在当前状态会获得的回报，即<br>$$<br>V\left(s_t\right) \leftarrow V\left(s_t\right)+\alpha\left[r_t+\gamma V\left(s_{t+1}\right)-V\left(s_t\right)\right]<br>$$<br>中括号里面的就被成为时序差分误差（TD），时序差分算法将其与步长 $\alpha$ 的乘积作为状态价值的更新量。将 TD 思想应用到动作价值函数 Q （V和Q的区别和联系见后面”常见QA”这一节）上，就得到了经典算法 Q-learning 的更新规则：</p>
+<center><br><img src="/2026/06/21/rl-basic/q-learning-formula.png" width="800" class="full-image"><br></center>
+
+<blockquote>
+<p>新Q值 = Q值 + 学习率 <em> (当前回报 + 折现率 </em> 未来最大Q值 - Q值)。实践中，可以理解成尽可能使Q值和【当前回报 + 折现率 <em> 未来最大Q值】接近，因此我们可以构造二者均方误差损失函数：mse(当前Q值, 当前回报+折现率 </em> 未来最大Q值)。</p>
+</blockquote>
+<h1 id="二、经典算法"><a href="#二、经典算法" class="headerlink" title="二、经典算法"></a>二、经典算法</h1><ul>
+<li><p>基于表格、没有神经网络参与的<strong>Q-Learning算法</strong></p>
+</li>
+<li><p>基于价值(Value-Based)的<strong>Deep Q Network（DQN）算法</strong></p>
+</li>
+<li><p>基于策略(Policy-Based)的<strong>Policy Gradient（PG）算法</strong></p>
+</li>
+<li><p>结合了Value-Based和Policy-Based的<strong>Actor Critic算法</strong></p>
+</li>
+</ul>
+<h2 id="2-1-Q-Learning（表格法）"><a href="#2-1-Q-Learning（表格法）" class="headerlink" title="2.1 Q-Learning（表格法）"></a>2.1 Q-Learning（表格法）</h2><p>在Q-learning中，我们维护一张Q值表，表的维数为：状态数S * 动作数A，表中每个数代表在当前状态S下可以采用动作A可以获得的未来收益的折现和。我们不断的迭代我们的Q值表使其最终收敛，然后根据Q值表我们就可以在每个状态下选取一个最优策略。</p>
+<p>下图是机器人走迷宫的游戏：</p>
+<center><br><img src="/2026/06/21/rl-basic/q-learning-game.png" width="400" class="full-image"><br></center>
+
+
+<p>机器人在每一步都失去1点。这样做是为了使机器人采用最短路径并尽可能快地到达目标。<br>如果机器人踩到地雷，则点损失为100并且游戏结束。<br>如果机器人获得闪电⚡️，它会获得1点。<br>如果机器人达到最终目标，则机器人获得100分。</p>
+<h3 id="Q函数"><a href="#Q函数" class="headerlink" title="Q函数"></a>Q函数</h3><p>Q函数(Q-Function)即为上文提到的动作价值函数，他有两个输入：「状态」和「动作」。它将返回在该状态下执行该动作的未来奖励期望。</p>
+<center><br><img src="/2026/06/21/rl-basic/q-function.png" width="500" class="full-image"><br></center>
+
+
+<h3 id="Q值表"><a href="#Q值表" class="headerlink" title="Q值表"></a>Q值表</h3><p>Q值表(Q-Table)是一个简单查找表，我们计算每个状态下各个行动的最大预期未来奖励，这张表将指导我们在每个状态采取最佳行动。Q值表有m行n列，其中m=状态数，n=操作数。初始Q值表：</p>
+<center><br><img src="/2026/06/21/rl-basic/q-table.png" width="300" class="full-image"><br></center>
+
+
+<h3 id="算法流程"><a href="#算法流程" class="headerlink" title="算法流程"></a>算法流程</h3><p>我们先将Q值表初始化为全0，不断从重复下述过程直到Q值表收敛：</p>
+<ul>
+<li>step1：选择并执行某个操作，不断迭代更新Q值表（探索与利用）：设探索概率为「epsilon」，在一开始，因为我们不知道 Q-table 中任何的值，epsilon需要设很大比如1，即进行大量的随机探索；随着迭代的进行，Q值表逐渐迭代更新，探索概率epsilon应逐步减小。</li>
+<li>step2：评估：根据观察到的结果和奖励，利用时序差分算法更新Q值：新Q值 = Q值 + 学习率 <em> (当前回报 + 折现率 </em> 未来最大Q值 - Q值)</li>
+</ul>
+<h2 id="2-2-DQN-Deep-Q-Network"><a href="#2-2-DQN-Deep-Q-Network" class="headerlink" title="2.2 DQN(Deep Q Network)"></a>2.2 DQN(Deep Q Network)</h2><p>当状态和动作空间是高维连续时，使用上述Q-Learning方法不现实，因为我们无法构建可以存储超大（甚至无限的）状态空间的Q值表。此时，我们可以用一个神经网络（Q Network）来拟合Q值，这样我们就没必要维护一个巨大的Q值表。</p>
+<h3 id="损失函数"><a href="#损失函数" class="headerlink" title="损失函数"></a>损失函数</h3><p>我们要如何定义损失函数来训练神经网络呢？回顾一下Q-Learning采用的Q值更新规则（时序差分算法）：新Q值 = Q值 + 学习率 <em> (当前回报 + 折现率 </em> 未来最大Q值 - Q值)，可以理解成尽可能使Q值和【当前回报 + 折现率 * 未来最大Q值】接近，因此我们可以构造二者均方误差损失函数：</p>
+<center><br><img src="/2026/06/21/rl-basic/dqn-loss.png" width="500" class="full-image"><br></center>
+
+
+<p>即 mse(当前Q值, 当前回报+折现率 * 未来最大Q值)。</p>
+<h3 id="训练数据"><a href="#训练数据" class="headerlink" title="训练数据"></a>训练数据</h3><p>还有一个问题，那就是训练数据从哪儿来？可以采用Q-Learning中提到的epsilon贪婪策略来平衡探索与利用，将收集到的数据存储起来供训练使用。为了更好的利用训练数据，DQN 采用了<strong>经验回放</strong>策略。</p>
+<p>在一般的有监督学习中，假设训练数据是独立同分布的，我们每次训练神经网络的时候从训练数据中随机采样一个或若干个数据来进行梯度下降，随着学习的不断进行，每一个训练数据会被使用多次。在原来的 Q-learning 算法中，每一个数据只会用来更新一次值。为了更好地将 Q-learning 和神经网络结合，DQN 算法采用了经验回放（experience replay）方法，具体做法为维护一个回放缓冲区，将每次从环境中采样得到的四元组数据（状态、动作、奖励、下一状态）存储到回放缓冲区中，训练 Q 网络的时候再从回放缓冲区中随机采样若干数据来进行训练。这么做可以起到以下两个作用：</p>
+<blockquote>
+<ol>
+<li>使样本满足独立假设。从交互采样得到的数据本身不满足独立假设，因为这一时刻的状态和上一时刻的状态有关。非独立同分布的数据对训练神经网络有很大的负面影响，会使神经网络拟合到最近训练的数据上。</li>
+<li>提高样本效率。每一个样本可以被使用多次，十分适合深度神经网络的梯度学习。</li>
+</ol>
+</blockquote>
+<h3 id="目标网络"><a href="#目标网络" class="headerlink" title="目标网络"></a>目标网络</h3><p>回顾一下前面提到的损失函数=mse(当前Q值, 当前回报+折现率 * 未来最大Q值)，我们简写成 mse(pred, label)，可以发现pred包含Q网络的输出（即当前Q值），label也包含了Q网络的输出（即未来Q值），这非常容易造成神经网络训练的不稳定性。为了解决这一问题，DQN 使用了目标网络（target network）的思想：既然Q网络的更新会导致label的不断更新，不妨暂时先将 label 中的 Q 网络固定住。为了实现这一思想，我们需要利用两套 Q 网络：</p>
+<ol>
+<li>原来的Q网络，用于计算损失函数中的pred项（即当前Q值），并且使用正常梯度下降方法来进行更新。</li>
+<li>目标网络，用于计算原先损失函数中的label项中的未来Q值项，目标网络并不会每一步都更新，而是每隔C步才和原Q网络同步一次。</li>
+</ol>
+<p>综上所述，DQN 算法的具体流程如下：</p>
+<left><br><img src="/2026/06/21/rl-basic/dqn.png" width="500" class="full-image"><br></left>
+
+
+
+<h2 id="2-3-Policy-Gradient（策略梯度）"><a href="#2-3-Policy-Gradient（策略梯度）" class="headerlink" title="2.3 Policy Gradient（策略梯度）"></a>2.3 Policy Gradient（策略梯度）</h2><p>前面介绍的Q-Learning和DQN都是基于价值(value-based)的强化学习算法，在给定一个状态下，计算采取每个动作的价值，选择最高Q值（在所有状态下最大的期望奖励）的行动。而基于策略(Policy-Based)的强化学习算法则跳过中间步骤，直接显式地学习一个目标策略。</p>
+<p>策略梯度算法基本思想是：假设策略是一个随机性策略并处处可微，则可用一个神经网络去建模，输入当前的状态，输出action的概率分布，根据分布采样一个action（greedy策略就是选择概率最大的一个）作为要执行的操作。我们的目标是要寻找一个最优策略。</p>
+<p>如何找到最优策略呢？我们需要根据期望回报定义好目标函数，然后将目标函数对策略求导，得到导数后，就可以用梯度上升方法来最大化这个目标函数，从而得到最优策略。由于我们需要对策略进行求梯度，所以策略梯度算法为在线策略（on-policy）算法，即必须使用当前策略采样得到的数据来计算梯度。</p>
+<p>直观理解策略梯度算法：在每一个状态下，基于梯度的修改让策略更容易采样到带来较高值的动作，更少地去采样到带来较低值的动作。</p>
+<p>具体的，蒙特卡罗策略梯度reinforce算法是策略梯度最简单的也是最经典的一个算法：</p>
+<left><br><img src="/2026/06/21/rl-basic/reinforce.png" width="500" class="full-image"><br></left>
+
+<p>其中，T是和环境交互的最大步数。<br>算法缺点：采样使得算法存在高方差（variance），收敛速度慢；</p>
+<h2 id="2-4-Actor-Critic算法"><a href="#2-4-Actor-Critic算法" class="headerlink" title="2.4 Actor Critic算法"></a>2.4 Actor Critic算法</h2><p>演员-评论家算法(Actor-Critic)是基于策略(Policy Based)和基于价值(Value Based)相结合的方法。<strong>不过Actor-Critic 算法本质上是基于策略的算法，因为其目标是优化一个带参数的策略（即Actor），只是会额外学习一个Critic，从而帮助策略函数更好地学习</strong>。这和生成对抗网络（GAN）有点像，只是GAN是对抗关系，而 Actor-Critic 是合作关系。</p>
+<blockquote>
+<ul>
+<li>演员(Actor)是指我们想要的策略函数，即学习一个策略来得到尽量高的回报；</li>
+<li>评论家(Critic)是指价值函数，对当前Actor进行评估，并指导Actor更新</li>
+</ul>
+</blockquote>
+<p>Actor 的更新采用策略梯度的原则，那 Critic 如何更新呢？我们可以采取时序差分，定义价值函数的损失函数为mse(当前价值, 当前回报+折现率 * 未来价值)，即：<br>$$<br>\mathcal{L}(\omega)=\frac{1}{2}\left(r+\gamma V_\omega\left(s_{t+1}\right)-V_\omega\left(s_t\right)\right)^2<br>$$<br>然后使用梯度下降方法来更新 Critic 价值网络参数即可。</p>
+<p>总结下，Actor-Critic算法的具体流程：</p>
+<left><br><img src="/2026/06/21/rl-basic/actor-critic.png" width="500" class="full-image"><br></left>
+
+<p>Critic的引入能减小方差，使得 Actor-Critic 算法很快收敛到最优策略，并且训练过程非常稳定，抖动情况相比 REINFORCE 算法有了明显的改进。</p>
+<p>Actor-Critic 算法非常实用，后续DDPG、SAC 以及LLM常用的的PPO等深度强化学习算法都是在 Actor-Critic 框架下进行发展的。</p>
+<h1 id="常见QA"><a href="#常见QA" class="headerlink" title="常见QA"></a>常见QA</h1><h2 id="1-PPO是on-policy还是off-policy？"><a href="#1-PPO是on-policy还是off-policy？" class="headerlink" title="1. PPO是on-policy还是off-policy？"></a>1. PPO是on-policy还是off-policy？</h2><p>A：PPO 是 on-policy 算法，但 PPO 的核心创新（Clipped Surrogate Objective / Importance Sampling）恰恰是为了在 on-policy 框架下尽可能多次复用同一批采样数据，使其行为介于纯 on-policy 和 off-policy 之间。</p>
+<h2 id="2-状态价值函数V和动作价值函数Q的区别和联系？"><a href="#2-状态价值函数V和动作价值函数Q的区别和联系？" class="headerlink" title="2. 状态价值函数V和动作价值函数Q的区别和联系？"></a>2. 状态价值函数V和动作价值函数Q的区别和联系？</h2><p>定义：</p>
+<ul>
+<li>V(s)：在状态 s 下，遵循策略 $\pi$，从 s 出发能获得的期望回报。它只关心”处于这个状态有多好”，不关心具体采取什么动作。<br>$$V^\pi(s) = \mathbb{E}_\pi[G_t \mid s_t = s]$$</li>
+<li>Q(s, a)：在状态 s 下，先采取动作 a，之后再遵循策略  $\pi$，能获得的期望回报。它同时关心”在这个状态下采取这个具体动作有多好”。</li>
+</ul>
+<p>$$Q^\pi(s, a) = \mathbb{E}_\pi[G_t \mid s_t = s, a_t = a]$$</p>
+<p>区别：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>V(s)</th>
+<th>Q(s, a)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>输入</td>
+<td>只有状态s</td>
+<td>状态 s + 动作 a</td>
+</tr>
+<tr>
+<td>回答的问题</td>
+<td>“这个状态有多好？”</td>
+<td>“在这个状态下做这个动作有多好？”</td>
+</tr>
+<tr>
+<td>能否直接用来选动作</td>
+<td>不能，因为不知道哪个动作好</td>
+<td>能，选 Q 值最大的动作即可</td>
+</tr>
+<tr>
+<td>典型用途</td>
+<td>Actor-Critic 中的 Critic通常学的是 V(s)</td>
+<td>Q-Learning、DQN 学的是 Q(s, a)</td>
+</tr>
+</tbody>
+</table>
+<p>联系：<br>二者之间有明确的数学关系——V 是 Q 在策略 $\pi$ 下对动作的期望：</p>
+<p>$$<br>V^\pi(s) = \sum_a \pi(a|s) \cdot Q^\pi(s, a)<br>$$</p>
+<p>直觉理解：一个状态的价值，等于在该状态下所有可能动作的 Q 值按策略概率加权求和。<br>反过来，如果是最优策略下：</p>
+<p>$$<br>V^<em>(s) = \max_a Q^</em>(s, a)<br>$$</p>
+<p>即最优状态价值 = 选最好动作对应的 Q 值。</p>
+<p>一个具体例子：<br>假设下棋时轮到你走，当前局面是状态 s，你有三种走法 a1、a2、a3：</p>
+<ul>
+<li>V(s) = 0.7 — 表示当前局面整体来看你有 70% 的赢面（前提是你按策略 π 来走）</li>
+<li>Q(s, a1) = 0.9 — 走法 a1 之后赢面 90%</li>
+<li>Q(s, a2) = 0.5 — 走法 a2 之后赢面 50%</li>
+<li>Q(s, a3) = 0.3 — 走法 a3 之后赢面 30%</li>
+</ul>
+<p>V(s) 告诉你局面整体怎么样，但不告诉你该怎么走；Q(s, a) 告诉你每步棋的好坏，可以直接用来选动作（选 a1）。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://zhuanlan.zhihu.com/p/466455380" target="_blank" rel="noopener">强化学习入门：基本思想和经典算法 —— 知乎</a><br><a href="https://hrl.boyuai.com/chapter/intro/" target="_blank" rel="noopener">手动学强化学习</a><br><a href="https://datawhalechina.github.io/easy-rl/#/" target="_blank" rel="noopener">蘑菇书EasyRL</a><br><a href="https://www.cnblogs.com/pinard/category/1254674.html" target="_blank" rel="noopener">强化学习 —— 刘建平的博客</a></p>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/assets/wechatpay.jpg" alt="TangShusen 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/assets/alipay.jpg" alt="TangShusen 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/强化学习/" rel="tag"># 强化学习</a>
+          
+            <a href="/tags/Q-Learning/" rel="tag"># Q-Learning</a>
+          
+            <a href="/tags/DQN/" rel="tag"># DQN</a>
+          
+            <a href="/tags/Policy-Gradient/" rel="tag"># Policy Gradient</a>
+          
+            <a href="/tags/Actor-Critic/" rel="tag"># Actor Critic</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2026/06/07/gpt/" rel="next" title="LLM 之 GPT 系列（GPT、GPT2、GPT3、InstructGPT）">
+                <i class="fa fa-chevron-left"></i> LLM 之 GPT 系列（GPT、GPT2、GPT3、InstructGPT）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/assets/header.jpg" alt="TangShusen">
+            
+              <p class="site-author-name" itemprop="name">TangShusen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">28</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/shusentang" title="GitHub &rarr; https://github.com/shusentang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.zhihu.com/people/tang-shu-sen-77/activities" title="知乎 &rarr; https://www.zhihu.com/people/tang-shu-sen-77/activities" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                我的项目
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://github.com/ShusenTang/LeetCode" title="https://github.com/ShusenTang/LeetCode" rel="noopener" target="_blank">LeetCode题解</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Dive-into-DL-PyTorch" title="https://shusentang.github.io/Dive-into-DL-PyTorch" rel="noopener" target="_blank">《动手学深度学习》(PyTorch版)</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" title="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" rel="noopener" target="_blank">《Deep Learning with PyTorch》中文翻译</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、基本思想"><span class="nav-text">一、基本思想</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-术语"><span class="nav-text">1.1 术语</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-和监督学习-非监督学习区别"><span class="nav-text">1.2 和监督学习/非监督学习区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-算法分类"><span class="nav-text">1.3 算法分类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-求解方法"><span class="nav-text">1.4 求解方法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、经典算法"><span class="nav-text">二、经典算法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-Q-Learning（表格法）"><span class="nav-text">2.1 Q-Learning（表格法）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Q函数"><span class="nav-text">Q函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Q值表"><span class="nav-text">Q值表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#算法流程"><span class="nav-text">算法流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-DQN-Deep-Q-Network"><span class="nav-text">2.2 DQN(Deep Q Network)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#损失函数"><span class="nav-text">损失函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#训练数据"><span class="nav-text">训练数据</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#目标网络"><span class="nav-text">目标网络</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-Policy-Gradient（策略梯度）"><span class="nav-text">2.3 Policy Gradient（策略梯度）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-Actor-Critic算法"><span class="nav-text">2.4 Actor Critic算法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#常见QA"><span class="nav-text">常见QA</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-PPO是on-policy还是off-policy？"><span class="nav-text">1. PPO是on-policy还是off-policy？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-状态价值函数V和动作价值函数Q的区别和联系？"><span class="nav-text">2. 状态价值函数V和动作价值函数Q的区别和联系？</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 – <span itemprop="copyrightYear">2026</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TangShusen tip:本博客在电脑端食用更佳~</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">total view times: <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: true,
+        appId: 'Bi7QlJPklJ2hjFFoWMd1D2gB-gzGzoHsz',
+        appKey: 'yMWxfGo3ABn8yS13Ytq43Rdk',
+        placeholder: '在上面填上你的邮箱再评论可以收到我的回复哟~',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text('Counter not initialized! See more at console err msg.');
+              console.error('ATTENTION! LeanCloud counter has security bug, see here how to solve it: https://github.com/theme-next/hexo-leancloud-counter-security. \n But you also can use LeanCloud without security, by set \'security\' option to \'false\'.');
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz",
+                'X-LC-Key': "zK9lN00t9W1flFbM75hsjojR",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

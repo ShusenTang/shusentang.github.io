@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://tangshusen.me/"/>
-  <updated>2026-06-07T13:55:03.935Z</updated>
+  <updated>2026-06-21T10:25:25.287Z</updated>
   <id>https://tangshusen.me/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>强化学习基础与经典算法</title>
+    <link href="https://tangshusen.me/2026/06/21/rl-basic/"/>
+    <id>https://tangshusen.me/2026/06/21/rl-basic/</id>
+    <published>2026-06-21T09:06:58.000Z</published>
+    <updated>2026-06-21T10:25:25.287Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;强化学习入门，包括基本思想、经典算法（如Q-Learning，DQN，Policy Gradient、Actor-Critic等）。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="RL" scheme="https://tangshusen.me/categories/RL/"/>
+    
+    
+      <category term="强化学习" scheme="https://tangshusen.me/tags/%E5%BC%BA%E5%8C%96%E5%AD%A6%E4%B9%A0/"/>
+    
+      <category term="Q-Learning" scheme="https://tangshusen.me/tags/Q-Learning/"/>
+    
+      <category term="DQN" scheme="https://tangshusen.me/tags/DQN/"/>
+    
+      <category term="Policy Gradient" scheme="https://tangshusen.me/tags/Policy-Gradient/"/>
+    
+      <category term="Actor Critic" scheme="https://tangshusen.me/tags/Actor-Critic/"/>
+    
+  </entry>
   
   <entry>
     <title>LLM 之 GPT 系列（GPT、GPT2、GPT3、InstructGPT）</title>
