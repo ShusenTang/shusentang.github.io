@@ -1,0 +1,1416 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+  <meta name="google-site-verification" content="UM_oWjkmpNS4sC6N8fDEsgSTPTOong_3Muz7XL_l-bQ">
+
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="NntzqnjuUs">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/my_apple-touch-icon-next.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/my_favicon-32x32.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/my_favicon-16x16.jpg?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/my_logo.jpg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="在LLM训练场景中，一般在监督微调（SFT）阶段之后，需要通过强化学习对模型进一步优化，让模型生成符合人类偏好的内容。">
+<meta name="keywords" content="强化学习,LLM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LLM场景下的强化学习——PPO、DPO、GRPO">
+<meta property="og:url" content="https://tangshusen.me/2026/08/30/llm-rl/index.html">
+<meta property="og:site_name" content="TangShusen">
+<meta property="og:description" content="在LLM训练场景中，一般在监督微调（SFT）阶段之后，需要通过强化学习对模型进一步优化，让模型生成符合人类偏好的内容。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://tangshusen.me/2026/08/30/llm-rl/grpo.png">
+<meta property="og:image" content="https://tangshusen.me/2026/08/30/llm-rl/grpo-a.png">
+<meta property="og:image" content="https://tangshusen.me/2026/08/30/llm-rl/grpo-kl.png">
+<meta property="og:image" content="https://tangshusen.me/2026/08/30/llm-rl/grpo-loss.png">
+<meta property="og:updated_time" content="2026-08-30T08:11:49.861Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LLM场景下的强化学习——PPO、DPO、GRPO">
+<meta name="twitter:description" content="在LLM训练场景中，一般在监督微调（SFT）阶段之后，需要通过强化学习对模型进一步优化，让模型生成符合人类偏好的内容。">
+<meta name="twitter:image" content="https://tangshusen.me/2026/08/30/llm-rl/grpo.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="TangShusen" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://tangshusen.me/2026/08/30/llm-rl/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>LLM场景下的强化学习——PPO、DPO、GRPO | TangShusen</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TangShusen</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-findjob">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/findJob/" rel="section"><i class="menu-item-icon fa fa-fw fa-info"></i> <br>内推</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2026/08/30/llm-rl/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="TangShusen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/assets/header.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TangShusen">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">LLM场景下的强化学习——PPO、DPO、GRPO
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2026-08-30 15:06:58 / 修改时间：16:11:49" itemprop="dateCreated datePublished" datetime="2026-08-30T15:06:58+08:00">2026-08-30</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/RL/" itemprop="url" rel="index"><span itemprop="name">RL</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2026/08/30/llm-rl/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2026/08/30/llm-rl/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2026/08/30/llm-rl/" class="leancloud_visitors" data-flag-title="LLM场景下的强化学习——PPO、DPO、GRPO">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在LLM训练场景中，一般在监督微调（SFT）阶段之后，需要通过强化学习对模型进一步优化，让模型生成符合人类偏好的内容。</p>
+<a id="more"></a>
+<blockquote>
+<p>阅读本文需要具备一些强化学习基础，可先阅读<a href="./rl-basic.md">强化学习基础与经典算法</a>。</p>
+</blockquote>
+<h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><h2 id="基本概念"><a href="#基本概念" class="headerlink" title="基本概念"></a>基本概念</h2><p>这里简单回顾一些基本概念：</p>
+<ul>
+<li><strong>奖励R</strong>：R即为Reward，指智能体在环境的某一状态下所获得的<strong>真实</strong>反馈<strong>即时奖励</strong>，通常情况下只有当语言模型完整回答后才会有即时奖励，中间状态没有。</li>
+<li><strong>价值V</strong>：奖励 R 是<strong>真实的、来自外部的信号</strong>（比如人类打分），相对应的，<strong>价值（value）是对未来奖励的估计</strong>——因为模型不能预知未来，只能靠猜。</li>
+<li><strong>状态价值$V(s_t)$</strong>：在 $s_t$ 状态下，继续生成后续内容，期望能获得的奖励。一般由评论家模型预估得到。</li>
+<li><strong>动作价值$Q(s_t,a)$</strong>：如果我现在处于状态 $s_t$（比如上下文是“今天过得”），并选择动作 a（比如生成“不”），那么我能获得的即时奖励（通常是 0，因为回复还没结束），再加上未来所有状态价值的折现和，即$Q(s_t, a) = R_t + \gamma V_{t+1} + \gamma^2 V_{t+2}+…$ 。</li>
+<li><strong>优势A</strong>：即Advantage，优势函数通常定义为A(s, a) = Q(s,a) - V(s)，直观上，优势函数反映了当前动作相对于该状态下平均策略动作的“优势”程度。</li>
+</ul>
+<h2 id="优势估计"><a href="#优势估计" class="headerlink" title="优势估计"></a>优势估计</h2><p>优势函数 $A_t = Q(s_t, a_t) - V(s_t)$，衡量的是”在状态 $s_t$ 下选择动作 $a_t$ 比平均水平好多少”。问题是 Q 和 V 我们都没有真实值，只能估计。不同的估计方式在偏差（bias）和方差（variance） 之间存在取舍。</p>
+<h3 id="方法一：时序差分（1步估计）"><a href="#方法一：时序差分（1步估计）" class="headerlink" title="方法一：时序差分（1步估计）"></a>方法一：时序差分（1步估计）</h3><p>时序差分（TD）法结合即时奖励和当前时刻的状态价值估计和下一个状态的价值估计值来更新当前的价值估计。<br>$$A(s,a) = \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$$<br>其中，$\delta_t$ 就是时序差分误差， r 是当前状态s采取动作a所得到的即时奖励，$\gamma$ 是折扣因子。<br>优缺点：</p>
+<ul>
+<li>只看一步（适合在线学习），依赖 Critic 的估计 $V(s_{t+1})$</li>
+<li>低方差（只涉及一步随机性），但高偏差（Critic 估计不准时误差会传导）</li>
+</ul>
+<h3 id="方法二：蒙特卡洛方法（全展开估计）"><a href="#方法二：蒙特卡洛方法（全展开估计）" class="headerlink" title="方法二：蒙特卡洛方法（全展开估计）"></a>方法二：蒙特卡洛方法（全展开估计）</h3><p>蒙特卡洛方法通过对完整的轨迹进行采样，计算实际的回报来对优势进行无偏估计：<br>$$A(s,a)  = \sum_{l=0}^{T-t-1} \gamma^l r_{t+l} - V(s_t) = R_t(s,a) - V(s_t)$$<br>其中，R(s,a)是从状态 _s_ 采取动作 _a_ 后获得的实际总回报。</p>
+<ul>
+<li>用完整的实际回报，完全不依赖 Critic 对中间状态的估计</li>
+<li>零偏差（用的是真实回报），但高方差（受整条轨迹上所有随机性影响）</li>
+<li>只有在整个回合结束后才能得到估计结果，因此不能用于在线场景</li>
+</ul>
+<h3 id="广义优势估计GAE"><a href="#广义优势估计GAE" class="headerlink" title="广义优势估计GAE"></a>广义优势估计GAE</h3><p> GAE结合上述两种方法进行 bias-variance tradeoff。GAE 的核心思想是：不只看一步，而是综合考虑未来多步的 TD 误差，并通过引入一个新参数 $\lambda$ (通常在 0 到 1 之间，实践常取0.95) 来对它们进行加权平均。</p>
+<ul>
+<li>当 $\lambda = 0$ 时，GAE 只考虑单步 TD 误差，这对应于低方差、高偏差的情况。</li>
+<li>当 $\lambda = 1$ 时，GAE 会考虑未来所有步的 TD 误差，这等价于蒙特卡洛方法，对应于高方差、低偏差的情况。</li>
+</ul>
+<p>将前面的1步差分估计优势推广到k步：</p>
+<ul>
+<li><p><strong>1-step 优势估计</strong>：$A_t^{(1)} = -V(s_t) + r_t + \gamma V(s_{t+1}) = \delta_t^V$</p>
+</li>
+<li><p><strong>2-step 优势估计</strong>：$A_t^{(2)} = -V(s_t) + r_t + \gamma r_{t+1} + \gamma^2 V(s_{t+2}) = \delta_t^V + \gamma \delta_{t+1}^V$</p>
+</li>
+<li><p><strong>k-step 优势估计</strong>：$A_t^{(k)} = \sum_{l=0}^{k-1} \gamma^l \delta_{t+l}^V$</p>
+</li>
+</ul>
+<p>为了综合不同步数的优势估计，引入衰减系数 $\lambda$ 对所有 k-step 优势进行几何加权平均（指数加权平均）：<br>$$<br>A_t^{GAE} = (1-\lambda) [A_t^{(1)} + \lambda A_t^{(2)} +  \lambda^2 A_t^{(3)} + … ]<br>$$<br>代入k-step优势估计并运用等比数列求和可以得到<br>$$<br>A_t^{GAE} = \sum_{l=0}^{\infty} (\gamma\lambda)^l \delta_{t+l}<br>$$</p>
+<p> 注意观察这个式子，</p>
+<ul>
+<li><p>$\delta_t$：当前这一步的 TD 误差 $\delta_{t}$ 被完全计算在内，权重为 1。</p>
+<ul>
+<li>$(\gamma\lambda) \delta_{t+1}$: 下一步的 TD 误差 $\delta_{t+1}$ 也被考虑进来，但它的权重被折扣了两次：一次是常规的未来奖励折扣 $\gamma$，另一次是 GAE 的平衡因子 $\lambda$。</li>
+<li>$(\gamma\lambda)^2\delta_{t+2}$: 再下一步的 TD 误差 $\delta_{t+2}$ 被考虑，但其权重被进一步削减。<br>以此类推，来自更遥远未来的 TD 误差的“话语权”会以 $\gamma\lambda$ 的指数级速度衰减。</li>
+</ul>
+<p>在代码实现中，不需要对每个 t 都去做求和，而是从后往前递推：<br>$${A}_t = \delta_t + \gamma\lambda \cdot {A}_{t+1}$$<br>伪代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">delta_t = r_t + gamma * V(s_&#123;t+<span class="number">1</span>&#125;) - V(s_t)</span><br><span class="line"><span class="comment"># 在 LLM 场景中，r_t = 0 (t &lt; T-1), r_&#123;T-1&#125; = R (最终奖励)</span></span><br><span class="line">deltas = torch.zeros(T)</span><br><span class="line"><span class="keyword">for</span> t <span class="keyword">in</span> range(T):</span><br><span class="line">    r_t = R <span class="keyword">if</span> t == T - <span class="number">1</span> <span class="keyword">else</span> <span class="number">0.0</span></span><br><span class="line">    deltas[t] = r_t + gamma * values[t + <span class="number">1</span>] - values[t]</span><br><span class="line">    </span><br><span class="line"><span class="comment"># 从后往前递推计算 GAE</span></span><br><span class="line">advantages = torch.zeros(T)</span><br><span class="line">advantages[T - <span class="number">1</span>] = deltas[T - <span class="number">1</span>]</span><br><span class="line"><span class="keyword">for</span> t <span class="keyword">in</span> reversed(range(T - <span class="number">1</span>)):</span><br><span class="line">    advantages[t] = deltas[t] + gamma * lam * advantages[t + <span class="number">1</span>]</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h1 id="PPO"><a href="#PPO" class="headerlink" title="PPO"></a>PPO</h1><p>OpenAI于2017年提出的<a href="https://arxiv.org/abs/1707.06347" target="_blank" rel="noopener">PPO（Proximal Policy Optimization）</a>是 RLHF（基于人类反馈的强化学习）流程中的核心算法，PPO的目标是：<strong>让大语言模型生成更受人类欢迎的回复</strong>。</p>
+<p>PPO一共涉及四个模型：</p>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>作用</th>
+<th>是否训练</th>
+<th>输入</th>
+<th>输出</th>
+<th>输出维度说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Policy Model</strong><br><strong>策略模型</strong></td>
+<td>SFT后的我们想要训练的目标模型</td>
+<td>✅</td>
+<td>prompt x（token IDs，长度 L）</td>
+<td>生成回复 $y=(a_1,…,a_T)$, <br>以及每个 token 的对数概率logprob</td>
+<td>y: [T] ,  logprobs: [T]</td>
+</tr>
+<tr>
+<td><strong>Critic Model</strong><br><strong>评论家模型</strong><br><br>也叫Value Model价值模型</td>
+<td>用来预估总收益，一般用SFT模型做初始化</td>
+<td>✅</td>
+<td>状态序列: concat(x, $y_{\leq t}$ )，（token IDs，长度 L+t）</td>
+<td>价值估计 V</td>
+<td>对每个 t=0,…,T 输出一个值<br>总输出 [T+1]</td>
+</tr>
+<tr>
+<td><strong>Reward Model</strong><br><strong>奖励模型</strong></td>
+<td>用来计算即时收益，提前用人工标注数据训练好的</td>
+<td>❌ <br>冻结</td>
+<td>(x, y)（完整 prompt + response）</td>
+<td>标量奖励 R</td>
+<td>标量（或 [1]）</td>
+</tr>
+<tr>
+<td><strong>Reference Model</strong><br><strong>参考模型</strong></td>
+<td>用来增加一些“约束”防止训崩，一般就是SFT模型。<br>直观理解：我们希望训练出来的Actor模型既能符合人类喜好，又尽量让它和SFT模型不要差异太大（两个模型输出分布尽可能相似 =&gt; KL散度）</td>
+<td>❌ <br>冻结</td>
+<td>和策略模型一样：prompt x（token IDs，长度 L）</td>
+<td>每个token的对数概率log-prob</td>
+<td>[T]</td>
+</tr>
+</tbody>
+</table>
+<p>PPO主要分成两个阶段：采样与反馈（数据生成） + 策略学习（参数更新）</p>
+<p>伪代码：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">policy_model = load_model()</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> k <span class="keyword">in</span> range(<span class="number">20000</span>):</span><br><span class="line">    <span class="comment"># 采样（生成回答和价值估计）</span></span><br><span class="line">    prompts = sample_prompt()</span><br><span class="line">    data = respond(policy_model, critic_model, prompts)</span><br><span class="line">    <span class="comment"># 反馈（计算奖励）</span></span><br><span class="line">    rewards = reward_func(reward_model, data)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 策略学习（更新参数）</span></span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> range(<span class="number">4</span>):</span><br><span class="line">        policy_model = train(policy_model, critic_model, prompts, data, rewards)</span><br></pre></td></tr></table></figure></p>
+<h2 id="1-采样与反馈（数据生成）"><a href="#1-采样与反馈（数据生成）" class="headerlink" title="1. 采样与反馈（数据生成）"></a>1. 采样与反馈（数据生成）</h2><h3 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h3><p>采样：策略模型根据提示（prompt）输出token数为T的回答（response），以及评论家模型对回答的每一步输出预估收益V（是个向量）。<br>反馈：用冻结的奖励模型给response整体打分（标量），并利用【当前收益 = 当前即时收益 + 折现因子 * 未来收益】计算每一步的实际收益，注意中间态的即时收益为0。然后计算优势（advantage），表示在某个状态下执行某个动作比“平均水平”要好多少。</p>
+<h3 id="伪代码"><a href="#伪代码" class="headerlink" title="伪代码"></a>伪代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">trajectories = []</span><br><span class="line"><span class="keyword">for</span> x <span class="keyword">in</span> prompts: <span class="comment"># x: [L_x]</span></span><br><span class="line">	<span class="comment"># 1. 用当前策略生成回复 y 和 log-prob </span></span><br><span class="line">    y, logprobs = policy_model.generate_with_logprobs(x) <span class="comment"># y: [T], logprobs: [T] </span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 2. 构建状态序列 s_0 ... s_T </span></span><br><span class="line">    states = [torch.cat([x, y[:t]]) <span class="keyword">for</span> t <span class="keyword">in</span> range(len(y) + <span class="number">1</span>)] <span class="comment"># len = T+1</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 3. 用当前评论家估计每个状态的价值</span></span><br><span class="line">    values = torch.stack([critic_model(s) <span class="keyword">for</span> s <span class="keyword">in</span> states]) <span class="comment"># [T+1]</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 4. 奖励模型打分</span></span><br><span class="line">    R = reward_model(x, y) <span class="comment"># scalar</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 5. 计算回报：R_t = γ^&#123;T−t&#125; * R T_len = len(y) </span></span><br><span class="line">    returns = torch.zeros(T_len + <span class="number">1</span>) </span><br><span class="line">    returns[T_len] = R </span><br><span class="line">    <span class="keyword">for</span> t <span class="keyword">in</span> reversed(range(T_len)): </span><br><span class="line">        returns[t] = gamma * returns[t + <span class="number">1</span>] </span><br><span class="line">	</span><br><span class="line">    <span class="comment"># 6. 计算优势：A_t = R_t - V(s_t)，仅对 t=0..T-1 有效 </span></span><br><span class="line">    <span class="comment"># 这里使用了蒙特卡洛回报计算优势（即lambda=1的GAE）。实际实现中通常用 lambda = 0.95 来提升训练稳定性</span></span><br><span class="line">    advantages = returns[:<span class="number">-1</span>] - values[:<span class="number">-1</span>] <span class="comment"># [T] </span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 7. 保存“旧”值（detach 阻断梯度） </span></span><br><span class="line">    trajectories.append(&#123;</span><br><span class="line">        <span class="string">'x'</span>: x, <span class="string">'y'</span>: y, </span><br><span class="line">        <span class="string">'logprobs_old'</span>: logprobs.detach(), <span class="comment"># [T] , old后缀表示是采样阶段得到的,而不是在学习阶段得到的</span></span><br><span class="line">        <span class="string">'values_old'</span>: values.detach(),     <span class="comment"># [T+1] </span></span><br><span class="line">        <span class="string">'advantages'</span>: advantages.detach(), <span class="comment"># [T] </span></span><br><span class="line">        <span class="string">'returns'</span>: returns.detach()        <span class="comment"># [T+1] </span></span><br><span class="line">    &#125;)</span><br></pre></td></tr></table></figure>
+<p>此阶段结束时，我们得到一个<strong>固定的数据集</strong>，后续训练将在此数据上多次迭代。</p>
+<h2 id="2-策略学习（策略和评论家模型更新）"><a href="#2-策略学习（策略和评论家模型更新）" class="headerlink" title="2. 策略学习（策略和评论家模型更新）"></a>2. 策略学习（策略和评论家模型更新）</h2><h3 id="学习目标"><a href="#学习目标" class="headerlink" title="学习目标"></a>学习目标</h3><p>利用阶段 1 收集的数据，<strong>更新策略模型（Policy）和评论家模型（Critic）</strong>，使得：</p>
+<ul>
+<li>策略模型更倾向于选择高优势的动作（需要clip以避免策略突变）；</li>
+<li>同时通过和参考模型计算 <strong>KL正则</strong> 防止策略偏离初始SFT模型太远。</li>
+<li>另外评论家也需要不断更新来更准确地预测未来回报；</li>
+</ul>
+<p>因此总的损失函数为三者加权和：$L_{total} = L_{PPO} + \beta L_{KL} + c_1 L_{value}$  </p>
+<h3 id="损失函数"><a href="#损失函数" class="headerlink" title="损失函数"></a>损失函数</h3><h4 id="（1）策略损失"><a href="#（1）策略损失" class="headerlink" title="（1）策略损失"></a>（1）策略损失</h4><p>为了使策略模型倾向于选择高优势的动作，直观上，我们可以构造如下损失函数：</p>
+<p>$$<br>L_{PPO} = - A_t \cdot p(a_t|s_t)<br>$$<br>其中 $A_t$ 就是优势（注意优势是detach的），p是策略模型输出的概率。实践中采用的loss是：<br>$$<br>L_{PPO} = - A_t \frac {p(a_t|s_t)}{p_{old}(a_t|s_t)}<br>$$<br>即多了一个分母 $p_{old}$，注意 $p_{old}$ 是detach的，不回传梯度，所以可以看做是学习率的一部分。这其实就是重要性采样机制， $\frac{p}{p_{old}}$ 就是重要度权重。<strong>直观来说，比如当生成某个token的概率已经很大了的时候，即便这个动作的优势很大，也不要再使劲增大概率了。</strong> 此外，实践中还会对 $\frac{p}{p_{old}}$ 进行裁剪（clip）避免步子迈得过大，最终的loss变为<br>$$<br>L_{PPO} = - min[A_t \cdot \frac {p(a_t|s_t)}{p_{old}(a_t|s_t)}, A_t \cdot \text{clip}( \frac {p(a_t|s_t)}{p_{old}(a_t|s_t)}, 1-\epsilon,  1+\epsilon)]<br>$$<br>这样当 $\frac{p}{p_{old}}$ 过大或者过小时会被设置成一个常数，没梯度了，那Actor也就不会被更新。</p>
+<blockquote>
+<p>至于最终loss为啥会把原始的和clip后的取min，详细可见<a href="https://zhuanlan.zhihu.com/p/28223597805" target="_blank" rel="noopener">如何理解 PPO-CLIP 目标函数中的 clip 和 min 操作？过犹不及论</a>。</p>
+<p>一句话理解：取min后目标函数成了原始目标函数的下界，这样当动作概率表现很好（优势大于0时动作概率很大或者优势小于0时动作概率很小）时进行截断以忽视它对目标函数的贡献，不更新。</p>
+<p>详细理解：</p>
+<ul>
+<li><p>当A &gt; 0, 要提升动作概率<br>  （1）比值大于 $1+\epsilon$，说明当前动作概率很大，不需要再提升了（可能会崩），所以选择 clip 后的值（对应取 min 操作）参与计算目标函数值，此时没有梯度不更新；<br>  （2）比值小于 $1+\epsilon$，说明当前动作概率没那么大，还有上升空间，正常计算梯度&amp;更新；</p>
+</li>
+<li><p>当A &lt; 0, 要降低动作概率<br>  （1）比值小于 $1-\epsilon$，说明当前动作概率很小，不需要再降低了（可能会崩），所以选择 clip 后的值（对应取 min 操作）参与计算目标函数值，此时没有梯度不更新；<br>  （2）比值大于 $1-\epsilon$，说明当前动作概率没那么小，还有下降空间，正常计算梯度&amp;更新；</p>
+</li>
+</ul>
+</blockquote>
+<h4 id="（2）KL散度（防止训崩）"><a href="#（2）KL散度（防止训崩）" class="headerlink" title="（2）KL散度（防止训崩）"></a>（2）KL散度（防止训崩）</h4><p>虽然我们希望训练出来的策略模型能符合人类喜好，但不希望让它和参考模型（即SFT模型）差异太大（两个模型输出分布尽可能相似 =&gt; KL散度）以至于崩掉。</p>
+<p>$$<br>L_{KL} = KL[Actor(X) || Ref(X)] = E[\log \frac {p}{p_{ref}}] = E[log(p) - log(p_{ref})]<br>$$</p>
+<p>注意参考模型是始终冻结的。</p>
+<blockquote>
+<p>实际上，GRPO才是直接将KL散度作为惩罚项添加到损失函数中，而PPO是从奖励中减去KL散度。这里忽略了这个区别。</p>
+</blockquote>
+<h4 id="（3）评论家损失"><a href="#（3）评论家损失" class="headerlink" title="（3）评论家损失"></a>（3）评论家损失</h4><p>这个和经典Actor-Critic算法是一样的，定义评论家损失函数为mse(收益估计, 实际收益)：<br>$$<br>L_{value} = E_t[(V_t - R_t)^2]<br>$$<br>目标是让评论家能准确预估出价值估计V。</p>
+<h3 id="伪代码-1"><a href="#伪代码-1" class="headerlink" title="伪代码"></a>伪代码</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> range(K):  <span class="comment"># K=2~4，对同一数据集多轮优化</span></span><br><span class="line">    <span class="keyword">for</span> traj <span class="keyword">in</span> trajectories:</span><br><span class="line">        x, y = traj[<span class="string">'x'</span>], traj[<span class="string">'y'</span>]                     <span class="comment"># x: [L_x], y: [T]</span></span><br><span class="line">        logprobs_old = traj[<span class="string">'logprobs_old'</span>]             <span class="comment"># [T]</span></span><br><span class="line">        advantages = traj[<span class="string">'advantages'</span>]                 <span class="comment"># [T]</span></span><br><span class="line">        returns = traj[<span class="string">'returns'</span>]                       <span class="comment"># [T+1]</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># --- 1. 策略损失 ---</span></span><br><span class="line">        logprobs_curr = policy_model.get_logprobs(x, y)  <span class="comment"># [T]</span></span><br><span class="line">        ratio = torch.exp(logprobs_curr - logprobs_old)  <span class="comment"># [T]</span></span><br><span class="line"></span><br><span class="line">        surr1 = ratio * advantages</span><br><span class="line">        surr2 = torch.clamp(ratio, <span class="number">1</span> - eps, <span class="number">1</span> + eps) * advantages</span><br><span class="line">        ppo_loss = -torch.mean(torch.min(surr1, surr2))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># KL 正则（ref_model 冻结）</span></span><br><span class="line">        <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">            logprobs_ref = ref_model.get_logprobs(x, y)  <span class="comment"># [T]</span></span><br><span class="line">        kl_loss = torch.mean(logprobs_curr - logprobs_ref)</span><br><span class="line"></span><br><span class="line">        policy_loss = ppo_loss + beta * kl_loss</span><br><span class="line"></span><br><span class="line">        <span class="comment"># --- 2. 评论家损失 ---</span></span><br><span class="line">        states = [torch.cat([x, y[:t]]) <span class="keyword">for</span> t <span class="keyword">in</span> range(len(y) + <span class="number">1</span>)]</span><br><span class="line">        values_pred = torch.stack([critic_model(s) <span class="keyword">for</span> s <span class="keyword">in</span> states])  <span class="comment"># [T+1]</span></span><br><span class="line">        value_loss = F.mse_loss(values_pred, returns)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># --- 3. 优化 ---</span></span><br><span class="line">        total_loss = policy_loss + c1 * value_loss</span><br><span class="line">        optimizer.zero_grad()</span><br><span class="line">        total_loss.backward()</span><br><span class="line">        optimizer.step()</span><br></pre></td></tr></table></figure>
+<h1 id="DPO"><a href="#DPO" class="headerlink" title="DPO"></a>DPO</h1><p>DPO（Direct Preference Optimization， 直接偏好优化）核心思想是直接从人类偏好数据中优化策略，相对于PPO更简单、低成本。</p>
+<p>DPO只涉及2个模型：策略模型和参考模型。</p>
+<h2 id="损失函数-1"><a href="#损失函数-1" class="headerlink" title="损失函数"></a>损失函数</h2><p>我们有如下成对的人类偏好数据：</p>
+<ul>
+<li>$x$：用户输入（prompt）</li>
+<li>$y_w$：人类偏好的回复（win）</li>
+<li>$y_l$：较差的回复（lose）</li>
+</ul>
+<p>DPO的损失函数为<br>$$<br>L_{DPO} = - [\log \sigma(\beta ( \log \frac {p(y_w|x)}{p_{ref}(y_w|x)} - \log \frac {p(y_l|x)}{p_{ref}(y_l|x)}))]<br>$$<br>其中 $p_{ref}$ 是参考模型的概率输出， $\beta$ 是温度参数，越大优化越激进。DPO本质上是一种对比学习，无需标准RL那套先采样再优化的逻辑。</p>
+<p><strong>通俗理解</strong>：DPO 希望模型对“好回复”的相对概率（相比参考模型）比“坏回复”更高。</p>
+<blockquote>
+<p><a href="https://zhuanlan.zhihu.com/p/18603295907" target="_blank" rel="noopener">简单例子说明 DPO 为什么对偏好数据集要求较高</a>:<br>由于 $\log \frac {p(y_w|x)}{p_{ref}(y_w|x)} - \log \frac {p(y_l|x)}{p_{ref}(y_l|x)}$ 等价于 $\log \frac {p(y_w|x)}{p(y_l|x)} - \log \frac {p_{ref}(y_w|x)}{p_{ref}(y_l|x)}$ ，那么只要策略生成正样本和负样本的概率的比值高于参考策略就可以降低损失。假设策略模型的正负样本输出概率是 $\frac{0.3}{0.1} = 3$，参考模型的是  $\frac{0.5}{0.25} = 2$，此时损失也会下降，但模型生成正样本的概率其实是下降的（0.5 -&gt; 0.3），当然生成负样本的概率也下降了，这会导致模型可能会输出一些不包含在偏好数据集的奇奇怪怪的输出，比如“意大利面就应该拌42号混凝土”。所以 <strong>DPO 对数据集要求很高（需要尽可能多地覆盖动作空间），在高质量数据集上进行 DPO 才能取得好效果</strong>。</p>
+</blockquote>
+<h2 id="伪代码-2"><a href="#伪代码-2" class="headerlink" title="伪代码"></a>伪代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> batch <span class="keyword">in</span> preference_data:</span><br><span class="line">    x, y_w, y_l = batch</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 计算当前模型和参考模型对两个回复的 log 概率</span></span><br><span class="line">    logp_w = policy_model.log_prob(x, y_w)</span><br><span class="line">    logp_l = policy_model.log_prob(x, y_l)</span><br><span class="line">    ref_logp_w = ref_model.log_prob(x, y_w)</span><br><span class="line">    ref_logp_l = ref_model.log_prob(x, y_l)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 计算 logits 差</span></span><br><span class="line">    logits = beta * ((logp_w - ref_logp_w) - (logp_l - ref_logp_l))</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 二分类损失：希望 logits 越大越好</span></span><br><span class="line">    loss = -F.logsigmoid(logits).mean()</span><br><span class="line">    optimizer.step(loss)</span><br></pre></td></tr></table></figure>
+<h1 id="GRPO"><a href="#GRPO" class="headerlink" title="GRPO"></a>GRPO</h1><p>PPO需要4个模型，DPO只需要2模型，而DeepSeek提出的<a href="https://arxiv.org/pdf/2402.03300" target="_blank" rel="noopener">组相对策略优化（GRPO）</a> 则是二者折中——3个，相比PPO去掉了Critic Model（评论家模型，或者价值模型）。</p>
+<blockquote>
+<p>注意在PPO中Critic Model是需要训练更新的，因此很耗费显存和计算资源。</p>
+</blockquote>
+<center><br><img src="/2026/08/30/llm-rl/grpo.png" width="500" class="full-image"><br></center>
+
+<p>去掉了价值模型，那怎么计算优势呢？</p>
+<p>GRPO的核心思想是：从旧策略中采样多个输出，将这些输出的平均奖励视为基准，高于平均值的产生“正优势”，低于平均值的都产生“负优势”：</p>
+<left><br><img src="/2026/08/30/llm-rl/grpo-a.png" width="300" class="full-image"><br></left>
+
+<p>此外，GRPO 通过直接在损失函数中加入策略模型和参考模型之间的 KL 散度来正则化，而不是像PPO那样在奖励中加入 KL 惩罚项。另外GRPO使用以下无偏估计量估计KL散度（unbiased estimator）：</p>
+<left><br><img src="/2026/08/30/llm-rl/grpo-kl.png" width="400" class="full-image"><br></left><br>即 new_KL = KL - log(KL) - 1，这能保证计算结果始终大于0。<br><br>最终，GRPO采用下述loss来对策略模型进行优化：<br><left><br><img src="/2026/08/30/llm-rl/grpo-loss.png" width="700" class="full-image"><br></left>
+
+<h2 id="与PPO的异同"><a href="#与PPO的异同" class="headerlink" title="与PPO的异同"></a>与PPO的异同</h2><p><strong>与PPO相同点</strong>：</p>
+<ol>
+<li>都引入了重要性采样（ $\frac{p}{p_{old}}$ ），来让rollout出来的样本可以更新多次参数，注意这个重要性采样是token级别的。</li>
+<li>都使用了clip，用于防止策略更新导致训练崩溃的问题；</li>
+</ol>
+<p><strong>与PPO的不同点</strong>：</p>
+<ol>
+<li>优势函数的计算不同：抛开GAE不说的话，PPO中的优势函数是动作价值函数（reward模型-kl散度）- 状态价值函数（critic模型）。而GRPO是利用reward模型计算出当前回复的得分后，减去rollout出来的所有序列的reward的平均得分（baseline），不需要价值模型，更加适合资源受限的场景。</li>
+<li>GRPO把KL散度从reward移出来，移动到loss中来，另外KL使用了无偏估计量（unbiased estimator）。</li>
+</ol>
+<h2 id="伪代码-3"><a href="#伪代码-3" class="headerlink" title="伪代码"></a>伪代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">grpo_training_step</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">    model,          # 当前 Actor 模型 <span class="params">(pi_theta)</span></span></span></span><br><span class="line"><span class="function"><span class="params">    ref_model,      # 冻结的参考模型 <span class="params">(pi_ref)</span></span></span></span><br><span class="line"><span class="function"><span class="params">    tokenizer,</span></span></span><br><span class="line"><span class="function"><span class="params">    prompts,        # 输入的 Prompts [Batch_Size]</span></span></span><br><span class="line"><span class="function"><span class="params">    group_size=<span class="number">4</span>,   # G: 每组生成多少个回答</span></span></span><br><span class="line"><span class="function"><span class="params">    beta=<span class="number">0.04</span>,      # KL 惩罚系数</span></span></span><br><span class="line"><span class="function"><span class="params">    clip_eps=<span class="number">0.2</span>,   # PPO 裁剪系数</span></span></span><br><span class="line"><span class="function"><span class="params">    optimizer=None</span></span></span><br><span class="line"><span class="function"><span class="params">)</span>:</span>  </span><br><span class="line">    <span class="comment"># ================= PHASE 1: 采样与评估 (Sampling &amp; Eval) =================</span></span><br><span class="line">    <span class="comment"># 这一步不需要梯度，因为我们要生成“旧数据”</span></span><br><span class="line">    model.eval()</span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        <span class="comment"># 1. 复制 Prompts 以进行组采样</span></span><br><span class="line">        <span class="comment"># [Batch] -&gt; [Batch * G]</span></span><br><span class="line">        prompts_repeated = [p <span class="keyword">for</span> p <span class="keyword">in</span> prompts <span class="keyword">for</span> _ <span class="keyword">in</span> range(group_size)]</span><br><span class="line">        inputs = tokenizer(prompts_repeated, return_tensors=<span class="string">"pt"</span>, padding=<span class="keyword">True</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 2. 模型生成 (Action)</span></span><br><span class="line">        <span class="comment"># 生成输出序列 outputs</span></span><br><span class="line">        generation_output = model.generate(</span><br><span class="line">            **inputs, </span><br><span class="line">            do_sample=<span class="keyword">True</span>, </span><br><span class="line">            temperature=<span class="number">1.0</span>, </span><br><span class="line">            max_new_tokens=<span class="number">512</span>,</span><br><span class="line">            return_dict_in_generate=<span class="keyword">True</span>,</span><br><span class="line">            output_scores=<span class="keyword">True</span></span><br><span class="line">        )</span><br><span class="line">        sequences = generation_output.sequences</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 3. 计算旧概率 (pi_old)</span></span><br><span class="line">        <span class="comment"># 这里必须保存 log_probs 用于计算 Ratio</span></span><br><span class="line">        old_log_probs = compute_log_probs(model, sequences, inputs.attention_mask)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 4. 计算参考概率 (pi_ref) 用于 KL</span></span><br><span class="line">        ref_log_probs = compute_log_probs(ref_model, sequences, inputs.attention_mask)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 5. 获取奖励 (Reward), rewards shape: [Batch * G]</span></span><br><span class="line">        raw_rewards = external_reward_func(prompts_repeated, sequences)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 6. 计算优势 (Advantage) - 组内标准化</span></span><br><span class="line">        rewards_matrix = raw_rewards.view(<span class="number">-1</span>, group_size) <span class="comment"># [Batch, Group]</span></span><br><span class="line">        mean_rewards = rewards_matrix.mean(dim=<span class="number">1</span>, keepdim=<span class="keyword">True</span>)</span><br><span class="line">        std_rewards = rewards_matrix.std(dim=<span class="number">1</span>, keepdim=<span class="keyword">True</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 核心公式: (r - mean) / std</span></span><br><span class="line">        advantages = (rewards_matrix - mean_rewards) / (std_rewards + <span class="number">1e-8</span>)</span><br><span class="line">        advantages = advantages.view(<span class="number">-1</span>) <span class="comment"># 展平回 [Batch * G]</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># ================= PHASE 2: 训练更新 (Training) =================</span></span><br><span class="line">    model.train()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 7. 重新计算当前概率 (pi_theta) - 这一次带有梯度</span></span><br><span class="line">    new_log_probs = compute_log_probs(model, sequences, inputs.attention_mask)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 8. 计算损失函数</span></span><br><span class="line">    <span class="comment"># Ratio: exp(log_new - log_old)</span></span><br><span class="line">    ratio = torch.exp(new_log_probs - old_log_probs)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 近似 KL: log_new - log_ref</span></span><br><span class="line">    kl_div = new_log_probs - ref_log_probs</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># PPO Loss 部分</span></span><br><span class="line">    surr1 = ratio * advantages</span><br><span class="line">    surr2 = torch.clamp(ratio, <span class="number">1</span> - clip_eps, <span class="number">1</span> + clip_eps) * advantages</span><br><span class="line">    ppo_loss = -torch.min(surr1, surr2).mean()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># KL 惩罚部分</span></span><br><span class="line">    kl_loss = beta * kl_div.mean()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 总 Loss</span></span><br><span class="line">    total_loss = ppo_loss + kl_loss</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 9. 反向传播</span></span><br><span class="line">    optimizer.zero_grad()</span><br><span class="line">    total_loss.backward()</span><br><span class="line">    optimizer.step()</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> total_loss.item()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">compute_log_probs</span><span class="params">(model, sequences, attention_mask)</span>:</span></span><br><span class="line">    <span class="string">"""辅助函数：计算序列的 Log Probabilities"""</span></span><br><span class="line">    outputs = model(sequences, attention_mask=attention_mask)</span><br><span class="line">    logits = outputs.logits[:, :<span class="number">-1</span>, :]</span><br><span class="line">    labels = sequences[:, <span class="number">1</span>:]</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 提取对应 Token 的 log_prob</span></span><br><span class="line">    log_probs = F.log_softmax(logits, dim=<span class="number">-1</span>)</span><br><span class="line">    selected_log_probs = torch.gather(log_probs, <span class="number">-1</span>, labels.unsqueeze(<span class="number">-1</span>)).squeeze(<span class="number">-1</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Mask 掉 Padding 部分，求和得到整个句子的 log_prob</span></span><br><span class="line">    mask = attention_mask[:, <span class="number">1</span>:]</span><br><span class="line">    sum_log_probs = (selected_log_probs * mask).sum(dim=<span class="number">-1</span>)</span><br><span class="line">    <span class="keyword">return</span> sum_log_probs</span><br></pre></td></tr></table></figure>
+<h1 id="三者对比"><a href="#三者对比" class="headerlink" title="三者对比"></a>三者对比</h1><table>
+<thead>
+<tr>
+<th></th>
+<th><strong>PPO</strong> (Proximal Policy Optimization)</th>
+<th><strong>DPO</strong> (Direct Preference Optimization)</th>
+<th><strong>GRPO</strong> (Group Relative Policy Optimization)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>核心思想</strong></td>
+<td>Actor-Critic 框架，通过重要性采样和比率裁剪（Clip）限制策略更新步长。</td>
+<td>将 RLHF 中的奖励拟合过程显式求解，直接通过<strong>二元偏好对</strong>（Chosen/Rejected）优化策略，绕过强化学习。</td>
+<td>PPO 的变体，<strong>抛弃了价值网络（Critic）</strong>，利用同一 Prompt 下<strong>组内多个响应的相对奖励</strong>来标准化优势。</td>
+</tr>
+<tr>
+<td><strong>所需模型架构</strong></td>
+<td><strong>4 个模型</strong>：  <br>1. Actor (策略)  <br>2. Critic (价值)  <br>3. Reward Model (奖励)  <br>4. Reference (参考)</td>
+<td><strong>2 个模型</strong>：  <br>1. Policy (策略)  <br>2. Reference (参考)  <br>（无需奖励模型和 Critic）</td>
+<td><strong>3 个模型</strong>：  <br>1. Actor (策略)  <br>2. Reward Model (奖励)  <br>3. Reference (参考)  <br>（<strong>无需 Critic</strong>）</td>
+</tr>
+<tr>
+<td><strong>训练数据流</strong></td>
+<td><strong>在线 (Online)</strong>：  <br>策略实时生成响应，与环境（奖励模型）交互，持续采集新样本。</td>
+<td><strong>离线 (Offline)</strong>：  <br>基于固定的静态偏好数据集（如人类标注的对比数据）训练，不生成新样本。</td>
+<td><strong>在线 (Online)</strong>：  <br>策略实时为每个 Prompt 采样 G 个响应，在线获取奖励并更新。</td>
+</tr>
+<tr>
+<td><strong>优势/回报估计</strong></td>
+<td><strong>GAE (广义优势估计)</strong>  <br>依赖 Critic 网络预测状态价值 V</td>
+<td><strong>隐式建模</strong>：  <br>直接优化策略概率比，无显式优势计算。</td>
+<td><strong>组内标准化</strong>：  <br>仅依赖本组奖励的相对高低，无需价值预测。</td>
+</tr>
+<tr>
+<td><strong>显存占用</strong></td>
+<td><strong>极高</strong> 🔴  <br>需同时加载 4 个与主模型同规模的大模型（尤其是 Critic 参数量极大），显存压力巨大。</td>
+<td><strong>低</strong> 🟢  <br>仅需加载 2 个模型，且梯度只更新 Policy，显存消耗约为 PPO 的一半。</td>
+<td><strong>中等</strong> 🟡  <br>比 PPO 少加载一个 Critic，但需同时加载 Actor、RM 和 Ref，通常配合 Offload 使用。</td>
+</tr>
+<tr>
+<td><strong>训练稳定性</strong></td>
+<td><strong>较困难</strong>：  <br>Critic 拟合误差易引入偏差，且 KL 惩罚系数、裁剪阈值等超参数极为敏感。</td>
+<td><strong>较稳定</strong>：  <br>无强化学习探索方差，训练过程平稳，收敛快。</td>
+<td><strong>较稳定</strong>：  <br>无价值网络导致的过估计（Overestimation）问题，组内标准化使训练更为平滑。</td>
+</tr>
+<tr>
+<td><strong>计算效率</strong></td>
+<td><strong>慢</strong>：  <br>需进行多轮优势估计和策略更新（通常多 Epoch），且生成和训练串行。</td>
+<td><strong>快</strong>：  <br>只需一次前向传播计算损失，支持大 Batch 训练，训练速度极快。</td>
+<td><strong>中等偏快</strong>：  <br>生成阶段需采样 G 倍样本，但<strong>去除了 Critic 的前向/反向计算</strong>，实际训练速度优于 PPO。</td>
+</tr>
+<tr>
+<td><strong>主要优点</strong></td>
+<td>✅ 通用性强，适用范围广；  <br>✅ 能处理复杂的非标量奖励（如结合过程监督）。</td>
+<td>✅ 极简架构，无需强化学习库；  <br>✅ 完全避免 Reward Hacking 中的复杂度问题。</td>
+<td>✅ <strong>内存友好</strong>（省去 Critic）；  <br>✅ 避免了 GAE 中价值估计不准造成的方差；  <br>✅ 效果强，支撑了 DeepSeek-Math/R1 的推理能力。</td>
+</tr>
+<tr>
+<td><strong>主要缺点</strong></td>
+<td>资源消耗大，调参难</td>
+<td>依赖离线高质量偏好数据分布，泛化性受限，容易过拟合（尤其数据少时）；无法引入精细化动态奖励</td>
+<td>需要为每个指令生成多个样本，增加了开销</td>
+</tr>
+</tbody>
+</table>
+<p>选型建议：</p>
+<ul>
+<li><strong>选 PPO</strong>：你有<strong>顶级算力</strong>（如 A100/H100 集群），且需要处理<strong>非标量、过程级</strong>的复杂奖励信号（如代码执行结果、数学验证器）。</li>
+<li><strong>选 DPO</strong>：你的算力<strong>有限</strong>，且有现成的高质量离线对比数据（如人工标注的“好/坏”回答），希望快速迭代出可用模型。</li>
+<li><strong>选 GRPO</strong>：你既想保留<strong>在线采样</strong>带来的探索增益（数据分布不依赖静态集），又<strong>无法承受</strong> PPO 中 Critic 带来的显存和调参负担——这是目前做 <strong>RL 微调最“性价比”</strong> 的选择，尤其适合推理任务（数学、代码）。</li>
+</ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://www.cnblogs.com/marsggbo/p/19161792" target="_blank" rel="noopener">LLM 场景下的强化学习技术扫盲</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/677607581" target="_blank" rel="noopener">图解大模型RLHF系列之：人人都能看懂的PPO原理与源码解读</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/7461863937" target="_blank" rel="noopener">人人都能看懂的RL-PPO理论知识</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/645225982" target="_blank" rel="noopener">拆解大语言模型RLHF中的PPO</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/1934998392511132399" target="_blank" rel="noopener">RLHF第一篇-从PPO-&gt;GRPO-&gt;GSPO（动机、理论、verl代码、分析）</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/2047023571269165830" target="_blank" rel="noopener">一文吃透 PPO / DPO / GRPO / GSPO:从公式推导到 verl 源码逐行拆解</a></li>
+<li>公式可视化讲解：<a href="https://zcy233035.github.io/rl-explainer/" target="_blank" rel="noopener">强化学习算法在 LLM 训练中的交互式可视化</a></li>
+</ul>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/assets/wechatpay.jpg" alt="TangShusen 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/assets/alipay.jpg" alt="TangShusen 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/强化学习/" rel="tag"># 强化学习</a>
+          
+            <a href="/tags/LLM/" rel="tag"># LLM</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2026/06/21/rl-basic/" rel="next" title="强化学习基础与经典算法">
+                <i class="fa fa-chevron-left"></i> 强化学习基础与经典算法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/assets/header.jpg" alt="TangShusen">
+            
+              <p class="site-author-name" itemprop="name">TangShusen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">18</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">29</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/shusentang" title="GitHub &rarr; https://github.com/shusentang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.zhihu.com/people/tang-shu-sen-77/activities" title="知乎 &rarr; https://www.zhihu.com/people/tang-shu-sen-77/activities" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                我的项目
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://github.com/ShusenTang/LeetCode" title="https://github.com/ShusenTang/LeetCode" rel="noopener" target="_blank">LeetCode题解</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Dive-into-DL-PyTorch" title="https://shusentang.github.io/Dive-into-DL-PyTorch" rel="noopener" target="_blank">《动手学深度学习》(PyTorch版)</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" title="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" rel="noopener" target="_blank">《Deep Learning with PyTorch》中文翻译</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-text">引言</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#基本概念"><span class="nav-text">基本概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优势估计"><span class="nav-text">优势估计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#方法一：时序差分（1步估计）"><span class="nav-text">方法一：时序差分（1步估计）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方法二：蒙特卡洛方法（全展开估计）"><span class="nav-text">方法二：蒙特卡洛方法（全展开估计）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#广义优势估计GAE"><span class="nav-text">广义优势估计GAE</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PPO"><span class="nav-text">PPO</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-采样与反馈（数据生成）"><span class="nav-text">1. 采样与反馈（数据生成）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#流程"><span class="nav-text">流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#伪代码"><span class="nav-text">伪代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-策略学习（策略和评论家模型更新）"><span class="nav-text">2. 策略学习（策略和评论家模型更新）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#学习目标"><span class="nav-text">学习目标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#损失函数"><span class="nav-text">损失函数</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#（1）策略损失"><span class="nav-text">（1）策略损失</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（2）KL散度（防止训崩）"><span class="nav-text">（2）KL散度（防止训崩）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#（3）评论家损失"><span class="nav-text">（3）评论家损失</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#伪代码-1"><span class="nav-text">伪代码</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DPO"><span class="nav-text">DPO</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#损失函数-1"><span class="nav-text">损失函数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#伪代码-2"><span class="nav-text">伪代码</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GRPO"><span class="nav-text">GRPO</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#与PPO的异同"><span class="nav-text">与PPO的异同</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#伪代码-3"><span class="nav-text">伪代码</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三者对比"><span class="nav-text">三者对比</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 – <span itemprop="copyrightYear">2026</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TangShusen tip:本博客在电脑端食用更佳~</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">total view times: <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: true,
+        appId: 'Bi7QlJPklJ2hjFFoWMd1D2gB-gzGzoHsz',
+        appKey: 'yMWxfGo3ABn8yS13Ytq43Rdk',
+        placeholder: '在上面填上你的邮箱再评论可以收到我的回复哟~',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text('Counter not initialized! See more at console err msg.');
+              console.error('ATTENTION! LeanCloud counter has security bug, see here how to solve it: https://github.com/theme-next/hexo-leancloud-counter-security. \n But you also can use LeanCloud without security, by set \'security\' option to \'false\'.');
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz",
+                'X-LC-Key': "zK9lN00t9W1flFbM75hsjojR",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

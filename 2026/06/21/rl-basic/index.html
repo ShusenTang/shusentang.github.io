@@ -129,7 +129,7 @@
 <meta property="og:image" content="https://tangshusen.me/2026/06/21/rl-basic/dqn.png">
 <meta property="og:image" content="https://tangshusen.me/2026/06/21/rl-basic/reinforce.png">
 <meta property="og:image" content="https://tangshusen.me/2026/06/21/rl-basic/actor-critic.png">
-<meta property="og:updated_time" content="2026-06-21T10:25:25.287Z">
+<meta property="og:updated_time" content="2026-06-21T10:28:51.144Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="强化学习基础与经典算法">
 <meta name="twitter:description" content="强化学习入门，包括基本思想、经典算法（如Q-Learning，DQN，Policy Gradient、Actor-Critic等）。">
@@ -427,7 +427,7 @@
                 
               
 
-              <time title="创建时间：2026-06-21 17:06:58 / 修改时间：18:25:25" itemprop="dateCreated datePublished" datetime="2026-06-21T17:06:58+08:00">2026-06-21</time>
+              <time title="创建时间：2026-06-21 17:06:58 / 修改时间：18:28:51" itemprop="dateCreated datePublished" datetime="2026-06-21T17:06:58+08:00">2026-06-21</time>
             
 
             
@@ -663,7 +663,7 @@
 <p>联系：<br>二者之间有明确的数学关系——V 是 Q 在策略 $\pi$ 下对动作的期望：</p>
 <p>$$<br>V^\pi(s) = \sum_a \pi(a|s) \cdot Q^\pi(s, a)<br>$$</p>
 <p>直觉理解：一个状态的价值，等于在该状态下所有可能动作的 Q 值按策略概率加权求和。<br>反过来，如果是最优策略下：</p>
-<p>$$<br>V^<em>(s) = \max_a Q^</em>(s, a)<br>$$</p>
+<p>$$<br>V^ \ast(s)  = \max_a Q^ \ast(s, a)<br>$$</p>
 <p>即最优状态价值 = 选最好动作对应的 Q 值。</p>
 <p>一个具体例子：<br>假设下棋时轮到你走，当前局面是状态 s，你有三种走法 a1、a2、a3：</p>
 <ul>
@@ -761,6 +761,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2026/08/30/llm-rl/" rel="prev" title="LLM场景下的强化学习——PPO、DPO、GRPO">
+                LLM场景下的强化学习——PPO、DPO、GRPO <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -836,7 +840,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-count">18</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -936,7 +940,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">28</span>
+                      
+                    
+                    <span class="site-state-item-count">29</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
