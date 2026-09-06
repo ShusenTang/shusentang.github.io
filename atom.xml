@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://tangshusen.me/"/>
-  <updated>2026-08-30T08:11:49.861Z</updated>
+  <updated>2026-09-06T11:44:31.181Z</updated>
   <id>https://tangshusen.me/</id>
   
   <author>
@@ -17,11 +17,31 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>LLM中的位置编码</title>
+    <link href="https://tangshusen.me/2026/09/06/position-embed/"/>
+    <id>https://tangshusen.me/2026/09/06/position-embed/</id>
+    <published>2026-09-06T09:06:58.000Z</published>
+    <updated>2026-09-06T11:44:31.181Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Transformer中的注意力计算是与位置无关的，这显然与真实语言逻辑不符。因此，我们需要引入位置编码（Position Encoding, PE）来告诉模型每个 token 在序列中的位置。本文介绍了三种常见的位置编码：训练式位置编码、正余弦位置编码以及现代LLM常用的RoPE位置编码。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="LLM" scheme="https://tangshusen.me/categories/LLM/"/>
+    
+    
+      <category term="位置编码" scheme="https://tangshusen.me/tags/%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81/"/>
+    
+  </entry>
+  
+  <entry>
     <title>LLM场景下的强化学习——PPO、DPO、GRPO</title>
     <link href="https://tangshusen.me/2026/08/30/llm-rl/"/>
     <id>https://tangshusen.me/2026/08/30/llm-rl/</id>
     <published>2026-08-30T07:06:58.000Z</published>
-    <updated>2026-08-30T08:11:49.861Z</updated>
+    <updated>2026-09-06T12:19:32.810Z</updated>
     
     <summary type="html">
     

@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+  <meta name="google-site-verification" content="UM_oWjkmpNS4sC6N8fDEsgSTPTOong_3Muz7XL_l-bQ">
+
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="NntzqnjuUs">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/my_apple-touch-icon-next.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/my_favicon-32x32.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/my_favicon-16x16.jpg?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/my_logo.jpg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Transformer中的注意力计算是与位置无关的，这显然与真实语言逻辑不符。因此，我们需要引入位置编码（Position Encoding, PE）来告诉模型每个 token 在序列中的位置。本文介绍了三种常见的位置编码：训练式位置编码、正余弦位置编码以及现代LLM常用的RoPE位置编码。">
+<meta name="keywords" content="位置编码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LLM中的位置编码">
+<meta property="og:url" content="https://tangshusen.me/2026/09/06/position-embed/index.html">
+<meta property="og:site_name" content="TangShusen">
+<meta property="og:description" content="Transformer中的注意力计算是与位置无关的，这显然与真实语言逻辑不符。因此，我们需要引入位置编码（Position Encoding, PE）来告诉模型每个 token 在序列中的位置。本文介绍了三种常见的位置编码：训练式位置编码、正余弦位置编码以及现代LLM常用的RoPE位置编码。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://tangshusen.me/2026/09/06/position-embed/sin-cos.png">
+<meta property="og:image" content="https://tangshusen.me/2026/09/06/position-embed/sin-cos-decay.png">
+<meta property="og:image" content="https://tangshusen.me/2026/09/06/position-embed/rope1.png">
+<meta property="og:image" content="https://tangshusen.me/2026/09/06/position-embed/rope2.png">
+<meta property="og:image" content="https://tangshusen.me/2026/09/06/position-embed/rope3.png">
+<meta property="og:image" content="https://tangshusen.me/2026/09/06/position-embed/rope4.png">
+<meta property="og:updated_time" content="2026-09-06T11:44:31.181Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LLM中的位置编码">
+<meta name="twitter:description" content="Transformer中的注意力计算是与位置无关的，这显然与真实语言逻辑不符。因此，我们需要引入位置编码（Position Encoding, PE）来告诉模型每个 token 在序列中的位置。本文介绍了三种常见的位置编码：训练式位置编码、正余弦位置编码以及现代LLM常用的RoPE位置编码。">
+<meta name="twitter:image" content="https://tangshusen.me/2026/09/06/position-embed/sin-cos.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="TangShusen" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://tangshusen.me/2026/09/06/position-embed/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>LLM中的位置编码 | TangShusen</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TangShusen</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-findjob">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/findJob/" rel="section"><i class="menu-item-icon fa fa-fw fa-info"></i> <br>内推</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2026/09/06/position-embed/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="TangShusen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/assets/header.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TangShusen">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">LLM中的位置编码
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2026-09-06 17:06:58 / 修改时间：19:44:31" itemprop="dateCreated datePublished" datetime="2026-09-06T17:06:58+08:00">2026-09-06</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/LLM/" itemprop="url" rel="index"><span itemprop="name">LLM</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2026/09/06/position-embed/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2026/09/06/position-embed/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2026/09/06/position-embed/" class="leancloud_visitors" data-flag-title="LLM中的位置编码">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Transformer中的注意力计算是与位置无关的，这显然与真实语言逻辑不符。因此，我们需要引入位置编码（Position Encoding, PE）来告诉模型每个 token 在序列中的位置。本文介绍了三种常见的位置编码：训练式位置编码、正余弦位置编码以及现代LLM常用的RoPE位置编码。</p>
+<a id="more"></a>
+<h1 id="为什么需要位置编码？"><a href="#为什么需要位置编码？" class="headerlink" title="为什么需要位置编码？"></a>为什么需要位置编码？</h1><p>Attention的本质是计算输入序列中token与token之间的注意力权重。如果不加位置编码，那么这个注意力权重只和token的语义embedding有关，和位置无关，这显然和直观理解不符：一般来讲，如果两个token之间的距离较近，它们之间的的注意力权重应该更大，当距离较远时，注意力权重应该更小。</p>
+<h2 id="理想位置编码的特性"><a href="#理想位置编码的特性" class="headerlink" title="理想位置编码的特性"></a>理想位置编码的特性</h2><p>直观上，好的位置编码需要满足以下特性：</p>
+<ul>
+<li>外推性：在超过训练长度的数据上依然能维持较好的效果</li>
+<li>相对位置：任何位置之间的相对距离在不同长度的句子中应该是一致的</li>
+<li>远程衰减：相对距离越大的输入，其相关性应该越弱</li>
+</ul>
+<h1 id="训练式位置编码"><a href="#训练式位置编码" class="headerlink" title="训练式位置编码"></a>训练式位置编码</h1><p>把每个位置的位置向量设置成可学习参数随着模型一起训练。训练式位置编码广泛应用于早期的transformer类型的模型，如BERT、GPT、ALBERT等。但其缺点是模型完全不具有长度外推性，因为位置编码矩阵的大小是预设的，若对其进行扩展，将会破坏模型在预训练阶段学习到的位置信息。但早期大家对长文本输入的需求并不如现在迫切。此外，训练式位置编码为每个位置分配一个固定的（可学习）向量，但语言中真正重要的往往是<strong>相对位置</strong>：两个词相距多远，而非它们各自在句子中的绝对位置。</p>
+<blockquote>
+<p>苏神的博文<a href="https://kexue.fm/archives/7947" target="_blank" rel="noopener">《层次分解位置编码，让BERT可以处理超长文本》</a>通过层次分解的方式使得绝对位置编码能外推到足够长的范围，同时保持还不错的效果。</p>
+</blockquote>
+<h1 id="正余弦位置编码"><a href="#正余弦位置编码" class="headerlink" title="正余弦位置编码"></a>正余弦位置编码</h1><p>Sinusoidal位置编码，是原始transformer论文<a href="https://papers.cool/arxiv/1706.03762" target="_blank" rel="noopener">《Attention is All You Need》</a>提出来的，它的形式如下，其中 d 表示词向量的维度，k 表示位置索引，2i 和 2i+1 表示位置向量的分量索引，则位置 k 的位置向量的第 2i 和第 2i+1 个分量为：<br>$$<br>\begin{align}<br>p_{k,2i} &amp;= \sin(\frac{k}{10000^{2i/d}}) \\<br>p_{k,2i+1} &amp;= \cos(\frac{k}{10000^{2i/d}})<br>\end{align}<br>$$<br>如下图所示，每个分量都具有周期性，越靠后的分量，波长越长，频率越低。</p>
+<center><br><img src="/2026/09/06/position-embed/sin-cos.png" width="400" class="full-image"><br></center>
+
+<blockquote>
+<p>图片来源：<a href="https://huggingface.co/blog/zh/designing-positional-encoding" target="_blank" rel="noopener">设计位置编码 - Hugging Face</a></p>
+</blockquote>
+<p>由于Sinusoidal位置编码的每个分量都具有周期性，可以证明，两个相对位置为k的位置向量的内积是一个关于k的常数，即只和相对位置 k 有关。</p>
+<p>除了周期性外，正余弦位置编码还具有远程衰减性质，具体表现为：对于两个相同的词向量，如果它们之间的距离越近，则他们的内积分数越高，反之则越低。</p>
+<center><br><img src="/2026/09/06/position-embed/sin-cos-decay.png" width="400" class="full-image"><br></center>
+
+<blockquote>
+<p>图片来源: <a href="https://arxiv.org/abs/1911.04474" target="_blank" rel="noopener">TENER: Adapting Transformer Encoder for Named Entity Recognition</a></p>
+</blockquote>
+<h2 id="正余弦编码是否真的具备外推性？"><a href="#正余弦编码是否真的具备外推性？" class="headerlink" title="正余弦编码是否真的具备外推性？"></a>正余弦编码是否真的具备外推性？</h2><p>虽然正余弦编码的內积只和相对位置有关，理论上具备外推性的潜力，<strong>但实践中已被证明效果十分有限</strong>。</p>
+<p>回顾transformer的注意力计算：<br>$$<br>\begin{align}<br>\text{Attention}(Q,K,V)=\mathrm{softmax}\left(\frac{QK^\top}{\sqrt d}\right)  \\<br>Q=(x+PE_p)W_Q,\quad K=(x+PE_q)W_K<br>\end{align}<br>$$</p>
+<p>经过 $W_Q,W_K$ 投影后，內积只和相对位置有关的性质就被破坏掉。而且权重矩阵 $W_Q,W_K$ 只在训练长度内见过位置组合： 训练最长 512 步时，权重几乎从未见过 <code>pos=600</code> 与 <code>pos=10</code> 这样远距离位置对，当推理来到超出训练长度的位置，Q‑K 点积产出的注意力分数是不可靠的。</p>
+<h1 id="旋转位置编码（RoPE）"><a href="#旋转位置编码（RoPE）" class="headerlink" title="旋转位置编码（RoPE）"></a>旋转位置编码（RoPE）</h1><p>直观理解：<strong>旋转位置编码通过将一个向量旋转某个角度，为其赋予位置信息</strong>。</p>
+<p>一般地，我们通过下述运算来给向量q和k分别添加绝对位置信息m和n：<br>$$<br>q_m=f(q,m),k_n=f(k,n)<br>$$<br>RoPE希望 $q_m$ 和 $k_n$ 的点积 $q_m \cdot k_n$ 带有相对位置 $m-n$ 信息，即<br>$$<br>⟨f(q,m),f(k,n)⟩=g(q,k,m−n)<br>$$<br>所以我们的目标就是找出满足上述等式（且尽可能简单）的函数 $f$ 。</p>
+<blockquote>
+<p>注意前面正余弦位置编码的相对位置不变性只针对纯 PE 向量之间，一旦送入注意力模块经过 Q/K 投影，就不再保证成立。而RoPE 在设计时就瞄准解决这个痛点：它把相对位置不变性<strong>保留到 Q/K 点积层面</strong>。<br>核心区别：Sinusoidal 是<strong>先加位置再投影</strong>，RoPE 是<strong>先投影语义、再对 QK 做位置旋转</strong>。</p>
+</blockquote>
+<p>假设向量都是2维的情况，我们可以把向量都看作是复数：</p>
+<p>$$<br>q = a + bi = r e^{i\theta} = r (\cos\theta + i \sin\theta)<br>$$</p>
+<p>其中 a 是实部，b是虚部，$r = \sqrt{a^2 + b^2}$ 是模长，$\theta = \arctan(b/a)$ 是幅角（或相位）表示向量与正实轴之间的夹角。</p>
+<p>再经过一系列推导（见苏神的博客或论文：<a href="https://kexue.fm/archives/8265" target="_blank" rel="noopener">博采众长的旋转式位置编码</a>、<a href="https://arxiv.org/pdf/2104.09864" target="_blank" rel="noopener">RoFormer</a>），可得出二维RoPE：<br>$$<br>f(q,m) = q e^{im\theta}<br>$$<br>即相当于把复数 q 逆时针旋转了角度 $m\theta$。</p>
+<blockquote>
+<p>复数知识：一个复数乘以单位复数 $e^{i\theta}$ 表示这个复数对应的向量逆时针旋转了角度 $\theta$。</p>
+</blockquote>
+<p>写成矩阵形式并推广到任意偶数维（两两一组，分别旋转）即：</p>
+<left><br><img src="/2026/09/06/position-embed/rope1.png" width="600" class="full-image"><br></left>
+
+<p>再借鉴正余弦位置编码，把每组的 $\theta$ 设置成不同的常量从而引入远程衰减的性质：</p>
+<left><br><img src="/2026/09/06/position-embed/rope2.png" width="600" class="full-image"><br></left>
+
+<p>其中 $\theta_i = 10000^{-2(i-1)/d}, i \in [1,2,…,d/2]$ 。</p>
+<p>RoPE的示意图：</p>
+<center><br><img src="/2026/09/06/position-embed/rope3.png" width="600" class="full-image"><br></center>
+
+<h2 id="RoPE的高效计算"><a href="#RoPE的高效计算" class="headerlink" title="RoPE的高效计算"></a>RoPE的高效计算</h2><p>由于上面旋转矩阵的稀疏性，直接矩阵相乘会很浪费算力，因此实践一般通过下述方式来实现RoPE：</p>
+<left><br><img src="/2026/09/06/position-embed/rope4.png" width="600" class="full-image"><br></left>
+
+<p>其中 $\bigotimes$ 表示element-wise相乘。</p>
+<h2 id="RoPE代码实现"><a href="#RoPE代码实现" class="headerlink" title="RoPE代码实现"></a>RoPE代码实现</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">precompute_freqs_cis</span><span class="params">(dim: int, end: int, theta: float = <span class="number">10000.0</span>)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    预计算复数形式旋转因子: freqs_cis[position, i] = exp(i * m * theta_i)</span></span><br><span class="line"><span class="string">    dim: head_dim</span></span><br><span class="line"><span class="string">    end: 最大需要的序列长度</span></span><br><span class="line"><span class="string">    return shape: [end, dim//2] complex64</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    freqs = <span class="number">1.0</span> / (theta ** (torch.arange(<span class="number">0</span>, dim, <span class="number">2</span>)[: (dim // <span class="number">2</span>)].float() / dim))</span><br><span class="line">    t = torch.arange(end, device=freqs.device, dtype=torch.float32)</span><br><span class="line">    freqs = torch.outer(t, freqs)  <span class="comment"># [seq_len, dim/2]</span></span><br><span class="line">    <span class="comment"># 复数: cos + i sin</span></span><br><span class="line">    freqs_cis = torch.polar(torch.ones_like(freqs), freqs)</span><br><span class="line">    <span class="keyword">return</span> freqs_cis</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">apply_rotary_emb</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">    xq: torch.Tensor,</span></span></span><br><span class="line"><span class="function"><span class="params">    xk: torch.Tensor,</span></span></span><br><span class="line"><span class="function"><span class="params">    freqs_cis: torch.Tensor,</span></span></span><br><span class="line"><span class="function"><span class="params">)</span> -&gt; tuple[torch.Tensor, torch.Tensor]:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    xq/xk: [batch, seq_len, n_heads, head_dim]</span></span><br><span class="line"><span class="string">    freqs_cis: [seq_len, head_dim//2] 复数</span></span><br><span class="line"><span class="string">    returns rotated q, k，同shape</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="comment"># 转为复数: 最后一维两两配对</span></span><br><span class="line">    xq_ = torch.view_as_complex(xq.float().reshape(*xq.shape[:<span class="number">-1</span>], <span class="number">-1</span>, <span class="number">2</span>))</span><br><span class="line">    xk_ = torch.view_as_complex(xk.float().reshape(*xk.shape[:<span class="number">-1</span>], <span class="number">-1</span>, <span class="number">2</span>))</span><br><span class="line">    <span class="comment"># broadcast: freqs_cis [S, D/2] -&gt; [1, S, 1, D/2]</span></span><br><span class="line">    freqs_cis = freqs_cis[<span class="keyword">None</span>, :, <span class="keyword">None</span>, :]</span><br><span class="line">    xq_out = xq_ * freqs_cis</span><br><span class="line">    xk_out = xk_ * freqs_cis</span><br><span class="line">    <span class="comment"># 转回实数值</span></span><br><span class="line">    xq_out = torch.view_as_real(xq_out).flatten(<span class="number">3</span>)</span><br><span class="line">    xk_out = torch.view_as_real(xk_out).flatten(<span class="number">3</span>)</span><br><span class="line">    <span class="keyword">return</span> xq_out.type_as(xq), xk_out.type_as(xk)</span><br></pre></td></tr></table></figure>
+<h1 id="对比"><a href="#对比" class="headerlink" title="对比"></a>对比</h1><table>
+<thead>
+<tr>
+<th>对比维度</th>
+<th>训练式 PE</th>
+<th>正余弦 PE（Sinusoidal）</th>
+<th>RoPE 旋转位置编码</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>位置注入方式</td>
+<td>Embedding 相加 (x+PE)</td>
+<td>Embedding 相加 (x+PE)</td>
+<td>对投影后的 Q、K 做旋转变换，V 不动</td>
+</tr>
+<tr>
+<td>是否带可训练参数</td>
+<td>✅ 全部参数可学习</td>
+<td>❌ 完全固定无参数</td>
+<td>❌ 旋转公式固定无参数</td>
+</tr>
+<tr>
+<td>能否生成大于训练长度的位置向量</td>
+<td>❌ 超出 max_len 无向量</td>
+<td>✅ 公式无限生成</td>
+<td>✅ 旋转角度无限生成</td>
+</tr>
+<tr>
+<td><strong>Q‑K 点积是否仅依赖相对偏移</strong></td>
+<td>❌ 无保证</td>
+<td>❌ 投影后相对关系被破坏</td>
+<td>✅ 理想状态严格成立</td>
+</tr>
+<tr>
+<td>相对位置特性</td>
+<td>偏向<strong>绝对位置</strong></td>
+<td>弱相对位置偏置（仅 PE 向量层）</td>
+<td>强<strong>相对位置</strong>归纳偏置</td>
+</tr>
+<tr>
+<td>外推能力</td>
+<td>❌ 完全不可外推</td>
+<td>❌ 很差，极易崩坏</td>
+<td>⭐较好（有上限，超长需缩放增强）</td>
+</tr>
+<tr>
+<td>典型代表模型</td>
+<td>BERT</td>
+<td>原始 Transformer</td>
+<td>LLaMA、Mistral、Qwen</td>
+</tr>
+</tbody>
+</table>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://zhuanlan.zhihu.com/p/667864459" target="_blank" rel="noopener">图解RoPE旋转位置编码及其特性</a></li>
+<li>苏神本人博客和论文：<a href="https://kexue.fm/archives/8265" target="_blank" rel="noopener">博采众长的旋转式位置编码</a>、<a href="https://arxiv.org/pdf/2104.09864" target="_blank" rel="noopener">RoFormer</a></li>
+</ul>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/assets/wechatpay.jpg" alt="TangShusen 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/assets/alipay.jpg" alt="TangShusen 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/位置编码/" rel="tag"># 位置编码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2026/08/30/llm-rl/" rel="next" title="LLM场景下的强化学习——PPO、DPO、GRPO">
+                <i class="fa fa-chevron-left"></i> LLM场景下的强化学习——PPO、DPO、GRPO
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/assets/header.jpg" alt="TangShusen">
+            
+              <p class="site-author-name" itemprop="name">TangShusen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">19</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">30</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/shusentang" title="GitHub &rarr; https://github.com/shusentang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.zhihu.com/people/tang-shu-sen-77/activities" title="知乎 &rarr; https://www.zhihu.com/people/tang-shu-sen-77/activities" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                我的项目
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://github.com/ShusenTang/LeetCode" title="https://github.com/ShusenTang/LeetCode" rel="noopener" target="_blank">LeetCode题解</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Dive-into-DL-PyTorch" title="https://shusentang.github.io/Dive-into-DL-PyTorch" rel="noopener" target="_blank">《动手学深度学习》(PyTorch版)</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" title="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" rel="noopener" target="_blank">《Deep Learning with PyTorch》中文翻译</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#为什么需要位置编码？"><span class="nav-text">为什么需要位置编码？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#理想位置编码的特性"><span class="nav-text">理想位置编码的特性</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#训练式位置编码"><span class="nav-text">训练式位置编码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#正余弦位置编码"><span class="nav-text">正余弦位置编码</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#正余弦编码是否真的具备外推性？"><span class="nav-text">正余弦编码是否真的具备外推性？</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#旋转位置编码（RoPE）"><span class="nav-text">旋转位置编码（RoPE）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#RoPE的高效计算"><span class="nav-text">RoPE的高效计算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RoPE代码实现"><span class="nav-text">RoPE代码实现</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#对比"><span class="nav-text">对比</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 – <span itemprop="copyrightYear">2026</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TangShusen tip:本博客在电脑端食用更佳~</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">total view times: <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: true,
+        appId: 'Bi7QlJPklJ2hjFFoWMd1D2gB-gzGzoHsz',
+        appKey: 'yMWxfGo3ABn8yS13Ytq43Rdk',
+        placeholder: '在上面填上你的邮箱再评论可以收到我的回复哟~',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text('Counter not initialized! See more at console err msg.');
+              console.error('ATTENTION! LeanCloud counter has security bug, see here how to solve it: https://github.com/theme-next/hexo-leancloud-counter-security. \n But you also can use LeanCloud without security, by set \'security\' option to \'false\'.');
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz",
+                'X-LC-Key': "zK9lN00t9W1flFbM75hsjojR",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
