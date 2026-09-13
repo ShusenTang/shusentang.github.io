@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://tangshusen.me/"/>
-  <updated>2026-09-06T11:44:31.181Z</updated>
+  <updated>2026-09-13T08:16:16.513Z</updated>
   <id>https://tangshusen.me/</id>
   
   <author>
@@ -15,6 +15,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>生成式推荐中的SID构建方法</title>
+    <link href="https://tangshusen.me/2026/09/13/sid/"/>
+    <id>https://tangshusen.me/2026/09/13/sid/</id>
+    <published>2026-09-13T08:02:58.000Z</published>
+    <updated>2026-09-13T08:16:16.513Z</updated>
+    
+    <summary type="html">
+    
+      &lt;center&gt;&lt;br&gt;&lt;img src=&quot;/2026/09/13/sid/rq-vae.png&quot; width=&quot;600&quot; class=&quot;full-image&quot;&gt;&lt;br&gt;&lt;/center&gt;
+
+&lt;p&gt;生成式推荐（Generative Recommendation）的核心，是把”推荐下一个物品”建模成”生成下一个 token”。但物品动辄上亿、且 ItemID 本身不带任何语义，无法像单词一样被模型直接生成——语义 ID（Semantic ID, SID） 就是为此而生：它将物品 embedding 压缩成一小串离散码字，让语义相近的物品拥有相近的 ID，从而成为生成式模型可学习、可生成的基本单元。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="搜广推" scheme="https://tangshusen.me/categories/%E6%90%9C%E5%B9%BF%E6%8E%A8/"/>
+    
+    
+      <category term="SID" scheme="https://tangshusen.me/tags/SID/"/>
+    
+      <category term="RQ-VAE" scheme="https://tangshusen.me/tags/RQ-VAE/"/>
+    
+      <category term="RQ-Kmeans" scheme="https://tangshusen.me/tags/RQ-Kmeans/"/>
+    
+      <category term="生成式推荐" scheme="https://tangshusen.me/tags/%E7%94%9F%E6%88%90%E5%BC%8F%E6%8E%A8%E8%8D%90/"/>
+    
+  </entry>
   
   <entry>
     <title>LLM中的位置编码</title>

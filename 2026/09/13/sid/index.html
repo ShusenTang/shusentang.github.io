@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+  <meta name="google-site-verification" content="UM_oWjkmpNS4sC6N8fDEsgSTPTOong_3Muz7XL_l-bQ">
+
+
+
+
+
+
+
+
+  <meta name="baidu-site-verification" content="NntzqnjuUs">
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.5.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/my_apple-touch-icon-next.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/my_favicon-32x32.jpg?v=6.5.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/my_favicon-16x16.jpg?v=6.5.0">
+
+
+  <link rel="mask-icon" href="/images/my_logo.jpg?v=6.5.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '6.5.0',
+    sidebar: {"position":"left","display":"always","offset":12,"b2t":false,"scrollpercent":false,"onmobile":true},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="生成式推荐（Generative Recommendation）的核心，是把”推荐下一个物品”建模成”生成下一个 token”。但物品动辄上亿、且 ItemID 本身不带任何语义，无法像单词一样被模型直接生成——语义 ID（Semantic ID, SID） 就是为此而生：它将物品 embedding 压缩成一小串离散码字，让语义相近的物品拥有相近的 ID，从而成为生成式模型可学习、可生成的基">
+<meta name="keywords" content="SID,RQ-VAE,RQ-Kmeans,生成式推荐">
+<meta property="og:type" content="article">
+<meta property="og:title" content="生成式推荐中的SID构建方法">
+<meta property="og:url" content="https://tangshusen.me/2026/09/13/sid/index.html">
+<meta property="og:site_name" content="TangShusen">
+<meta property="og:description" content="生成式推荐（Generative Recommendation）的核心，是把”推荐下一个物品”建模成”生成下一个 token”。但物品动辄上亿、且 ItemID 本身不带任何语义，无法像单词一样被模型直接生成——语义 ID（Semantic ID, SID） 就是为此而生：它将物品 embedding 压缩成一小串离散码字，让语义相近的物品拥有相近的 ID，从而成为生成式模型可学习、可生成的基">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://tangshusen.me/2026/09/13/sid/rq-vae.png">
+<meta property="og:image" content="https://tangshusen.me/2026/09/13/sid/vq-vae.png">
+<meta property="og:image" content="https://tangshusen.me/2026/09/13/sid/rq-vae.png">
+<meta property="og:updated_time" content="2026-09-13T08:16:16.513Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="生成式推荐中的SID构建方法">
+<meta name="twitter:description" content="生成式推荐（Generative Recommendation）的核心，是把”推荐下一个物品”建模成”生成下一个 token”。但物品动辄上亿、且 ItemID 本身不带任何语义，无法像单词一样被模型直接生成——语义 ID（Semantic ID, SID） 就是为此而生：它将物品 embedding 压缩成一小串离散码字，让语义相近的物品拥有相近的 ID，从而成为生成式模型可学习、可生成的基">
+<meta name="twitter:image" content="https://tangshusen.me/2026/09/13/sid/rq-vae.png">
+
+
+
+  <link rel="alternate" href="/atom.xml" title="TangShusen" type="application/atom+xml">
+
+
+
+
+  <link rel="canonical" href="https://tangshusen.me/2026/09/13/sid/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>生成式推荐中的SID构建方法 | TangShusen</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">TangShusen</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-tags">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-categories">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-findjob">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/findJob/" rel="section"><i class="menu-item-icon fa fa-fw fa-info"></i> <br>内推</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://tangshusen.me/2026/09/13/sid/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="TangShusen">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/assets/header.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="TangShusen">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">生成式推荐中的SID构建方法
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2026-09-13 16:02:58 / 修改时间：16:16:16" itemprop="dateCreated datePublished" datetime="2026-09-13T16:02:58+08:00">2026-09-13</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/搜广推/" itemprop="url" rel="index"><span itemprop="name">搜广推</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2026/09/13/sid/#comments" itemprop="discussionUrl">
+                  <span class="post-meta-item-text">评论数：</span> <span class="post-comments-count valine-comment-count" data-xid="/2026/09/13/sid/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2026/09/13/sid/" class="leancloud_visitors" data-flag-title="生成式推荐中的SID构建方法">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数：</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <center><br><img src="/2026/09/13/sid/rq-vae.png" width="600" class="full-image"><br></center>
+
+<p>生成式推荐（Generative Recommendation）的核心，是把”推荐下一个物品”建模成”生成下一个 token”。但物品动辄上亿、且 ItemID 本身不带任何语义，无法像单词一样被模型直接生成——语义 ID（Semantic ID, SID） 就是为此而生：它将物品 embedding 压缩成一小串离散码字，让语义相近的物品拥有相近的 ID，从而成为生成式模型可学习、可生成的基本单元。</p>
+<a id="more"></a>
+<p>本文沿 VQ-VAE → RQ-VAE → RQ-KMeans 的脉络，梳理两类主流的 SID 构建方法：基于神经网络端到端学习的 RQ-VAE，以及直接对 embedding 递归聚类、被快手 OneRec 等采用的 RQ-KMeans。每部分均配原理讲解与代码解析。</p>
+<h1 id="从VQ-VAE到RQ-VAE"><a href="#从VQ-VAE到RQ-VAE" class="headerlink" title="从VQ-VAE到RQ-VAE"></a>从VQ-VAE到RQ-VAE</h1><h2 id="VQ-VAE"><a href="#VQ-VAE" class="headerlink" title="VQ-VAE"></a>VQ-VAE</h2><p>向量量化 (Vector Quantization, VQ) 的核心思想是将一个连续的、高维的向量空间，映射到一个离散的、有限的码本（Codebook）空间中。</p>
+<center><br><img src="/2026/09/13/sid/vq-vae.png" width="700" class="full-image"><br></center>
+
+<p>如上图所示，<strong>VQ-VAE</strong>将这一思想整合进了标准的自编码器（Auto-Encoder）架构中。它由三部分构成：</p>
+<ul>
+<li><strong>编码器 (Encoder)</strong>：将输入数据 $x$（如图片）压缩成一个低维的连续潜在向量 $z_e$。</li>
+<li><strong>量化器 (Quantizer)</strong>：通过查找码本，将 $z_e$ 替换为离它最近的码本向量 $z_q$ ，这个查找操作是不可导的，因此VQ-VAE引入了<strong>梯度直通估计器</strong>（Straight-Through Estimator，STE）来解决反向传播中的梯度中断问题。</li>
+<li><strong>解码器 (Decoder)</strong>：接收量化后的  $z_q$ ，并尝试将其重建为原始输入 $x’$。</li>
+</ul>
+<p>训练VQ-VAE包含两个损失（实际是三个，重建一个，量化两个）：</p>
+<ul>
+<li>一是最小化  $x$ 和  $x’$ 之间的<strong>重建损失</strong>，以保证信息保真度；</li>
+<li>二是<strong>量化损失</strong>，通过最小化 mse($z_e$, $z_q$) 来让 $z_e$ 和  $z_q$ 相互靠近：<ul>
+<li><strong>码本损失</strong>：阻断 $z_e$ 的梯度，梯度只通过 $z_q$ 回传至码本用于更新码本</li>
+<li><strong>承诺损失(Commitment Loss)</strong>：阻断 $z_q$ 的梯度，梯度只通过 $z_e$ 回传至encoder用于保证 encoder 提取出的隐变量与码本中的向量尽可能接近，稳定训练过程</li>
+</ul>
+</li>
+</ul>
+<p>即损失函数：<br>$$\mathcal{L} = \underbrace{|x - x’|^2}_{\text{重建}} + \sum_{l} \underbrace{|z_q^l - \text{sg}[z_e^l]|^2}_{\text{码本}} + \beta \sum_{l} \underbrace{|\text{sg}[z_q^l] - z_e^l|^2}_{\text{承诺}}$$<br>其中 sg = stop gradient表示梯度阻断。</p>
+<p>VQ部分（不包括encoder和decoder部分）代码逻辑如下所示：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">VQEmbedding</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    单层向量量化模块 (Vector Quantization Embedding)。</span></span><br><span class="line"><span class="string">    包含一个码本 (codebook)，负责将输入向量映射到码本中最接近的向量。</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, num_embeddings: int, embedding_dim: int, commitment_cost: float = <span class="number">0.25</span>)</span>:</span></span><br><span class="line">        super().__init__()</span><br><span class="line">        self.num_embeddings = num_embeddings</span><br><span class="line">        self.embedding_dim = embedding_dim</span><br><span class="line">        self.commitment_cost = commitment_cost</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 将码本注册为可学习的参数</span></span><br><span class="line">        self.embeddings = nn.Parameter(torch.randn(num_embeddings, embedding_dim))</span><br><span class="line">        self.initialized_with_data = <span class="keyword">False</span></span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">initialize_from_data</span><span class="params">(self, data: torch.Tensor)</span>:</span></span><br><span class="line">        <span class="string">"""使用K-Means对码本进行一次性初始化，避免随机初始化陷阱。"""</span></span><br><span class="line">        <span class="keyword">if</span> self.initialized_with_data:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">            </span><br><span class="line">        data_np = data.detach().cpu().numpy()</span><br><span class="line">        n_samples = data_np.shape[<span class="number">0</span>]</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> n_samples &lt; self.num_embeddings:</span><br><span class="line">            <span class="comment"># 样本不足时，有放回地抽样</span></span><br><span class="line">            indices = np.random.choice(n_samples, self.num_embeddings, replace=<span class="keyword">True</span>)</span><br><span class="line">            centroids = data_np[indices]</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            kmeans = KMeans(n_clusters=self.num_embeddings, n_init=<span class="string">'auto'</span>, max_iter=<span class="number">100</span>)</span><br><span class="line">            kmeans.fit(data_np)</span><br><span class="line">            centroids = kmeans.cluster_centers_</span><br><span class="line">        </span><br><span class="line">        self.embeddings.data.copy_(torch.from_numpy(centroids))</span><br><span class="line">        self.initialized_with_data = <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, z: torch.Tensor)</span>:</span></span><br><span class="line">        distances = (</span><br><span class="line">            torch.sum(z**<span class="number">2</span>, dim=<span class="number">1</span>, keepdim=<span class="keyword">True</span>) +</span><br><span class="line">            torch.sum(self.embeddings**<span class="number">2</span>, dim=<span class="number">1</span>) -</span><br><span class="line">            <span class="number">2</span> * torch.matmul(z, self.embeddings.t())</span><br><span class="line">        ) <span class="comment"># z离码本中每个向量的L2距离</span></span><br><span class="line">        </span><br><span class="line">        indices = torch.argmin(distances, dim=<span class="number">1</span>)</span><br><span class="line">        z_q = F.embedding(indices, self.embeddings)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 计算损失</span></span><br><span class="line">        codebook_loss = F.mse_loss(z_q, z.detach())  <span class="comment"># 用于更新码本</span></span><br><span class="line">        commitment_loss = F.mse_loss(z, z_q.detach()) * self.commitment_cost  <span class="comment"># 用于更新z上游(encoder)</span></span><br><span class="line">        total_loss = codebook_loss + commitment_loss</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Straight-Through Estimator (梯度直通) 用于解决码本查找不可导的问题</span></span><br><span class="line">        z_q = z + (z_q - z).detach()</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> z_q, indices, total_loss</span><br></pre></td></tr></table></figure></p>
+<h2 id="RQ-VAE：多层VQ"><a href="#RQ-VAE：多层VQ" class="headerlink" title="RQ-VAE：多层VQ"></a>RQ-VAE：多层VQ</h2><p>VQ-VAE在处理高保真度数据时面临一个瓶颈：若要精确表示复杂的输入，就需要一个极大的码本，这会带来巨大的计算和存储开销。<strong>RQ-VAE</strong> 通过引入<strong>残差量化 (Residual Quantization)</strong> 机制完美地解决了这个问题。其核心思想是“由粗到精”进行多次VQ：</p>
+<center><br><img src="/2026/09/13/sid/rq-vae.png" width="700" class="full-image"><br></center>
+
+<ol>
+<li><strong>第一层量化</strong>: 与VQ-VAE相同，对原始向量进行一次“粗略”的量化，得到第一个码字；</li>
+<li><strong>计算残差</strong>: 计算原始向量与第一次量化结果之间的差值（残差）；</li>
+<li><strong>第二层量化</strong>: 不再对原始向量进行操作，而是对残差进行第二次量化，得到第二个码字；</li>
+<li><strong>迭代</strong>: 继续计算新的残差，并交给下一层处理。</li>
+</ol>
+<p>残差量化代码如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ResidualVQ</span><span class="params">(nn.Module)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    残差向量量化 (Residual Vector Quantization)。</span></span><br><span class="line"><span class="string">    包含多个VQEmbedding层，对前一层的残差进行逐层量化。</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, num_layers: int, num_embeddings_list: list, embedding_dim: int, commitment_cost: float = <span class="number">0.25</span>)</span>:</span></span><br><span class="line">        super().__init__()</span><br><span class="line">        self.num_layers = num_layers</span><br><span class="line">        self.vq_layers = nn.ModuleList([</span><br><span class="line">            VQEmbedding(num_embeddings_list[i], embedding_dim, commitment_cost)</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> range(num_layers)</span><br><span class="line">        ])</span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">initialize_from_data</span><span class="params">(self, data: torch.Tensor)</span>:</span></span><br><span class="line">        <span class="string">"""逐层初始化所有码本。"""</span></span><br><span class="line">        residual = data.clone()</span><br><span class="line">        <span class="keyword">for</span> i, vq_layer <span class="keyword">in</span> enumerate(self.vq_layers):</span><br><span class="line">            print(<span class="string">f"[INFO] Initializing codebook layer <span class="subst">&#123;i+<span class="number">1</span>&#125;</span>/<span class="subst">&#123;self.num_layers&#125;</span>..."</span>)</span><br><span class="line">            vq_layer.initialize_from_data(residual)</span><br><span class="line">            <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">                quantized, _, _ = vq_layer(residual)</span><br><span class="line">                residual -= quantized</span><br><span class="line">                </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span><span class="params">(self, inputs: torch.Tensor, commitment_cost: float = None)</span>:</span></span><br><span class="line">        residual = inputs</span><br><span class="line">        quantized_total = torch.zeros_like(inputs)</span><br><span class="line">        indices_list = []</span><br><span class="line">        loss_total = <span class="number">0.0</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> vq_layer <span class="keyword">in</span> self.vq_layers:</span><br><span class="line">            <span class="comment"># 支持动态传入commitment_cost</span></span><br><span class="line">            <span class="keyword">if</span> commitment_cost <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">                vq_layer.commitment_cost = commitment_cost</span><br><span class="line">            </span><br><span class="line">            quantized, indices, loss = vq_layer(residual)</span><br><span class="line">            residual = residual - quantized             <span class="comment"># 会创建新张量,反向传播需要用到未被修改前的值</span></span><br><span class="line">            quantized_total = quantized_total + quantized</span><br><span class="line">            indices_list.append(indices)</span><br><span class="line">            loss_total += loss</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">return</span> quantized_total, torch.stack(indices_list, dim=<span class="number">1</span>), loss_total</span><br></pre></td></tr></table></figure></p>
+<h2 id="超参设置"><a href="#超参设置" class="headerlink" title="超参设置"></a>超参设置</h2><p>RQ-VAE的调参关键是<strong>重建保真度</strong>、<strong>量化稳定性</strong>、和<strong>模型复杂度</strong>三者之间的权衡。</p>
+<p><strong><code>num_vq_layers</code></strong>：码本层数，越深越保真，但复杂度越高，推荐2~4层。<br><strong><code>num_embeddings_list</code></strong>：各层码本大小，为了避免  <strong>Codebook Collapse</strong>（码本坍塌：过大的码本在不稳定的训练或不足的训练数据下很容易导致编码器只学会使用其中一小部分“安全”的码字，造成大量参数浪费），不应过大，一般256足矣。<br><strong><code>latent_dim</code></strong>：隐向量维度，编码器的输出维度，是模型中的<strong>信息瓶颈</strong>，一般和输入维度有关，<strong>8x到32x</strong>的压缩率是合理的探索起点。<br><strong><code>commitment_cost</code>（$\beta$）</strong>：承诺损失系数， $\beta$ 较低 (如 &lt; 0.25)时对编码器的约束力较弱。编码器有更大的“自由”去学习如何映射输入，这可能有利于降低<strong>重建损失</strong>。但如果编码器输出过于“随心所欲”，可能会与码本整体疏远，导致量化困难和<strong>码本坍塌</strong>。$\beta$较高 (如 &gt; 0.25)时对编码器的约束力很强。它会产生一股强大的梯度“拉力”，迫使编码器的输出必须紧密贴合码本。这通常能有效<strong>提升码本利用率</strong>，防止坍塌。但如果约束过强，可能会限制编码器的表达能力，牺牲一部分重建质量。</p>
+<h2 id="常见问题"><a href="#常见问题" class="headerlink" title="常见问题"></a>常见问题</h2><h3 id="问题1：码本坍塌"><a href="#问题1：码本坍塌" class="headerlink" title="问题1：码本坍塌"></a>问题1：码本坍塌</h3><p>这是训练VQ-VAE/RQ-VAE时最容易遇到的问题。</p>
+<ul>
+<li><strong>现象</strong>: 训练结束后，通过分析脚本发现码本利用率（Codebook Usage）极低。例如，设定的码本大小为256，但最终只有不到10%（甚至只有个位数）的码字被使用过。同时，<code>vq_loss</code>可能会收敛到一个异常低的值。</li>
+<li><strong>深层次原因</strong>： 码本更新机制的缺陷，未被任何样本选中的码字在该 batch 内梯度为零得不到更新，形成”富者愈富”的马太效应——初始离数据近的码字被频繁选中并持续优化，离得远的码字则永远选不到、永远不更新，最终坍塌。</li>
+<li><strong>可能原因</strong>:<ol>
+<li><strong>初始化不佳</strong>: K-Means初始化步骤未能提供一个良好的码本起始分布。</li>
+<li><strong>学习率太高导致训练不稳定</strong>: 学习率太高导致模型在优化过程中发生“抖动”或“崩溃”，最终收敛到一个“懒惰”的局部最优点，即编码器只输出少数几种潜在向量，因为这样做最容易降低损失。</li>
+</ol>
+</li>
+<li><strong>解决方案</strong>:<ol>
+<li><strong>降低学习率</strong>: 降低学习率，并配合学习率动态策略使用。</li>
+<li><strong>指数移动平均 (EMA) 更新</strong>：不用梯度下降，而是通过编码器输出的移动平均值来更新码本。这样码本更新方向由真实数据的聚类中心驱动，不受学习率、梯度噪声的直接影响，训练更平滑；本质上更接近 KMeans 的更新逻辑，这也是它能缓解坍塌的原因。使用 EMA 时，码本损失那一项就不再需要，只保留承诺损失。</li>
+<li><strong>引入码本重置 (Codebook Resetting)</strong>: 一种更高级的技巧。在训练中周期性地检测并重置那些长期未被使用的“死亡”码字，例如，将它们重新初始化到高密度数据簇的中心附近。</li>
+<li><strong>减少嵌入维度，增加码本容量</strong>: 降低维度，能够减小潜在向量空间的体积来缩短“潜在向量分布”与“码本向量分布”之间的平均距离，从而让更多的码本向量有机会成为某个潜在向量的最近邻，从而进行码字更新</li>
+</ol>
+</li>
+</ul>
+<h3 id="问题2：重建损失过高"><a href="#问题2：重建损失过高" class="headerlink" title="问题2：重建损失过高"></a>问题2：重建损失过高</h3><ul>
+<li><strong>现象</strong>: 重建损失在训练后期依然维持在较高的水平，无法有效降低，导致重建出的向量与原始向量差异巨大。</li>
+<li><strong>可能原因</strong>: 模型在“编码-量化-解码”的完整链路中丢失了过多关键信息。<ol>
+<li><strong>信息瓶颈过窄</strong>: <code>latent_dim</code>设置得太小，在量化前就已经造成了不可逆的信息损失。</li>
+<li><strong>模型容量不足</strong>: 编码器/解码器的网络层数太少或维度太低，不足以学习到从原始空间到潜在空间的复杂映射。</li>
+<li><strong>承诺系数β过高</strong>: 过强的约束力迫使编码器过度关注于对齐码本，而牺牲了对原始信息细节的保留。</li>
+</ol>
+</li>
+<li><strong>解决方案</strong>:<ol>
+<li><strong>增大潜在向量维度 <code>latent_dim</code></strong>: 这是最直接的解决方式，拓宽了信息瓶颈。</li>
+<li><strong>加深/加宽编解码器网络</strong>: 增加模型的参数量和拟合能力。</li>
+<li><strong>降低承诺系数β</strong>: 适当减小<code>commitment_cost</code>，降低编码器对对齐码本的关注度，保留原始细节。</li>
+</ol>
+</li>
+</ul>
+<h3 id="问题3：量化损失过高"><a href="#问题3：量化损失过高" class="headerlink" title="问题3：量化损失过高"></a>问题3：量化损失过高</h3><ul>
+<li><strong>现象</strong>: <code>vq_loss</code>（尤其是其中的<code>commitment_loss</code>部分）居高不下。</li>
+<li><strong>可能原因</strong>: 编码器的输出分布与码本的分布始终存在较大差异，两者未能有效“会合”。<ol>
+<li><strong>承诺系数β过低</strong>: 对编码器的“拉力”不足，无法有效引导其输出向码本靠近。</li>
+<li><strong>码本容量不足</strong>: 码本的“词汇量”不足以覆盖编码器输出的潜在向量分布。</li>
+<li><strong>初始化不佳</strong>: K-Means初始化阶段未能给码本一个良好的起点。</li>
+</ol>
+</li>
+<li><strong>解决方案</strong>:<ol>
+<li><strong>增大承诺系数β</strong>: 这是最直接的对策，增强编码器向码本对齐的激励。</li>
+<li><strong>增大码本容量</strong>: 提供更多、更丰富的码字供编码器选择。</li>
+<li><strong>检查并优化初始化</strong>: 确保用于K-Means初始化的数据量足够且具有代表性。</li>
+</ol>
+</li>
+</ul>
+<h1 id="RQ-Kmeans"><a href="#RQ-Kmeans" class="headerlink" title="RQ-Kmeans"></a>RQ-Kmeans</h1><p>RQ-KMeans 与 RQ-VAE 的核心差异在于：它<strong>不训练任何神经网络</strong>，直接对已有的物品 embedding 做递归聚类。这里的 embedding 通常来自预训练模型的产出，比如多模态内容向量、协同过滤向量等，是”固定不动”的输入。</p>
+<p>其流程与 RQ-VAE 的残差量化一脉相承，只是把”码本查找 + 反向传播更新码本”换成了”KMeans 聚类得到簇中心”：</p>
+<ol>
+<li>第一层聚类：对全体原始 embedding $X$ 执行 KMeans，得到 $K$ 个簇中心作为一级码本，每个样本被分配到最近的簇，簇索引即为 SID 的第一位；</li>
+<li>计算残差：每个样本减去其所属簇中心，得到残差 $r = x - c_{\text{level1}}$；</li>
+<li>第二层聚类：对上一层的残差再执行 KMeans，得到二级码本与第二位索引；</li>
+<li>迭代：继续对新残差聚类，直到达到设定的层数 num_levels，最终每个物品得到一个长度为 num_levels 的 SID。</li>
+</ol>
+<p>为什么快手 OneRec 等系列选择 RQ-KMeans：</p>
+<ul>
+<li>训练成本极低：只是若干次 KMeans，无需 GPU、无需反向传播、无需调 encoder/decoder 与损失权重，几分钟即可跑完百万级物品。</li>
+<li>结果稳定可复现：固定随机种子后结果确定，不存在 RQ-VAE 那种训练不稳定、需要反复调参的问题。</li>
+<li>几乎不坍塌：KMeans 会为每个簇分配样本、更新每一个簇中心，天然保证各码字都被使用，码本利用率高，基本不出现 RQ-VAE 中的码本坍塌。</li>
+<li>可解释性强：每一层就是一次明确的聚类，簇中心即语义原型，便于分析和排查。</li>
+</ul>
+<p>代价：RQ-KMeans 的效果<strong>完全依赖输入 embedding 的质量</strong>——它只做量化、不做表示学习，无法像 RQ-VAE 那样通过重建损失端到端地优化表示。如果输入 embedding 本身语义不佳，SID 质量也会受限。</p>
+<p>RQ-KMeans代码示例如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> sklearn.cluster <span class="keyword">import</span> KMeans</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RQKMeans</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, num_levels, codebook_size, random_state=<span class="number">42</span>)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        num_levels: 残差量化层数（即SID长度）</span></span><br><span class="line"><span class="string">        codebook_size: 每层码本大小（建议各层相同）</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self.num_levels = num_levels</span><br><span class="line">        self.codebook_size = codebook_size</span><br><span class="line">        self.random_state = random_state</span><br><span class="line">        self.codebooks = []      <span class="comment"># 每层的码本中心 (list of np.ndarray)</span></span><br><span class="line">        self.sids = <span class="keyword">None</span>         <span class="comment"># 所有样本的SID (N, num_levels)</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">fit</span><span class="params">(self, X)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        X: (N, D) 物品embedding矩阵</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        N, D = X.shape</span><br><span class="line">        self.sids = np.zeros((N, self.num_levels), dtype=int)</span><br><span class="line">        residuals = X.copy()   <span class="comment"># 当前待量化的残差</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> level <span class="keyword">in</span> range(self.num_levels):</span><br><span class="line">            <span class="comment"># 对当前残差做 KMeans</span></span><br><span class="line">            kmeans = KMeans(n_clusters=self.codebook_size,</span><br><span class="line">                            random_state=self.random_state,</span><br><span class="line">                            n_init=<span class="number">10</span>)</span><br><span class="line">            kmeans.fit(residuals)</span><br><span class="line">            self.codebooks.append(kmeans.cluster_centers_)   <span class="comment"># (K, D)</span></span><br><span class="line">            labels = kmeans.labels_                           <span class="comment"># (N,)</span></span><br><span class="line"></span><br><span class="line">            <span class="comment"># 保存当前层索引</span></span><br><span class="line">            self.sids[:, level] = labels</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 计算下一层的残差：原残差 - 所属簇中心</span></span><br><span class="line">            centers = kmeans.cluster_centers_[labels]         <span class="comment"># (N, D)</span></span><br><span class="line">            residuals = residuals - centers</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> self.sids</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">transform</span><span class="params">(self, X)</span>:</span></span><br><span class="line">        <span class="string">"""对新样本生成SID（基于已拟合的码本）"""</span></span><br><span class="line">        N, D = X.shape</span><br><span class="line">        sids = np.zeros((N, self.num_levels), dtype=int)</span><br><span class="line">        residuals = X.copy()</span><br><span class="line">        <span class="keyword">for</span> level <span class="keyword">in</span> range(self.num_levels):</span><br><span class="line">            codebook = self.codebooks[level]   <span class="comment"># (K, D)</span></span><br><span class="line">            <span class="comment"># 计算每个样本与所有码本中心的距离</span></span><br><span class="line">            distances = np.linalg.norm(residuals[:, np.newaxis, :] - codebook, axis=<span class="number">2</span>)</span><br><span class="line">            labels = np.argmin(distances, axis=<span class="number">1</span>)</span><br><span class="line">            sids[:, level] = labels</span><br><span class="line">            centers = codebook[labels]</span><br><span class="line">            residuals = residuals - centers</span><br><span class="line">        <span class="keyword">return</span> sids</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">fit_transform</span><span class="params">(self, X)</span>:</span></span><br><span class="line">        self.fit(X)</span><br><span class="line">        <span class="keyword">return</span> self.sids</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ================== 使用示例 ==================</span></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:</span><br><span class="line">    <span class="comment"># 生成随机物品embedding</span></span><br><span class="line">    N, D = <span class="number">10000</span>, <span class="number">128</span></span><br><span class="line">    X = np.random.randn(N, D)</span><br><span class="line"></span><br><span class="line">    rqkmeans = RQKMeans(num_levels=<span class="number">3</span>, codebook_size=<span class="number">256</span>)</span><br><span class="line">    sids = rqkmeans.fit_transform(X)</span><br><span class="line">    print(<span class="string">"RQ-KMeans SID shape:"</span>, sids.shape)</span><br><span class="line">    print(<span class="string">"第一层簇大小分布:"</span>, np.bincount(sids[:, <span class="number">0</span>])[:<span class="number">5</span>])  <span class="comment"># 示例</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 对新样本推理</span></span><br><span class="line">    new_X = np.random.randn(<span class="number">10</span>, D)</span><br><span class="line">    new_sids = rqkmeans.transform(new_X)</span><br><span class="line">    print(<span class="string">"新样本SID:\n"</span>, new_sids)</span><br></pre></td></tr></table></figure></p>
+<h1 id="SID-冲突与去重"><a href="#SID-冲突与去重" class="headerlink" title="SID 冲突与去重"></a>SID 冲突与去重</h1><p>无论 RQ-VAE 还是 RQ-KMeans，都可能出现不同物品被映射到完全相同 SID 的情况（即码字序列碰撞）。当两个物品的 embedding 非常接近、在每一层都落到同一个码字时，它们的 SID 会一模一样。这在生成式推荐里是个问题——SID 需要能唯一定位一个物品，冲突会导致解码时产生歧义。</p>
+<p>工业界常见解法是在原有 SID 末尾追加一位去重码：对落到同一个 SID 的物品按顺序编号（0, 1, 2, …），把这个编号作为额外的一层。例如 TIGER 论文中，若三层 SID 为 (12, 45, 7) 的物品有多个，就扩展成 (12, 45, 7, 0)、(12, 45, 7, 1) …… 从而保证唯一性。<br>这样 SID 的长度从 num_levels 变为 num_levels + 1，最后一位不携带语义、仅用于消歧。</p>
+<h1 id="RQ-VAE和RQ-Kmeans对比"><a href="#RQ-VAE和RQ-Kmeans对比" class="headerlink" title="RQ-VAE和RQ-Kmeans对比"></a>RQ-VAE和RQ-Kmeans对比</h1><table>
+<thead>
+<tr>
+<th>方法</th>
+<th>原理</th>
+<th>训练方式</th>
+<th>是否容易坍缩</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RQ-VAE</strong></td>
+<td>DNN压缩表示 + 残差量化</td>
+<td>反向传播梯度下降</td>
+<td>是</td>
+<td>可微、可联合优化重建质量</td>
+<td>训练较慢，需要调参</td>
+</tr>
+<tr>
+<td><strong>RQ-KMeans</strong></td>
+<td>递归KMeans残差聚类</td>
+<td>无监督聚类（无需梯度）</td>
+<td>否</td>
+<td>快速、可解释、无需GPU</td>
+<td>依赖初始embedding质量，缺乏重建优化</td>
+</tr>
+</tbody>
+</table>
+
+      
+    </div>
+
+    
+      
+
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+      <div>
+        <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+  <div></div>
+  <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+    <span>打赏</span>
+  </button>
+  <div id="QR" style="display: none;">
+
+    
+      <div id="wechat" style="display: inline-block">
+        <img id="wechat_qr" src="/assets/wechatpay.jpg" alt="TangShusen 微信支付">
+        <p>微信支付</p>
+      </div>
+    
+
+    
+      <div id="alipay" style="display: inline-block">
+        <img id="alipay_qr" src="/assets/alipay.jpg" alt="TangShusen 支付宝">
+        <p>支付宝</p>
+      </div>
+    
+
+    
+
+  </div>
+</div>
+
+      </div>
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/SID/" rel="tag"># SID</a>
+          
+            <a href="/tags/RQ-VAE/" rel="tag"># RQ-VAE</a>
+          
+            <a href="/tags/RQ-Kmeans/" rel="tag"># RQ-Kmeans</a>
+          
+            <a href="/tags/生成式推荐/" rel="tag"># 生成式推荐</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2026/09/06/position-embed/" rel="next" title="LLM中的位置编码">
+                <i class="fa fa-chevron-left"></i> LLM中的位置编码
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/assets/header.jpg" alt="TangShusen">
+            
+              <p class="site-author-name" itemprop="name">TangShusen</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">20</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-categories">
+                  <a href="/categories/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">9</span>
+                    <span class="site-state-item-name">分类</span>
+                  </a>
+                </div>
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  <a href="/tags/index.html">
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">34</span>
+                    <span class="site-state-item-name">标签</span>
+                  </a>
+                </div>
+              
+            </nav>
+          
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/shusentang" title="GitHub &rarr; https://github.com/shusentang" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://www.zhihu.com/people/tang-shu-sen-77/activities" title="知乎 &rarr; https://www.zhihu.com/people/tang-shu-sen-77/activities" rel="noopener" target="_blank"><i class="fa fa-fw fa-globe"></i>知乎</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                我的项目
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://github.com/ShusenTang/LeetCode" title="https://github.com/ShusenTang/LeetCode" rel="noopener" target="_blank">LeetCode题解</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Dive-into-DL-PyTorch" title="https://shusentang.github.io/Dive-into-DL-PyTorch" rel="noopener" target="_blank">《动手学深度学习》(PyTorch版)</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" title="https://shusentang.github.io/Deep-Learning-with-PyTorch-Chinese" rel="noopener" target="_blank">《Deep Learning with PyTorch》中文翻译</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#从VQ-VAE到RQ-VAE"><span class="nav-text">从VQ-VAE到RQ-VAE</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#VQ-VAE"><span class="nav-text">VQ-VAE</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RQ-VAE：多层VQ"><span class="nav-text">RQ-VAE：多层VQ</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#超参设置"><span class="nav-text">超参设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#常见问题"><span class="nav-text">常见问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题1：码本坍塌"><span class="nav-text">问题1：码本坍塌</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题2：重建损失过高"><span class="nav-text">问题2：重建损失过高</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题3：量化损失过高"><span class="nav-text">问题3：量化损失过高</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RQ-Kmeans"><span class="nav-text">RQ-Kmeans</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SID-冲突与去重"><span class="nav-text">SID 冲突与去重</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RQ-VAE和RQ-Kmeans对比"><span class="nav-text">RQ-VAE和RQ-Kmeans对比</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 – <span itemprop="copyrightYear">2026</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">TangShusen tip:本博客在电脑端食用更佳~</span>
+
+  
+
+  
+</div>
+
+
+
+
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span id="busuanzi_container_site_pv">total view times: <span id="busuanzi_value_site_pv"></span>
+</span>
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+    
+      
+  
+  <script type="text/javascript" color="0,0,255" opacity="0.5" zindex="-1" count="99" src="/lib/canvas-nest/canvas-nest.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.5.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.5.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.5.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.5.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.5.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  
+  
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(function (item) {
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: true,
+        appId: 'Bi7QlJPklJ2hjFFoWMd1D2gB-gzGzoHsz',
+        appKey: 'yMWxfGo3ABn8yS13Ytq43Rdk',
+        placeholder: '在上面填上你的邮箱再评论可以收到我的回复哟~',
+        avatar:'mm',
+        meta:guest,
+        pageSize:'10' || 10,
+        visitor: false
+    });
+  </script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script>
+    
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+
+      Counter('get', '/classes/Counter', { where: JSON.stringify({ url }) })
+        .done(function ({ results }) {
+          if (results.length > 0) {
+            var counter = results[0];
+            
+            Counter('put', `/classes/Counter/${counter.objectId}`, JSON.stringify({ time: { "__op":"Increment", "amount":1 } }))
+            
+            .done(function () {
+                  var $element = $(document.getElementById(url));
+                  $element.find('.leancloud-visitors-count').text(counter.time + 1);
+            })
+            
+            .fail(function ({ responseJSON }) {
+                console.log('Failed to save Visitor num, with error message: ' + responseJSON.error);
+            })
+          } else {
+            
+              var $element = $(document.getElementById(url));
+              $element.find('.leancloud-visitors-count').text('Counter not initialized! See more at console err msg.');
+              console.error('ATTENTION! LeanCloud counter has security bug, see here how to solve it: https://github.com/theme-next/hexo-leancloud-counter-security. \n But you also can use LeanCloud without security, by set \'security\' option to \'false\'.');
+            
+          }
+        })
+      .fail(function ({ responseJSON }) {
+        console.log('LeanCloud Counter Error:' + responseJSON.code + " " + responseJSON.error);
+      });
+    }
+    
+
+    $(function() {
+      $.get('https://app-router.leancloud.cn/2/route?appId=' + "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz")
+        .done(function ({ api_server }) {
+          var Counter = function (method, url, data) {
+            return $.ajax({
+              method: method,
+              url: `https://${api_server}/1.1${url}`,
+              headers: {
+                'X-LC-Id': "TH5bGglgABPqXSsUxDTpqs7l-gzGzoHsz",
+                'X-LC-Key': "zK9lN00t9W1flFbM75hsjojR",
+                'Content-Type': 'application/json',
+              },
+              data: data,
+            });
+          };
+          
+          addCount(Counter);
+          
+        })
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+  
+
+  
+    
+      <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+        processEscapes: true,
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      },
+      TeX: {equationNumbers: { autoNumber: "AMS" }}
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+      var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/npm/mathjax@2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+    
+  
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
