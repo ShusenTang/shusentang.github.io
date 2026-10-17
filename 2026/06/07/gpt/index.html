@@ -127,7 +127,7 @@
 <meta property="og:image" content="https://tangshusen.me/2026/06/07/gpt/gpt3_eval.jpg">
 <meta property="og:image" content="https://tangshusen.me/2026/06/07/gpt/rlhf.png">
 <meta property="og:image" content="https://tangshusen.me/2026/06/07/gpt/rlhf_loss.png">
-<meta property="og:updated_time" content="2026-06-07T13:55:03.935Z">
+<meta property="og:updated_time" content="2026-10-17T09:11:12.145Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="LLM 之 GPT 系列（GPT、GPT2、GPT3、InstructGPT）">
 <meta name="twitter:description" content="本文从初代 GPT 开始，总结 GPT 系列（GPT、GPT2、GPT3、InstructGPT/ChatGPT）的发展演变，主要包括模型结构、训练数据、核心创新等。">
@@ -425,12 +425,24 @@
                 
               
 
-              <time title="创建时间：2026-06-07 19:56:58 / 修改时间：21:55:03" itemprop="dateCreated datePublished" datetime="2026-06-07T19:56:58+08:00">2026-06-07</time>
+              <time title="创建时间：2026-06-07 19:56:58" itemprop="dateCreated datePublished" datetime="2026-06-07T19:56:58+08:00">2026-06-07</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2026-10-17 17:11:12" itemprop="dateModified" datetime="2026-10-17T17:11:12+08:00">2026-10-17</time>
               
             
           </span>
@@ -683,14 +695,15 @@
 <li><strong>强化学习训练</strong>：使用初始化的策略模型根据 prompt 输入生成 response，然后使用奖励模型对该 response 打分，再使用打分值借助 <strong>PPO 算法</strong>重新优化策略模型。</li>
 </ol>
 <p>可以把上述步骤拆分成两大步：一个是有监督微调（SFT），一个是基于人类反馈的强化学习（RLHF）。</p>
-<h2 id="监督微调（SFT）"><a href="#监督微调（SFT）" class="headerlink" title="监督微调（SFT）"></a>监督微调（SFT）</h2><p>SFT 可以理解为人工标注了一批数据，然后去微调 GPT-3。注意这里的微调和 GPT-3 之前用来做下游任务使用的 few-shot learning 有非常本质的区别：</p>
+<h2 id="监督微调（SFT）"><a href="#监督微调（SFT）" class="headerlink" title="监督微调（SFT）"></a>监督微调（SFT）</h2><p>SFT 可以理解为人工标注了一批数据，数据格式是(prompt， completion)，训练目标与预训练类似，仍然是最大化正确输出的概率。注意这里的微调和 GPT-3 之前用来做下游任务使用的 few-shot learning 有非常本质的区别：</p>
 <p>GPT-3 中的 few-shot 对于同一个下游任务，通常采用固定的任务描述方式，而且需要人去探索哪一种任务表述方式更好。显然这种模式与真实场景下用户的使用方式存在较大的 gap，用户在向 GPT-3 提问时才不会采用某种固定的任务表述，而是随心所欲地以自己的说话习惯去表达某个需求。InstructGPT 在 SFT 中标注的数据，正是为了消除这种模型预测与用户表达习惯之间的 gap。在标注过程中，他们从 GPT-3 的用户真实请求中采样大量下游任务的描述，然后让标注人员对任务描述进行续写，从而得到该问题的高质量回答。这里用户真实请求又被称为某个任务的<strong>指令</strong>，即 InstructGPT 的核心思想“基于人类反馈的指令微调”。</p>
 <h2 id="基于人类反馈的强化学习（RLHF）"><a href="#基于人类反馈的强化学习（RLHF）" class="headerlink" title="基于人类反馈的强化学习（RLHF）"></a>基于人类反馈的强化学习（RLHF）</h2><p>基于 SFT 得到的模型被用于后续的 RLHF 做进一步的模型优化。</p>
 <h3 id="奖励模型（RM）"><a href="#奖励模型（RM）" class="headerlink" title="奖励模型（RM）"></a>奖励模型（RM）</h3><p>训练 Reward 模型去选择人类更倾向的选项（Instruction Learning，指示学习）。<br>首先通过人工标注的方式来提供奖励（Reward），标注者可以给那些涉及偏见的生成内容更低的分，从而鼓励模型不去生成这些人类不喜欢的内容。奖励模型 RM 的结构是将 SFT 训练后的模型的最后的嵌入层去掉后的模型。它的输入是 prompt 和 response，输出是奖励值。具体的讲，对每个 prompt，InstructGPT 会随机生成 K 个输出，然后向每个人工标注者成对的展示输出结果，标注者从中选择效果更好的输出。奖励模型的损失函数为：</p>
 <center><br><img src="/2026/06/07/gpt/rlhf_loss.png" width="500" class="full-image"><br></center>
 
 <p>其中 ( r_\theta ) 是奖励值，( y_w ) 是标注者更喜欢的响应结果，( y_l ) 是标注者不喜欢的响应结果。损失函数本质上是一个 <strong>pair-wise ranking loss</strong>，它最大化偏好响应与不偏好响应之间的奖励差值（实际是最小化负对数似然）。</p>
-<h3 id="强化学习模型（PPO）"><a href="#强化学习模型（PPO）" class="headerlink" title="强化学习模型（PPO）"></a>强化学习模型（PPO）</h3><p>PPO 算法（Proximal Policy Optimization）的核心思想是通过<strong>剪切概率比</strong>来限制策略更新的幅度，避免更新过大导致破坏奖励模型。在 InstructGPT 中，每个 episode 仅包含一对 prompt-response 和其 reward，为防止 RL 过度优化，还使用了 per-token KL 惩罚。PPO算法的详细流程这里不过多赘述。</p>
+<h3 id="强化学习模型（PPO）"><a href="#强化学习模型（PPO）" class="headerlink" title="强化学习模型（PPO）"></a>强化学习模型（PPO）</h3><p>有了奖励模型后，我们就可以用强化学习来优化语言模型，让它生成更高质量的回答。最经典的算法是 PPO。</p>
+<p>PPO 算法（Proximal Policy Optimization）的核心思想是通过<strong>剪切概率比</strong>来限制策略更新的幅度，在不要偏离原始模型（一般是SFT模型）太多的前提下最大化奖励。在 InstructGPT 中，每个 episode 仅包含一对 prompt-response 和其 reward，为防止 RL 过度优化，还使用了 per-token KL 惩罚。PPO算法的详细流程这里不过多赘述。</p>
 <h2 id="InstructGPT-总结"><a href="#InstructGPT-总结" class="headerlink" title="InstructGPT 总结"></a>InstructGPT 总结</h2><p>总的来说，InstructGPT 相对于之前的 GPT 系列，有以下几点值得注意：</p>
 <ol>
 <li>解决 GPT-3 的输出与人类意图之间的 Align 问题。</li>

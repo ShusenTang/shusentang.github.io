@@ -18,4 +18,5 @@
 {"title":"强化学习基础与经典算法","url":"/2026/06/21/rl-basic/"},
 {"title":"LLM场景下的强化学习——PPO、DPO、GRPO","url":"/2026/08/30/llm-rl/"},
 {"title":"LLM中的位置编码","url":"/2026/09/06/position-embed/"},
+{"title":"生成式推荐中的SID构建方法","url":"/2026/09/13/sid/"},
 ]
